@@ -1,0 +1,432 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.anyframe.centercut</groupId>
+	<artifactId>anyframe-centercut-admin</artifactId>
+	<packaging>war</packaging>
+	<version>5.0.2-SNAPSHOT</version>
+	<name>anyframe-centercut-admin</name>
+
+	<properties>
+		<encodingtype>UTF-8</encodingtype>
+		<jdkversion>1.7</jdkversion>
+		<spring.version>3.2.2.RELEASE</spring.version>
+<!-- 		<spring.version>3.1.1.RELEASE</spring.version> -->
+		<environment>cbk</environment>
+	</properties>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources-${environment}</directory>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>			
+		</resources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>${jdkversion}</source>
+					<target>${jdkversion}</target>
+					<encoding>${encodingtype}</encoding>
+					<compilerVersion>${jdkversion}</compilerVersion>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+<!-- 				<version>2.5.1</version> -->
+				<version>2.4.0</version>
+				<executions>
+					<execution>
+						<configuration>
+							<module>com.anyframe.centercut.admin.CenterCutAdmin</module>
+							<extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
+							<compilerVersion>${jdkversion}</compilerVersion>
+						</configuration>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+				 <configuration>
+	                 <runTarget>index.html</runTarget>
+	                 <hostedWebapp>${project.basedir}/src/main/webapp</hostedWebapp>
+<!-- 	                 <hostedWebapp>${project.build.directory}/anyframe-enterprise-admin-common-2.0.0</hostedWebapp> -->
+	             </configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>				
+					<!-- exclude META-INF/maven directory -->
+					<packagingExcludes>%regex[WEB-INF/lib/gwt-(?!servlet).*.jar],WEB-INF/lib/smartgwt*.jar, </packagingExcludes>
+					<archive>
+						<manifest>
+							<mainClass>Version</mainClass>
+						</manifest>
+						<addMavenDescriptor>false</addMavenDescriptor>
+					</archive>							
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.0.4</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>			
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-dependency-plugin
+										</artifactId>
+										<versionRange>
+											[2.1,)
+										</versionRange>
+										<goals>
+											<goal>
+												copy-dependencies
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+	<profiles>
+<!-- 240702 local 중복오류 주석함  -->
+<!-- 		<profile> -->
+<!-- 			<id>local</id> -->
+<!-- 			<activation> -->
+<!-- 				<activeByDefault>true</activeByDefault> -->
+<!-- 			</activation> -->
+<!-- 			<properties> -->
+<!-- 				<environment>local</environment> -->
+<!-- 			</properties> -->
+<!-- 			<dependencies> -->
+<!-- 				<dependency> -->
+<!-- 					<groupId>com.anyframe.centercut</groupId> -->
+<!-- 					<artifactId>anyframe-centercut-engine-ext</artifactId> -->
+<!-- 					<version>5.0.1-SNAPSHOT</version> -->
+<!-- 					<scope>compile</scope>			 -->
+<!-- 				</dependency> -->
+<!-- 			</dependencies>			 -->
+<!-- 		</profile> -->
+		<profile>
+			<id>local</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<environment>local</environment>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>com.anyframe.centercut</groupId>
+					<artifactId>anyframe-centercut-engine-ext</artifactId>
+					<version>5.0.1-SNAPSHOT</version>
+					<exclusions>
+						<exclusion>
+							<groupId>com.anyframe.centercut</groupId>
+							<artifactId>anyframe-centercut-engine</artifactId>
+						</exclusion>		
+					</exclusions>
+					<scope>compile</scope>			
+				</dependency>
+				
+				<dependency>
+   				 	<groupId>com.anyframe.centercut</groupId>
+    				<artifactId>anyframe-centercut-engine</artifactId>
+   	 				<version>5.0.2-SNAPSHOT</version>
+<!--     				<scope>system</scope> -->
+<!--     				<systemPath>${project.basedir}/lib/anyframe-centercut-engine-5.0.2-SNAPSHOT.jar</systemPath> -->
+				</dependency>
+				
+				
+			</dependencies>
+<!-- 			<build> -->
+<!-- 				<plugins>			 -->
+<!-- 					<plugin> -->
+<!-- 					    <groupId>org.apache.maven.plugins</groupId> -->
+<!-- 					    <artifactId>maven-antrun-plugin</artifactId> -->
+<!-- 					    <version>1.3</version> -->
+<!-- 					    <executions> -->
+<!-- 							<execution> -->
+<!-- 								<id>copy-server-config</id> -->
+<!-- 								<phase>process-sources</phase> -->
+<!-- 								<goals> -->
+<!-- 									<goal>run</goal> -->
+<!-- 								</goals> -->
+<!-- 								<configuration> -->
+<!-- 									<tasks> -->
+<!-- 										<copy file="src/main/webapp/WEB-INF/web_server.xml" tofile="src/main/webapp/WEB-INF/web.xml" overwrite="true" /> -->
+<!-- 									</tasks> -->
+<!-- 								</configuration> -->
+<!-- 							</execution> -->
+<!-- 					    </executions> -->
+<!-- 					  </plugin> -->
+<!-- 				</plugins> -->
+<!-- 			</build>						 -->
+		</profile>		
+	</profiles>
+	<dependencies>
+		<!-- Spring -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+			<version>${spring.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<!-- Spring End -->
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.6.8</version>
+			<scope>compile</scope>
+		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>commons-lang</groupId> -->
+<!-- 			<artifactId>commons-lang</artifactId> -->
+<!-- 			<version>2.6</version> -->
+<!-- 		</dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>commons-dbcp</groupId> -->
+<!-- 			<artifactId>commons-dbcp</artifactId> -->
+<!-- 			<version>1.4</version> -->
+<!-- 			<scope>compile</scope> -->
+<!-- 		</dependency> -->
+		<dependency>
+			<groupId>ojdbc</groupId>
+			<artifactId>ojdbc</artifactId>
+			<version>6</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-dev</artifactId>
+			<version>2.5.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-user</artifactId>
+			<version>2.5.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-servlet</artifactId>
+			<version>2.5.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-codeserver</artifactId>
+			<version>2.5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.gwt</groupId>
+			<artifactId>smartgwt</artifactId>
+			<version>4.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.gwt</groupId>
+			<artifactId>smartgwt-skins</artifactId>
+			<version>4.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>aopalliance</groupId>
+			<artifactId>aopalliance</artifactId>
+			<version>1.0</version>
+		</dependency>				
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.6.4</version>
+		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>ch.qos.logback</groupId> -->
+<!-- 			<artifactId>logback-core</artifactId> -->
+<!-- 			<version>1.0.7</version> -->
+<!-- 		</dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>ch.qos.logback</groupId> -->
+<!-- 			<artifactId>logback-classic</artifactId> -->
+<!-- 			<version>1.0.7</version> -->
+<!-- 		</dependency> -->
+		<dependency>
+			<groupId>com.anyframe.admin</groupId>
+			<artifactId>anyframe-enterprise-admin-core</artifactId>
+			<version>2.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jasypt</groupId>
+			<artifactId>jasypt</artifactId>
+			<version>1.7</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-log4j12</artifactId>
+		    <version>1.6.4</version>
+		    <scope>runtime</scope>
+		</dependency>	
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.google.gwt</groupId> -->
+<!-- 			<artifactId>gwt-dev</artifactId> -->
+<!-- 			<version>2.5.1</version> -->
+<!-- 			<scope>compile</scope> -->
+<!-- 		</dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.google.gwt</groupId> -->
+<!-- 			<artifactId>gwt-user</artifactId> -->
+<!-- 			<version>2.4.0</version> -->
+<!-- 			<scope>compile</scope> -->
+<!-- 			<exclusions> -->
+<!-- 				<exclusion> -->
+<!-- 					<artifactId>validation-api</artifactId> -->
+<!-- 					<groupId>javax.validation</groupId> -->
+<!-- 				</exclusion> -->
+<!-- 			</exclusions> -->
+<!-- 		</dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.google.gwt</groupId> -->
+<!-- 			<artifactId>gwt-servlet</artifactId> -->
+<!-- 			<version>2.4.0</version> -->
+<!-- 			<scope>compile</scope> -->
+<!-- 		</dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.google.gwt</groupId> -->
+<!-- 			<artifactId>gwt-codeserver</artifactId> -->
+<!-- 			<version>2.5.1</version> -->
+<!-- 			<scope>provided</scope> -->
+<!-- 		</dependency> -->
+	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>anyframe-releases</id>
+			<url>http://70.121.224.52:8081/nexus/content/repositories/anyframe-releases</url>
+		</repository>
+
+		<snapshotRepository>
+			<id>anyframe-snapshots</id>
+			<url>http://70.121.224.52:8081/nexus/content/repositories/anyframe-snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+	
+</project>	

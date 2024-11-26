@@ -1,0 +1,333 @@
+
+beforeJob
+
+step 
+    spring-retry 신뢰도 
+    retrycallbacj : 반복 수행할 티켓 메서드 지정 
+    
+job 계층 구조 
+
+
+
+afterjob
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+모니터링 
+    MonitorExecutorImpl.java - runBatchAdminMonitor
+    AgentMonitorServiceImpl.java
+배치 스케줄링 1초마다 돔
+    SELECT * fROM  BATCH_ADMIN_LEADER ;
+
+에이전트 추가 
+    BatchAgentServiceImpl.java insertAgent
+    BATCH_AGENT
+잡 추가 
+    JobServiceImpl.java insertNormalJob
+    라이센스키 Y 경우 BATCH_PRE_JOB INSERT   
+    BATCH_JOB INTSERT
+
+==== Job 실행 구조
+배치 호출시 anyframe-batch-runtime을 통해 배치를 실행하는데 해당의 일련 과정 설명  ex) CommandLineJobLauncher 를 통해 호출시 실제 배치실행까지의 설정 설명 
+
+- job 실행 구조 
+ Batch Runtime의 CommandLineJobLauncher 클래스의 main()를 실행시킨다.
+
+- 실제 배치상태 변경 
+
+
+DefaultJobOperator
+DefaultJobLauncher
+등
+
+
+배치를 제어하기 위해서는 어드민화면에 배치에이전트 통신
+admin - agent - runtime - CommandLineJobLauncher - jobargument(배치실행시 넘어옴) - defaultjoboperator -defaultjoblanucher - abstractjob - simple strp handler - abstractstep - strp 
+-
+
+
+
+:: 생성된 작업객체(AbstractJob)은 DefaultJobLauncher에서 AbstractJob의 execute() 메소드를 호출하여 Job 실행이 시작된다.
+
+
+
+image::images/runtime-architecture-job-run.png[align="center"]
+
+
+. DefaultJobLauncher는 AbstractJob의 execute() 메소드를 호출
+
+
+. AbstractJob은 JobExecution 에 startTime(현재시간), status(STARTED)를 저장한다.
+
+
+. ExecutionContext에 Job Parameter 설정을 저장한다.
+::
+Job Parameter는 작업정의(CFG)에 정의되거나, 실행 커맨드의 옵션 등으로 지정할 수 있다.
+
+
+. 등록된 JobExecutionListener의 beforeJob() 메소드 호출
+
+
+. SimpleStepHandler.handleStep() 메소드를 호출하여, Job에 포함된 Step들을 실행
+
+
+. 각 Step의 실행이 끝나면, JobExecution에 endTime(현재시간), status(COMPLETED)를 저장한다.
+
+
+. 등록된 JobExecutionListener의 afterJob() 메소드 호출
+
+
+. JobRepository를 통해 Job의 실행정보를 update한다.
+
+[[runtime-architecture-run-step]]
+
+
+==== Step 실행 구조
+
+:: 
+
+image::images/runtime-architecture-step-run.png[align="center"]
+
+
+. AbstractJob에서 Job에 포함된 Step의 수만큼 SimpleStepHandler의 handleStep() 메소드를 호출한다.
+
+
+. SimpleStepHandler는 DB로부터 해당 Job의 마지막 Step 정보를 조회하고, 아래와 같은 조건이면 수행되어야 하는 Step이므로 Step 실행을 정상적으로 진행한다.
+
+. Step 정보가 존재하지 않으면, 최초 실행되는 Step 임
+
+
+. Step 정보가 존재하나 Step의 상태가 COMPLETED가 아닌 경우
+
+
+. Step의 상태를 STARTED로 변경하고, Step 정보를 DB에 업데이트한다.
+
+
+. Step의 execute() 메소드를 호출한다.
+
+
+. TaskStep, ParallelStep, DeleteStep, ShellStep 등 모든 Step의 상위 클래스인 AbstractStep의 execute() 메소드를 호출한다. Step의 시작시간을 현재시간으로 설정한다.
+
+
+. Step에 설정된 Listener에 대하여 beforeStep() 메소드를 수행한다.
+
+. Java Step의 경우, 별도 정의된 Listener 이외에도, Java Step에서 수행하는 Java 프로그램 자체가 StepExecutionListener를 구현하고 있는 구현체이므로, 업무팀에서 개발한 Java 프로그램에 정의된 beforeStep()과 이후 afterStep()도 수행된다.
+
+
+. Resource 정보를 DB에 저장한다.
+
+. 컨텍스트에 저장되어 있는 Resource 정보가 이미 DB에 있는 정보인 경우, 정보를 업데이트하고, DB에 없는 Resource인 경우, 신규로 insert한다.
+
+
+. 신규 insert하는 정보는 jobId, stepId, resourceName, resourceUrl, ResourceStatus.LOCKED, resourceType, resourceMethod, 생성시간(현재시간), 수정시간(현재시간)이다.
+
+
+. 기존에 존재하는 Resource에 대하여 업데이트하는 정보는 resourceUrl, ResourceStatus.LOCKED, 수정시간(현재시간) 이다.
+
+
+. 각 Step의 open() 메소드를 수행하여 Step에서 사용하는 리소스들을 초기화한다.
+
+
+. 각 Step에 적합한 doExecute() 메소드를 수행한다.
+
+
+. 각 Step 수행이 끝나면, Step에 설정된 Listener에 대하여 afterStep() 메소드를 수행한다.
+
+
+. Step 정보와 Resource 정보를 업데이트한다.
+
+. Step : 상태(정상종료=BatchStatus.COMPLETED, 오류= BatchStatus.FAILED, 중지= BatchStatus.STOPPED) , 수정시간(현재시간), 종료 Description, totalCount, currenCount, commitCount, stepId
+
+
+. Resource : 상태(ResourceStatus.RELEASED), resourceCount, 수정시간(현재시간)
+
+[[runtime-architecture-run-step-task]]
+
+
+===== TaskStep 실행
+
+:: TaskStep은 Step의 유형이 java인 경우이며, doExecute()에서는 다음과 같은 순서로 Step이 수행된다.
+
+
+. context-batch-runtime.xml에 정의된 transactionManager로 트랜잭션을 start한다.
+
+
+. 작업정의(CFG)에 java step의 @class로 설정된 class의 execute() 메소드를 실행한다.
+
+. execute() 메소드 실행 시 전달되는 입력인자는 ItemFactory 의 구현체인 TaskContextImpl 객체이다.
+
+
+. TaskContextImpl 객체는 Step 실행에 필요한 각종 속성 및 컨텍스트 정보를 포함하고 있다.
+
+
+. 메소드 실행이 정상적으로 종료되면 트랜잭션을 commit하고, ExitStatus.COMPLETED 를 리턴한다.
+
+. StepExecution의 CommitCount를 1 증가시킨다.
+
+
+. Step에서 사용한 ItemWriter를 flush한다.
+
+
+. itemStream.update()
+
+
+. 트랜잭션 commit
+
+
+. Job/Step/Resource의 다음 내용을 update한다.
+* Job : short_context, serialized_context
+
+* Step : short_context, serialized_context
+
+* Resource : commit_pos, commit_count, update_time(현재시간)
+
+
+. execute() 메소드 수행 중 에러가 발생하면, 트랜잭션을 롤백 후, UnexpectedJobExecutionException을 throw한다. 메소드 수행 중 외부(batch admin, batch manager)로부터 Step 중지 요청이 들어와JobStoppingException이 발생하면, 트랜잭션 롤백 후, JobInterruptedException을 발생시킨다.
+
+[[runtime-architecture-run-step-parallel]]
+
+
+===== ParallelStep 실행
+
+:: ParallelStep은 Step의 유형이 parallel인 경우이며, doExecute()에서는 다음과 같은 순서로 Step이 수행된다.
+
+
+. ThreadPoolExecutor를 사용하여 ParallelStep에 포함된 개별 Step들을 동시에 실행시키며, 각 Step은 StepHandler.handleStep() 메소드를 호출하여 실행된다.
+
+
+. 각 Step의 수행이 모두 정상 종료되면, ExitStatus.COMPLETED을 리턴하고, Step의 수행결과 상태가 COMPLETED가 아니거나 Step 수행 시 에러가 발생한 경우에는 Exception을 발생시킨다.
+
+[[runtime-architecture-run-step-delete]]
+
+
+===== DeleteStep 실행
+
+:: DeleteStep은 Step의 유형이 "delete"인 경우이며, doExecute()에서는 다음과 같은 순서로 Step이 수행된다.
+
+
+. DeleteStep내에 정의된 Resource들에 대하여 file.delete()를 수행하고, 정상 종료된 경우 ExitStatus.COMPLETED를 리턴한다.
+
+
+. 정의된 url에 해당하는 파일이 없는 경우, "file does not exist: " 라는 info 레벨의 로그를 찍고 ExitStatus.COMPLETED를 리턴한다.
+
+[[runtime-architecture-run-step-shell]]
+
+
+===== ShellStep 실행
+
+:: ShellStep은 Step의 유형이 "shell"인 경우이며, doExecute()에서는 다음과 같은 순서로 Step이 수행된다.
+
+
+. ShellStep의 경우, StepExecutionListener의 구현체이기도 하므로, Step 실행 전에 beforeStep()이 실행된다. beforeStep()은 ShellStepFactory Bean 설정 시 scriptResolver가 정의되어 있는 경우, scriptResolver를 동작시킨다.
+
+
+. 기 정의된 preScript나 postScript가 있는 경우, 작업정의(CFG)의 Shell 수텝에 명시된 script의 앞 뒤에 해당 스크립트를 append한다. (preScript나 postScript는 context-batch-runtime.xml의 ShellStepFactory 설정에 정의할 수 있음)
+
+
+. script를 실행할 shell file을 생성한다. 이때, ShellStepFactory Bean 설정 시 정의된 fileNameGenerator가 사용된다. 해당 파일이 기 존재하는 경우에는 삭제한다.
+
+
+. 정의한 script의 내용을 2)에서 생성한 파일에 write한다.
+
+
+. ShellStepFactory Bean 설정 시 정의된 command로 해당 shell을 실행시킨다.
+
+
+. shell의 수행결과가 "0"인 경우, 정상종료로 판단하여 ExitStatus.COMPLETED를 리턴하고, \ 그 이외의 경우는 실패로 판단하여 UnexpectedJobExecutionException을 리턴한다.
+
+
+. 임시로 생성한 Script 실행 파일을 삭제한다.
+
+[[runtime-architecture-resource]]
+
+
+==== Reader &amp; Writer 구조
+
+:: 배치 프로그램(Java Step)에서는 입출력 데이터를 처리하기 위해 CFG 파일에서 데이터 유형 및 포맷에 맞게 정의한 Reader, Writer를 정의하여 사용한다.
+
+CFG 파일에 정의한 Reader, Writer는 Java Step에 정의한 클래스의 execute() 메소드의 입력 인자로 전달되는 ItemFactory의 getItemReader(), getItemWriter()를 호출하여 획득할 수 있다.
+
+리소스 별 ItemReader/Writer 객체는 StepParser에서 CFG 파일을 파싱하는 시점에 ResourceFactory에 의해 각 유형에 적합한 객체로 생성된다.
+
+.작업정의(CFG)
+====
+
+----
+select * From batch_config;
+
+
+SELECT * from BATCH_JOB 
+where job_name = 'hello1';
+
+select * from BATCH_JOB_EXECUTION
+;
+
+select * From batch_job_instance;
+select * From batch_job;
+
+select * From batch_RESOURCE_EXECUTION;
+
+select * from batch_JOB_NOTICE;
+
+
+JobOperator : 배치 중단 재시작 job요약 등 모니터링 가능
+
+jobExecution : JobInstance에 대한 한 번의 시도를 의미하는 객체, 잡, 스텝이 진행될때 변경, Job 실행 중에 발생한 정보들을 저장
+
+
+
+getMetaData : 배치 작업의 메타 정보를 추출, 어드민과 연계
+어드민 연동안되있을 때 디폴트 설정
+MetaData: contextemangement 연동하여 서비스별 어드민연결 timeout, loglevel 관리
+
+ClassPathXmlApplicationContext : xml 정보 읽어 설정 정보를 로딩,  root 경로 지정
+
+TenantDataSourceContextHolder:  현재 스레드에 대한 데이터베이스 정보만 포함
+
+
+
+BatchExecutionContext : jobExecution의 저장소
+ jobExecution의 상태변경 저장, 배치잡의 세션
+
+taskDecorator : 비동기처리하는 taskExecutor 커스터마이징 가능
+
+AbstractJob : Job 인터페이스를 구현하는 추상 클래스
+native 
+
+retryTemplate : 재시도 횟수, 간격 예외처리 지정 
+
+JobRepository : 데이터 저장소
+
+taskstep
+
+ThreadPoolTaskExecutor :  스레드 풀을 쉽고 간단하게 설정하고 관리
+ 자바에서 제공하는 ThreadPoolExecutor를 사용하기 쉽게 만들어 사용하도록 구현
+
+FutureTask : 시전 전대기 , 시작됨, 종료 상태되고 종료되면 상태 안바뀜
+
+
+jni : jvm 위에 실행, 자바코드가 다른 언어들로 작성된 라이브러리 호출
+
+
+futuretask 공부더하기

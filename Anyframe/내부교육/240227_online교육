@@ -1,0 +1,100 @@
+어드민은 온라인, 배치 제어함 
+
+하게될 업무 
+    인프라팀과 요건정의 후 협의를 통해 프레임워크 구축
+    인프라팀 고객사가 원하는 프레임 샘플을 달라고 요청 가능 
+    MSA 클라우드 사업 진행 예정 springboot 기반으로
+    온라인- springboot 처리예정 
+    배치- 클라우드 기반으로 
+
+⭐호출순서 
+    web.xml
+        ContextLoaderListener가 
+        <context-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath*:/spring/context-*.xml</param-value>
+        </context-param>
+        읽은 후 
+        context-*.xml 호출
+
+    context-base.xml
+        root 경로 "/service/**" 세팅 후 http-inbound-gateway 설정
+    context-http-inbound.xml
+        1. <http:inbound-gateway id="http-inbound-gateway"  id값 매핑 
+        2. 컨버터로 xml -> java object 변환 
+        3. 변환한 object받아 쓰레드 정보 저장,로직수행
+        4. serviceDispatcher로 데이터 전달 
+        5. ...
+        
+프레임워크단
+    core : 금융전문, 데이터포맷형식
+    runtime
+
+db백단
+    orm - mybatis
+    tx - transaction
+    jdbc
+
+ext 선후처리 세팅
+    외부 i/f  MCI, EAI, FEP 은행 자체솔루션을 커스텀함 ex. 파일암복호화, 주민번호 마스킹처리, tcp제어 
+    공통적으로 커스텀 역할, 런타임 확장판(?)같은 재질,, 
+
+샘플가이드 (아키텍처)
+    1. context-http-inbound : 순서정리 되어 있음 
+        - context-base.xml 
+
+    ServiceControlInterceptor.java : 어드민이 서비스제어
+    ServiceDispatcher.java : 선후처리진행, 실제비즈니스 로직 
+    logback.xml
+
+properties
+    context.properties : 업무단, 컴파일안하고 종종 변경가능한 것들 세팅 ex.EAI, URL주소, 나스, 파일서버
+
+서비스 아이디 
+    context-biz.xml : 커스텀, serviceMapping 세팅
+    re-context-management.xml : bean관리, 모니터링 log 
+                                어드민, 온라인 같은 management참조 그래서 따로 분리되어 있음 ! 
+                            
+web.xml serverCheck
+    
+        <servlet>
+            <servlet-name>serverCheck</servlet-name>
+            <servlet-class>com.anyframe.online.runtime.management.execute.ServerStatusReturningServlet</servlet-class>
+        </servlet>
+        <servlet-mapping>
+            <servlet-name>serverCheck</servlet-name>
+            <url-pattern>/serverCheck</url-pattern>
+        </servlet-mapping>
+        <!--online-configuration-END-->
+      
+        
+        ⭐어드민에서 온라인 호출 시 return 값 역할로 lib로 어드민 연결해주는 꼭 필요한 역할⭐
+
+interceptor 
+    로그관련 
+                       TX003코드값이 들어감 ㄱ
+url: '/anyframe-online-sample/service/listGenre',
+        ㄴ context-path        ㄴ context-base.xml bean으로 설정함
+                                        <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+                                            <property name="mappings">
+                                                <props>
+                                                    <prop key="/service/**">http-inbound-gateway</prop>
+                                                </props>
+                                            </property>
+                                            <property name="order" value="0" />
+                                            <property name="interceptors">
+                                                <list>
+                                                    <bean class="com.anyframe.online.runtime.ext.service.context.ServiceContextClearInterceptor" />
+                                                </list>
+                                            </property>
+                                        </bean>
+
+참고
+    애니프레임 4.ver vs 6.ver은 jdk 버전 차이임 
+    ext : 커스텀 실제
+    runtime, core : 베이스 역할 
+
+
+어드민 커먼 - 어드민온라인, 어드민배치 
+
+

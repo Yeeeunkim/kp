@@ -1,0 +1,286 @@
+
+1. dir 만들기 
+    오류 
+        Permission denied
+        디렉토리를 만들 수 없습니다: 허가 거부
+    조치 
+        root 계정변경 : su -
+        password : kpcnc8100
+        # 확인 
+        폴더생성 mkdir -v kang  * -v 설명 
+        소유권 변경 chown kpcnc:kpcnc kang 
+        kpcnc 계정변경 : su kpcnc 
+
+2. 파일 복사 
+    https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=diceworld&logNo=220190468271
+    cp -r /was/apache-tomcat-online /home/kang 
+
+3. 변경사항 (포트,경로,서버)
+
+    online 8099
+        server.xml :: server 8098, connector 8099
+        context.xml, management.xml application.prop 파일 변경 
+        /home/kang/apache-tomcat-online/conf/context.xml  resource주석
+        /home/kang/apache-tomcat-online/webapps/anyframe-online-sample/WEB-INF/classes/properties
+            instance.id=instance
+            jmx.host=70.30.17.111
+            jmx.port=8099
+        anyframe-online-sample\src\main\resources\spring\context-base.xml management 주석풀기 
+        anyframe-online-sample\src\main\resources\spring\context-management.xml dbcp2 변경
+
+        jdk 설정 conf.catalina.sh  JAVA_HOME=/home/kpcnc/output/jdk1.8.0_202 
+
+    admin 18099
+        server.xml :: server 18098, connector 18099 , engine defaulhost,  host name 70.30.17.111 변경
+        catalina.properties.dat :: 경로 변경 
+        /home/kang/anyframe-batch-sample/src/main/resources :: username, password변경 
+
+    agent 28099
+        application.properties
+        server.xml ::  server 8022, connector 28099, engine defaulhost,  host name 70.30.17.111 변경
+        context.xml :: resource 주석
+        apache-tomcat-agent2/webapps/anyframe-batch-agent/WEB-INF/classes :: batch.online.runtime.urls=
+
+    sample
+        anyframe-batch-sample/dist/bin/setenv.sh :: 
+            export JAVA_HOME=/usr/java/jdk1.8.0_341-amd64
+            export RUNTIME_HOME=/home/kang/anyframe-batch-sample
+
+4. 소스 패치 webapps 안에 war 적용
+        webapps 안에 내꺼 online.war 넣기 
+        기존파일삭제 rm -rf 
+
+5. 호출 
+    http://70.30.17.111:8099/anyframe-online-sample/
+    http://70.30.17.111:8095/admin#/login
+
+
+6. 배치실행오류
+        Caused by: com.caucho.hessian.client.HessianConnectionException: HessianProxy cannot connect to http://70.30.17.111:18085/adminOperator
+        at com.caucho.hessian.client.HessianProxy.invoke(HessianProxy.java:194)
+
+boot 실행 
+    /anyframe/app/batch-runtime_kye/
+    /was/boot-agent-kye/
+
+    /was/boot-agent-kye/config 로그경로 변경하기 
+    포트 확인하기 
+    boot로 실행해보기 
+
+
+    [/was/boot-agent-kye/]
+        bin변경
+        --.startup.sh, 
+            AGENT_BASE=$PWD <- 현재경로
+            jar_file 
+            * jar를 코드소스는 변경사항없으면 그대로 사용 
+            classpath 
+                $AGENT_BASE/$JAR_FILE <- 자르세팅
+                : $AGENT_BASE/config <- 설정파일 세팅
+                :  $AGENT_BASE/lib <- 라이브러리 세팅
+
+        --.shudown.sh
+            cd 경로 변경 
+
+        --bootkye.sh, downkye.sh port변경
+
+
+        config변경 
+        --application.properties 
+            spring.datasource.username=kye
+            spring.datasource.password=kye8100
+
+            runtime.working.directory=/anyframe/app/batch-sample-kye/dist/bin
+            runtime.run.batch=/anyframe/app/batch-sample-kye/dist/bin/runjob.sh
+            runtime.kill.batch=/anyframe/app/batch-sample-kye/dist/bin/killjob.sh
+            runtime.run.daemon=/anyframe/app/batch-sample-kye/dist/bin/rundaemon.sh
+            runtime.kill.daemon=/anyframe/app/batch-sample-kye/dist/bin/killdaemon.sh
+            
+            resource.file.directories=/was/boot-agent-kye/log
+
+            resource.job.directories=/anyframe/app/batch-sample-kye/target/classes
+
+            batch.admin.urls=70.30.17.111:18099/anyframe-batch-admin
+
+            batch.online.runtime.urls=70.30.17.111:8085/anyframe-runtime-web
+
+            batch.shell.log.dir=/was/boot-agent-kye/log
+
+        --logback.xml 
+            <fileNamePattern>${resource.log.directories}/agent-kye/${log.filename}.%d{yyyyMMdd}.log</fileNamePattern>
+
+        
+    [/anyframe/app/batch-sample-kye]]
+
+            sample runjob.cmd
+
+            boot-agent-kye/
+
+            batch-runtime_kye
+
+            target
+
+    cp 복사 
+    mv 기존파일명 변경파일명
+    mv  파일명/디렉터리명  파일명/디렉터리명
+
+    alias 
+    vi .bash_profile
+    2yy -> p 
+    . .bash_profile 
+
+
+    vi 
+    편집모드x
+
+    커서 -> shirt + insert 
+    dd 삭제 
+
+    편집모드상태 작성 -> esc -> . 
+=============명령어================
+alias 설정
+    2yy 
+    . .bash_profile 
+수정 cw    
+파일디렉토리복사 :: cp -rf 복사대상 새로복사파일
+
+압축 
+jar cvf fruit.jar 폴더명
+
+압축 풀기
+jar xvf fruit.jar
+
+*vi server.xml  편집기
+*i 수정
+*wq 저장 
+*vi 강제 나간 경우 
+
+:edit 파일명
+
+ls -lart 최긴꺼 조회 
+ls -al 
+rm -rf .server.xml.swp
+/home/kang/apache-tomcat-online/logs/catalina.out
+
+디렉토리 삭제
+rm -r  디렉토리 명 
+
+파일디렉토리복사 
+cp -rf 복사대상 새로복사파일
+
+echo 
+변수를 출력 하고 shell 스크립트에 문장의 내용을 입력 할때 사용 한다.
+
+
+리눅스
+ps -ef | grep /kang 
+kill -9 pid
+netstat -natp | grep 18099
+
+
+윈도우
+netstat -ano | findstr [포트]
+taskkill /f /pid 2092
+netstat -ano | find "443"
+
+
+
+
+서버 실행 
+./startup.sh 
+
+로그 실행 
+tail -f catalina.out
+
+ ./runjob.sh /home/kpcnc/output/batch-sample/bin/src/main/java/sample/batch/blob/cfg/hello_cfg.xml JOB:helloLin
+
+ sample/batch/blob/cfg/hello_cfg.xml JOB=helloLin -threadsleep=1000 -JOBID=7160 TENANTID=tenantIdA TENANTID=tenantIdA -PROFILE=processBatch
+
+배치 실행 
+    설정해야할 것 
+     sample/dist/bin/setenv.cmd 
+
+      ./runjob.cmd sample/batch/hello/cfg/hello_cfg.xml JOB=hello -threadsleep=1000 -JOBID=7160 TENANTID=tenantIdA TENANTID=tenantIdA -PROFILE=processBatch
+      ./runjob.sh test/daemon/file/daemon_cfg.xml threadsleep=1000
+      ./rundaemon.cmd  /home/kang/anyframe-batch-sample/target/classes/sample/batch/dt/cfg/dt_cfg.xml threadsleep=1000
+
+    ./rundaemon.cmd  /home/kang/anyframe-batch-sample/target/classes/sample/batch/hello/cfg/hello_cfg.xml threadsleep=1000
+
+    runjob.cmd C:\Users\kpcnc\git\anyframe-batch-0311\anyframe-batch-sample\target\classes\sample\batch\hello\cfg\hello_cfg.xml -threadsleep=1000 -JOBNAME=240414 TENANTID=tenantIdA -ID=4662
+
+
+    ./runjob.sh sample/batch/hello/cfg/hello_cfg.xml threadsleep=1000
+
+    CommandLineJobLauncher : command: JOB:linux_batchJob -JOBID=7159 TENANTID=tenantIdA TENANTID=tenantIdA -PROFILE=processBatch
+
+
+
+./runjob.sh /home/kang/anyframe-batch-sample-5/bin/src/main/java/sample/batch/flow/cfg/flow_cfg.xml threadsleep=1000
+
+
+chmod +x /home/kang/anyframe-batch-sample-5/bin/dist/bin/runjob.sh
+베이스 
+    webapps .war 
+    vi 강제 나가면 안열림 .swp 파일때문에 rm 명령어로 삭제
+
+
+    drwxr- xr-x     9          kpcnc  kpcnc     261  3월  5 16:15 ystd
+    파일타입 권한정보 링크수       소유자 소유그룹   용량   
+    x 실행 
+    r 읽기
+    w 쓰기
+
+
+    vim
+    :q  나가기 
+    :wq 저장나가기
+    :q! 저장안함 
+    :set nu  행번호
+
+    chmod 시스템 파일,객체 액세스 권한 
+    chown 파일 디렉터리 소유권 변경 (root권한 필요 )
+
+    
+    taskkill /F /PID 8080
+
+
+
+
+
+에러 
+    org.apache.catalina.util.LifecycleBase.handleSubClassException
+조치 
+    포트충돌 
+
+에러 
+    Failed to obtain JDBC Connection; nested exception is java.sql.SQLException
+조치 
+    db 설정 바꾸기 
+    필자는 기존 was 파일 옮겨서 안됨 
+    본인 online sample war updt 하기 
+
+에러
+    org.springframework.beans.factory.BeanDefinitionStoreException: IOException parsing XML document from class path resource [JOB:linux_batchJob]; 
+    nested exception is java.io.FileNotFoundException: class path resource [JOB:linux_batchJob] cannot be opened because it does not exist   
+조치 
+
+
+질문
+    server.xml contextpath 설정안했는데 어떻게 화면호출되는건지,, 
+답변 
+    appBase 속성을 webapps 설정
+    webapps online.war 풀어서 online 파일 읽은 후 호출 
+    이부분은 권장하는 형식은 아님 
+    아래 방법으로 해볼 예정!
+    https://velog.io/@falling_star3/Tomcat-%ED%86%B0%EC%BA%A3%EC%97%90-Context-%EC%B6%94%EA%B0%80%ED%95%98%EA%B8%B0
+
+에러 PCC-F-02144, CMD-LINE: Blank characters are not allowed on either side of an equ
+
+조치 vi makefile
+    ORA_FLAG=sqlcheck=semantic userid=kye/kye8100
+
+
+agent alive 안되는 문제 
+
+startup.sh
+shudown.sh

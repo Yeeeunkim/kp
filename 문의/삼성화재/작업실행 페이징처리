@@ -1,0 +1,16 @@
+
+요구사항
+    이전 다음 30개씩 보이게 
+
+실행일자
+
+
+
+수행일자 조회
+    화면단
+    JobExecutionTab
+
+    
+    백단
+    2. JobInstanceDao.java - selectJobInstances()  
+

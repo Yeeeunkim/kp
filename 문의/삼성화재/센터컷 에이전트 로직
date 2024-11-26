@@ -1,0 +1,284 @@
+2024-09-09 17:12:19] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11111]
+[2024-09-09 17:12:19] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [31]
+[2024-09-09 17:12:19] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [31]
+[2024-09-09 17:12:20] INFO  CenterCutAgentImpl : Chunk is started. : [jobId=sample3, execDate=20240909, execSeq=3, chunkSeq=1]
+[2024-09-09 17:12:20] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100000]
+[2024-09-09 17:12:20] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [32]
+[2024-09-09 17:12:20] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [32]
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'jobId' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'execDate' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'execSeq' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'dataSeq' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'threadGroup' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'statusCode' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'inputValue' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'outputValue' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'processTime' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'retryCount' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'dataDcd' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'dataKey' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'custId' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'zaContPrgStatCd' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'appMessage' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] DEBUG MetadataResolverImpl : 'sysMessgae' field of 'class com.anyframe.centercut.runtime.ext.dao.vo.InputTableVo' does not have @Length annotation.
+[2024-09-09 17:12:20] WARN  PerformanceRepositoryImpl : Couldn't find current cpu Usage
+[2024-09-09 17:12:20] INFO  ItemProcessHandler : Online transaction timeout : -1, serviceId : movieSvc_getList
+[2024-09-09 17:12:20] INFO  ItemProcessHandler : Item processing started : Item [jobId=sample3, execDate=20240909, execSeq=3, dataSeq=1, threadGroup=null, reprocessCount=0, retryCo
+unt=0]
+[2024-09-09 17:12:20] INFO  ItemProcessHandler : Item status check : Item [jobId=sample3, execDate=20240909, execSeq=3, dataSeq=1, threadGroup=null, reprocessCount=0, retryCount=0]
+,UNPROCESSED
+[2024-09-09 17:12:20] DEBUG GlobalIdSettingInterceptor : ##################### Global Id for Online Admin = 2024090990H9171220015616000001
+[2024-09-09 17:12:21] DEBUG ServiceContextHolder : ■ Initialize SGC by initValue(). Current Thread ID [44]
+[2024-09-09 17:12:21] DEBUG MetadataResolverImpl : 'svatPrcpMsgCon' field of 'class com.anyframe.online.runtime.ext.service.context.global.info.SvatRsn' does not have @Length annot
+ation.
+[2024-09-09 17:12:21] DEBUG MetadataResolverImpl : 'svatSbMsgCon' field of 'class com.anyframe.online.runtime.ext.service.context.global.info.SvatRsn' does not have @Length annotat
+ion.
+[2024-09-09 17:12:21] DEBUG MetadataResolverImpl : 'opatMsgCon' field of 'class com.anyframe.online.runtime.ext.service.context.global.info.OpatRsn' does not have @Length annotatio
+n.
+[2024-09-09 17:12:21] DEBUG MetadataResolverImpl : 'opatSbMsgCon' field of 'class com.anyframe.online.runtime.ext.service.context.global.info.OpatRsn' does not have @Length annotat
+ion.
+[2024-09-09 17:12:21] DEBUG MetadataResolverImpl : 'immediate' field of 'class com.anyframe.online.runtime.ext.service.context.global.info.OpatRsn' does not have @Length annotation
+.
+[2024-09-09 17:12:21] DEBUG RequestStartedEventPublisher : RequestStartedEvent published with startedTime [2024-09-09 17:12:20].
+[2024-09-09 17:12:21] WARN  ServiceExecutionInfoTransformer : Information of the client that sent a request is null. Create a default ClientInfo.
+[2024-09-09 17:12:21] DEBUG ServiceIdMappingAnnotationServiceMappingAsm : Looking up service method for serviceId 
+[2024-09-09 17:12:21] DEBUG ServiceIdMappingAnnotationServiceMappingAsm : Returning service method [ServiceMethodLazy [beanName=movieSvcImpl, methodName=getList, parameterTypeStrin
+gs=[com.anyframe.plugin.online.movie.vo.MovieSVO]]]
+[2024-09-09 17:12:21] DEBUG ServiceExecutionInfoTransformer : resolving the argument values (parameters length [1])
+[2024-09-09 17:12:21] DEBUG JsonArgumentResolver : VO from json : com.anyframe.plugin.online.movie.vo.MovieSVO@4faed58b
+[2024-09-09 17:12:21] INFO  BusinessTransactionDispatcher : [FRAMEWORK_OLT]__________ Set the timeout for this business transaction [60]s.
+[2024-09-09 17:12:21] DEBUG BusinessTransactionDispatcher : [FRAMEWORK_OLT]__________ business transation pre processing of [com.anyframe.online.runtime.ext.service.interceptor.Com
+positeSysInterceptors].
+[2024-09-09 17:12:21] DEBUG CompositeSysInterceptors : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:12:21] DEBUG CompositeSysInterceptors : ▶ [FRAMEWORK_OLT]__________ 시스템 공통 선처리 시작 (Total [0]).
+[2024-09-09 17:12:21] DEBUG CompositeSysInterceptors : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:12:21] DEBUG CompositeSysInterceptors : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:12:21] DEBUG CompositeSysInterceptors : ◀ [FRAMEWORK_OLT]__________ 시스템 공통 선처리 종료.
+[2024-09-09 17:12:21] DEBUG CompositeSysInterceptors : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:12:21] DEBUG BusinessTransactionDispatcher : [FRAMEWORK_OLT]__________ business transation pre processing of [com.anyframe.online.runtime.ext.service.interceptor.Com
+positeBizInterceptors].
+[2024-09-09 17:12:21] DEBUG CompositeBizInterceptors : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:12:21] DEBUG CompositeBizInterceptors : ▶ [FRAMEWORK_OLT]__________ 업무 공통 선처리 시작 (Total [0]).
+[2024-09-09 17:12:21] DEBUG CompositeBizInterceptors : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:12:21] DEBUG CompositeBizInterceptors : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:12:21] DEBUG CompositeBizInterceptors : ◀ [FRAMEWORK_OLT]__________ 업무 공통 선처리 종료.
+[2024-09-09 17:12:21] DEBUG CompositeBizInterceptors : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:12:21] DEBUG DefaultServiceDispatcher : Service ID to execute is movieSvc_getList
+[2024-09-09 17:12:21] DEBUG ServiceIdMappingAnnotationServiceMappingAsm : Looking up service method for serviceId 
+[2024-09-09 17:12:21] DEBUG ServiceIdMappingAnnotationServiceMappingAsm : Returning service method [ServiceMethodLazy [beanName=movieSvcImpl, methodName=getList, parameterTypeStrin
+gs=[com.anyframe.plugin.online.movie.vo.MovieSVO]]]
+[2024-09-09 17:12:21] DEBUG ServiceExecutionChain : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:12:21] DEBUG ServiceExecutionChain : ▶ [FRAMEWORK_OLT]__________ Call preProcess() of 2 ServiceInterceptor(s).
+[2024-09-09 17:12:21] DEBUG ServiceExecutionChain : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:12:21] DEBUG ServiceExecutionChain : [FRAMEWORK_OLT]__________ Start pre-processing of [com.anyframe.centercut.runtime.error.interceptor.ErrorHandlingInterceptor].
+[2024-09-09 17:12:21] DEBUG ServiceExecutionChain : [FRAMEWORK_OLT]__________ Start pre-processing of [com.anyframe.online.runtime.management.ServiceControlInterceptor].
+[2024-09-09 17:12:21] INFO  DefaultExecutionStatus : incrementCount - service id : movieSvc_getList, thread id : 44
+[2024-09-09 17:12:21] DEBUG ServiceExecutionChain : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:12:21] DEBUG ServiceExecutionChain : ◀ [FRAMEWORK_OLT]__________ Completed execution preProcess() of ServiceInterceptor(s).
+[2024-09-09 17:12:21] DEBUG ServiceExecutionChain : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:12:21] DEBUG DefaultServiceDispatcher : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:12:21] DEBUG DefaultServiceDispatcher : ▶ [FRAMEWORK_OLT]__________ Start service execution.
+[2024-09-09 17:12:21] DEBUG DefaultServiceDispatcher : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:12:21] DEBUG MovieSvcImpl : Search Movie Id : MV-00001
+[2024-09-09 17:12:22] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100001]
+[2024-09-09 17:12:22] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [33]
+[2024-09-09 17:12:22] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [33]
+[2024-09-09 17:12:25] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100010]
+[2024-09-09 17:12:25] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [34]
+[2024-09-09 17:12:25] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [34]
+[2024-09-09 17:12:26] DEBUG CompleteQueryPostProcessor : 
+
+ INSERT INTO EVENT_HISTORY 
+ (DOMAIN_ID, INSTANCE_ID, EXECUTION_ID, EVENT_NAME, EVENT_OCCUR_TIME, EVENT_DESCRIPTION)
+ VALUES 
+ ('domain', 'instance', '2024090990H9171220015616000001', 'ServiceStartedEvent', '1725869541588', 'Service Execution Started : ServiceExecutionInfo [GlobalId=2024090990H91712200156
+16000001, ServiceId=movieSvc_getList, clientIp=127.0.0.1, clientType=default, userId=admin, requestTime=0, startTime=1725869541583, endTime=0]')
+
+[2024-09-09 17:12:26] DEBUG DefaultHistoryHandler : 1 Events processed.
+[2024-09-09 17:12:28] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100011]
+[2024-09-09 17:12:28] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [35]
+[2024-09-09 17:12:28] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [35]
+[2024-09-09 17:12:29] DEBUG LogFactory : Logging initialized using 'class org.apache.ibatis.logging.slf4j.Slf4jImpl' adapter.
+[2024-09-09 17:12:31] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11010]
+[2024-09-09 17:12:31] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [26]
+[2024-09-09 17:12:31] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [26]
+[2024-09-09 17:12:34] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11011]
+[2024-09-09 17:12:34] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [27]
+[2024-09-09 17:12:34] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [27]
+[2024-09-09 17:12:37] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11100]
+[2024-09-09 17:12:37] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [28]
+[2024-09-09 17:12:37] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [28]
+[2024-09-09 17:12:40] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11101]
+[2024-09-09 17:12:40] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [29]
+[2024-09-09 17:12:40] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [29]
+[2024-09-09 17:12:42] DEBUG SqlSessionFactoryBean : Parsed configuration file: 'class path resource [mybatis/mybatis-config.xml]'
+[2024-09-09 17:12:43] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11110]
+[2024-09-09 17:12:43] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [30]
+[2024-09-09 17:12:43] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [30]
+[2024-09-09 17:12:45] DEBUG SqlSessionFactoryBean : Parsed mapper file: 'file [C:\kye\eclipse\workspace\centercut_v5.0.0\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpweba
+pps\anyframe-online-aui-mybatis-pi\WEB-INF\classes\sqlmap\hsql\com\anyframe\plugin\online\movie\dao\mapper-MovieDAO.xml]'
+[2024-09-09 17:12:46] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11111]
+[2024-09-09 17:12:46] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [31]
+[2024-09-09 17:12:46] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [31]
+[2024-09-09 17:12:49] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100000]
+[2024-09-09 17:12:49] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [32]
+[2024-09-09 17:12:49] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [32]
+[2024-09-09 17:12:52] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100001]
+[2024-09-09 17:12:52] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [33]
+[2024-09-09 17:12:52] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [33]
+[2024-09-09 17:12:55] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100010]
+[2024-09-09 17:12:55] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [34]
+[2024-09-09 17:12:55] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [34]
+[2024-09-09 17:12:58] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100011]
+[2024-09-09 17:12:58] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [35]
+[2024-09-09 17:12:58] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [35]
+[2024-09-09 17:12:59] DEBUG SqlSessionUtils : Creating a new SqlSession
+[2024-09-09 17:13:00] DEBUG SqlSessionUtils : Registering transaction synchronization for SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@33b06bbc]
+[2024-09-09 17:13:01] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11010]
+[2024-09-09 17:13:01] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [26]
+[2024-09-09 17:13:01] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [26]
+[2024-09-09 17:13:03] DEBUG SpringManagedTransaction : JDBC Connection [1976144818, URL=jdbc:oracle:thin:@70.30.17.111:1521:db21, UserName=KYE5, Oracle JDBC driver] will be managed
+ by Spring
+[2024-09-09 17:13:03] DEBUG com-anyframe-plugin-online-movie-dao-MovieDAO-listLimitMovie : ooo Using Connection [1976144818, URL=jdbc:oracle:thin:@70.30.17.111:1521:db21, UserName=
+KYE5, Oracle JDBC driver]
+[2024-09-09 17:13:03] DEBUG com-anyframe-plugin-online-movie-dao-MovieDAO-listLimitMovie : ==>  Preparing: SELECT movie.movie_id, movie.title, movie.director, movie.release_date, m
+ovie.genre_id, genre.name , movie.ticket_price, movie.actors, movie.runtime, movie.now_playing, movie.poster_file FROM MOVIE movie, GENRE genre WHERE movie.genre_id = genre.genre_i
+d AND title like '%' || ? || '%' 
+[2024-09-09 17:13:04] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11011]
+[2024-09-09 17:13:04] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [27]
+[2024-09-09 17:13:04] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [27]
+[2024-09-09 17:13:04] DEBUG com-anyframe-plugin-online-movie-dao-MovieDAO-listLimitMovie : ==> Parameters: Test01(String)
+[2024-09-09 17:13:06] DEBUG com-anyframe-plugin-online-movie-dao-MovieDAO-listLimitMovie : <==      Total: 0
+[2024-09-09 17:13:06] DEBUG SqlSessionUtils : Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@33b06bbc]
+[2024-09-09 17:13:07] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11100]
+[2024-09-09 17:13:07] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [28]
+[2024-09-09 17:13:07] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [28]
+[2024-09-09 17:13:10] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11101]
+[2024-09-09 17:13:10] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [29]
+[2024-09-09 17:13:10] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [29]
+[2024-09-09 17:13:13] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11110]
+[2024-09-09 17:13:13] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [30]
+[2024-09-09 17:13:13] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [30]
+[2024-09-09 17:13:16] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11111]
+[2024-09-09 17:13:16] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [31]
+[2024-09-09 17:13:16] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [31]
+[2024-09-09 17:13:19] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100000]
+[2024-09-09 17:13:19] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [32]
+[2024-09-09 17:13:19] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [32]
+[2024-09-09 17:13:19] DEBUG SqlSessionUtils : Fetched SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@33b06bbc] from current transaction
+[2024-09-09 17:13:19] DEBUG com-anyframe-plugin-online-movie-dao-MovieDAO-getMovieListCnt : ooo Using Connection [1976144818, URL=jdbc:oracle:thin:@70.30.17.111:1521:db21, UserName
+=KYE5, Oracle JDBC driver]
+[2024-09-09 17:13:19] DEBUG com-anyframe-plugin-online-movie-dao-MovieDAO-getMovieListCnt : ==>  Preparing: /*SQL_ID: com-anyframe-plugin-online-movie-dao-MovieDAO-getMovieListCnt 
+*/ SELECT count(*) as rowcount FROM MOVIE movie, GENRE genre WHERE movie.genre_id = genre.genre_id AND title like '%' || ? || '%' 
+[2024-09-09 17:13:19] DEBUG com-anyframe-plugin-online-movie-dao-MovieDAO-getMovieListCnt : ==> Parameters: Test01(String)
+[2024-09-09 17:13:19] DEBUG com-anyframe-plugin-online-movie-dao-MovieDAO-getMovieListCnt : <==      Total: 1
+[2024-09-09 17:13:19] DEBUG SqlSessionUtils : Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@33b06bbc]
+[2024-09-09 17:13:22] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100001]
+[2024-09-09 17:13:22] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [33]
+[2024-09-09 17:13:22] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [33]
+[2024-09-09 17:13:25] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100010]
+[2024-09-09 17:13:25] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [34]
+[2024-09-09 17:13:25] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [34]
+[2024-09-09 17:13:28] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100011]
+[2024-09-09 17:13:28] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [35]
+[2024-09-09 17:13:28] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [35]
+[2024-09-09 17:13:31] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11010]
+[2024-09-09 17:13:31] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [26]
+[2024-09-09 17:13:31] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [26]
+[2024-09-09 17:13:31] DEBUG MovieSvcImpl : movie list size :0
+[2024-09-09 17:13:34] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11011]
+[2024-09-09 17:13:34] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [27]
+[2024-09-09 17:13:34] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [27]
+[2024-09-09 17:13:37] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11100]
+[2024-09-09 17:13:37] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [28]
+[2024-09-09 17:13:37] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [28]
+[2024-09-09 17:13:39] DEBUG DefaultServiceDispatcher : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:13:40] DEBUG DefaultServiceDispatcher : ◀ [FRAMEWORK_OLT]__________ Completed service execution.
+[2024-09-09 17:13:40] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11101]
+[2024-09-09 17:13:40] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [29]
+[2024-09-09 17:13:40] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [29]
+[2024-09-09 17:13:40] DEBUG DefaultServiceDispatcher : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:13:41] DEBUG ServiceExecutionChain : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:13:41] DEBUG ServiceExecutionChain : ▶ [FRAMEWORK_OLT]__________ Call postProcess() of 2 ServiceInterceptor(s).
+[2024-09-09 17:13:41] DEBUG ServiceExecutionChain : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:13:41] DEBUG ServiceExecutionChain : [FRAMEWORK_OLT]__________ Start post-processing of [com.anyframe.online.runtime.management.ServiceControlInterceptor].
+[2024-09-09 17:13:41] DEBUG ServiceExecutionChain : [FRAMEWORK_OLT]__________ Start post-processing of [com.anyframe.centercut.runtime.error.interceptor.ErrorHandlingInterceptor].
+[2024-09-09 17:13:41] DEBUG ServiceExecutionChain : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:13:41] DEBUG ServiceExecutionChain : ◀ [FRAMEWORK_OLT]__________ Completed execution postProcess() of ServiceInterceptor(s).
+[2024-09-09 17:13:41] DEBUG ServiceExecutionChain : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:13:43] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11110]
+[2024-09-09 17:13:43] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [30]
+[2024-09-09 17:13:43] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [30]
+[2024-09-09 17:13:43] DEBUG ServiceExecutionChain : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:13:43] DEBUG ServiceExecutionChain : ▶ [FRAMEWORK_OLT]__________ Call afterCompletion() of 2 ServiceInterceptor(s).
+[2024-09-09 17:13:43] DEBUG ServiceExecutionChain : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:13:43] DEBUG ServiceExecutionChain : [FRAMEWORK_OLT]__________ Start after completion of request processing [com.anyframe.online.runtime.management.ServiceControlInt
+erceptor].
+[2024-09-09 17:13:43] INFO  DefaultExecutionStatus : decrementCount - service id : movieSvc_getList, thread id : 44
+[2024-09-09 17:13:43] INFO  DefaultExecutionStatus : decrementActiveCount - service id : movieSvc_getList, thread id : 44
+[2024-09-09 17:13:43] DEBUG ServiceExecutionChain : [FRAMEWORK_OLT]__________ Start after completion of request processing [com.anyframe.centercut.runtime.error.interceptor.ErrorHa
+ndlingInterceptor].
+[2024-09-09 17:13:43] INFO  ErrorHandlingInterceptor : Online error occured.
+[2024-09-09 17:13:43] DEBUG ServiceExecutionChain : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:13:43] DEBUG ServiceExecutionChain : ◀ [FRAMEWORK_OLT]__________ Completed execution afterCompletion() of ServiceInterceptor(s).
+[2024-09-09 17:13:43] DEBUG ServiceExecutionChain : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:13:46] DEBUG CompleteQueryPostProcessor : 
+
+ INSERT INTO EVENT_HISTORY 
+ (DOMAIN_ID, INSTANCE_ID, EXECUTION_ID, EVENT_NAME, EVENT_OCCUR_TIME, EVENT_DESCRIPTION)
+ VALUES 
+ ('domain', 'instance', '2024090990H9171220015616000001', 'ServiceEndedEvent', '1725869623746', 'Service Execution Ended : duration = 82163ms, Success, Sync')
+
+[2024-09-09 17:13:46] DEBUG DefaultHistoryHandler : 1 Events processed.
+[2024-09-09 17:13:46] DEBUG CompleteQueryPostProcessor : 
+
+ INSERT INTO SERVICE_HISTORY 
+ (DOMAIN_ID, INSTANCE_ID, EXECUTION_ID, SERVICE_ID, BEAN_NAME, METHOD_NAME, START_TIME, ELAPSED_TIME, SUCCESS, ARGUMENTS, STACK_TRACE) 
+ VALUES 
+ ('domain', 'instance', '2024090990H9171220015616000001', 'movieSvc_getList', 'com.anyframe.plugin.online.movie.svc.impl.MovieSvcImpl', 'getList', '1725869541583', '82163', '1', '[
+com.anyframe.plugin.online.movie.vo.MovieSVO@4faed58b]', '')
+
+[2024-09-09 17:13:46] DEBUG DefaultHistoryHandler : 1 Service Events processed.
+[2024-09-09 17:13:46] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11111]
+[2024-09-09 17:13:46] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [31]
+[2024-09-09 17:13:46] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [31]
+[2024-09-09 17:13:48] DEBUG BusinessTransactionDispatcher : [FRAMEWORK_OLT]__________ business transation post processing of [com.anyframe.online.runtime.ext.service.interceptor.Co
+mpositeBizInterceptors].
+[2024-09-09 17:13:49] DEBUG CompositeBizInterceptors : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:13:49] DEBUG CompositeBizInterceptors : ▶ [FRAMEWORK_OLT]__________ 업무 공통 후처리 시작 (Total [0]).
+[2024-09-09 17:13:49] DEBUG CompositeBizInterceptors : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:13:49] DEBUG CompositeBizInterceptors : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:13:49] DEBUG CompositeBizInterceptors : ◀ [FRAMEWORK_OLT]__________ 업무 공통 후처리 종료.
+[2024-09-09 17:13:49] DEBUG CompositeBizInterceptors : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:13:49] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100000]
+[2024-09-09 17:13:49] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [32]
+[2024-09-09 17:13:49] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [32]
+[2024-09-09 17:13:50] DEBUG BusinessTransactionDispatcher : [FRAMEWORK_OLT]__________ business transation post processing of [com.anyframe.online.runtime.ext.service.interceptor.Co
+mpositeSysInterceptors].
+[2024-09-09 17:13:50] DEBUG CompositeSysInterceptors : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:13:50] DEBUG CompositeSysInterceptors : ▶ [FRAMEWORK_OLT]__________ 시스템 공통 후처리 시작 (Total [1]).
+[2024-09-09 17:13:50] DEBUG CompositeSysInterceptors : ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶
+[2024-09-09 17:13:50] DEBUG CompositeSysInterceptors : [FRAMEWORK_OLT]__________ Start post-processing of [com.anyframe.online.runtime.ext.service.interceptor.AUIDataSetSetIntercep
+tor].
+[2024-09-09 17:13:50] DEBUG CompositeSysInterceptors : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:13:50] DEBUG CompositeSysInterceptors : ◀ [FRAMEWORK_OLT]__________ 시스템 공통 후처리 종료.
+[2024-09-09 17:13:50] DEBUG CompositeSysInterceptors : ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀
+[2024-09-09 17:13:52] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100001]
+[2024-09-09 17:13:52] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [33]
+[2024-09-09 17:13:52] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [33]
+[2024-09-09 17:13:55] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100010]
+[2024-09-09 17:13:55] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [34]
+[2024-09-09 17:13:55] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [34]
+[2024-09-09 17:13:58] DEBUG BusinessTransactionDispatcher : [FRAMEWORK_OLT]__________ 온라인 트랜잭션 커밋 성공
+[2024-09-09 17:13:58] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100011]
+[2024-09-09 17:13:58] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [35]
+[2024-09-09 17:13:58] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [35]
+[2024-09-09 17:14:01] INFO  ServiceExecutionResultToObjectTransformer : com.anyframe.online.runtime.ext.integration.transformer.ServiceExecutionResultToJsonNodeTransformerServiceEx
+ecutionResultToObjectTransformer OUTPUT Message:[{"movieId":null,"genreId":null,"title":null,"director":null,"name":null,"actors":null,"runtime":null,"releaseDate":null,"ticketPric
+e":null,"posterFile":null,"nowPlaying":null,"movieList":[],"insertMovieList":null,"updateMovieList":null,"deleteMovieList":null,"readindex":0,"rowcount":0,"readcount":0}]
+[2024-09-09 17:14:01] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11010]
+[2024-09-09 17:14:01] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [26]
+[2024-09-09 17:14:01] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [26]
+[2024-09-09 17:14:02] DEBUG Segment : put added 0 on heap
+[2024-09-09 17:14:02] DEBUG Segment : fault removed 0 from heap
+[2024-09-09 17:14:02] DEBUG Segment : fault added 0 on disk

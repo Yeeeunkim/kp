@@ -1,0 +1,330 @@
+> 환경
+    maven 
+    jdk 
+    server 
+
+> git clone
+    develop
+    https://code.sdsdev.co.kr/anyframe/anyframe_enterprise_online.git
+    
+> 프로젝트 환경설정
+    anyframe-enterprise-parent
+    anyframe-online-core 
+    anyframe-online-runtime
+    anyframe-online-runtime-tx
+    anyframe-online-runtime-jdbc 
+    anyframe-online-runtime-orm 
+    anyframe-online-runtime-management
+    anyframe-online-runtime-ext
+    anyframe-online-sample         
+        context.properties
+        management.properties
+            biz.driver=oracle.jdbc.driver.OracleDriver
+            biz.url=jdbc:oracle:thin:@70.30.17.111:1521:db21
+            biz.username=kye
+            biz.password=kye8100
+
+> maven build 
+   anyframe-enterprise-parent
+   anyframe-online-core 
+   anyframe-online-runtime
+   anyframe-online-runtime-tx
+   anyframe-online-runtime-jdbc 
+   anyframe-online-runtime-orm 
+   anyframe-online-runtime-management
+   anyframe-online-runtime-ext
+   anyframe-online-sample
+
+   **goals : clean install -Dpmd.skip=true
+
+   
+
+> online admin 연결 
+    anyframe-enterprise-admin-online re-context-management.xml   
+            -> context-mangement.xml 변경 
+            2. key 매핑  
+            re-context-management.xml bean name 값 /management
+            == context-base.xml urlMapping key 일치 세팅  
+            3. context-mangement.xml dataSource class 경로
+                dbcp -> dbcp2 변경함 
+
+
+            
+
+> org.springframework.messaging.MessageDeliveryException: failed to send Message to channel 'inbound-request'; 
+
+
+> Online Layer 
+	
+		Client로부터 전달받은 데이터는 Layer별로 단계적으로 처리
+		fw - svo - svoimpl - bvo - biz - dvo - dao - fw - db
+
+		MovieModel.js                                           /process   *Client에서 서비스(Service)클래스 내 메소드를 호출하기 위한 ID로 하나의 서비스ID는 하나의 단일 트랜잭션을 보유
+			MovieSVO.java       :: JSON 데이터와 SVO 간의 매핑
+
+		서비스단                             
+			MovieSVC.java       :: 서비스의 인터페이스 클래스     @ServiceIdMapping("process")
+			MovieSVCImpl.java   :: Main 업무 프로세스            @Service("movieSVCImpl") *서비스명은 유일해야함(타 서비스명과 중복 불가)
+
+		비즈니스단 
+			MovieBVO.java       :: BIZ 호출 시 사용되는 VO
+			MovieBIZ.java       :: 검증/계산 로직
+
+		데이터접근 
+			MovieDVO.java       :: DAO 호출 시 사용되는 VO
+			MovieDAO.java       :: DB테이블에 접속하여 CRUD 구현
+
+> err 
+    
+    어느날 갑자기 이런 오류 뜸 
+		DEBUG ServiceExecutionInfoTransformer : resolving the argument values (parameters length [0])
+		org.springframework.messaging.MessageDeliveryException: failed to send Message to channel 'inbound-request'; nested exception is com.anyframe.online.runtime.management.execute.Serv
+		iceNotEnabledException:  / , failedMessage=GenericMessage [payload={"insertMovieList":[],"updateMovieList":[],"deleteMovieList":[]}, headers={http_requestMethod=POST, replyChannel=
+		org.springframework.messaging.core.GenericMessagingTemplate$TemporaryReplyChannel@7a571ff3, errorChannel=org.springframework.messaging.core.GenericMessagingTemplate$TemporaryReplyC
+		hannel@7a571ff3, http_requestUrl=http://localhost:8071/anyframe-online-sample/service/process, id=f2ac0b20-5ab5-783b-5cde-93cf9edfe6ae, contentType=application/json;charset=UTF-8, 
+		timestamp=1715909094095}][2024-05-17 10:24:54] INFO  MessagingMethodInvokerHelper : Overriding default instance of MessageHandlerMethodFactory with provided one.
+	조치 
+		1. service_meta 테이블의 bean_name, arguments com.anyKYE -> com.anyframe 수정함 
+		2.  ServiceConfigurationDao
+			select * From  service_configuration;
+    		select * From SERVICE_MASTER_CONFIGURATION;
+			데이터 삭제 
+
+
+	어드민-온라인 서비스 제어 오류 
+		[2024-05-20 15:17:47] INFO  CompleteQueryPostProcessor : SELECT * FROM SERVICE_MASTER_CONFIGURATION A LEFT OUTER JOIN SERVICE_CONFIGURATION B ON A.SERVICE_CONFIG_ID = B.ID WHERE A.TENANT_ID = 'tenantIdA' 
+		[2024-05-20 15:17:47] ERROR ErrorControllerAdvice : Failed to convert property value of type 'null' to required type 'boolean' for property 'logEnabled'; nested exception is org.springframework.core.convert.ConversionFailedException: Failed to convert from type [null] to type [boolean] for value 'null'; nested exception is java.lang.IllegalArgumentException: A null value cannot be assigned to a primitive type
+		org.springframework.beans.TypeMismatchException: Failed to convert property value of type 'null' to required type 'boolean' for property 'logEnabled'; nested exception is org.springframework.core.convert.ConversionFailedException: Failed to convert from type [null] to type [boolean] for value 'null'; nested exception is java.lang.IllegalArgumentException: A null value cannot be assigned to a primitive type
+			at org.springframework.beans.AbstractNestablePropertyAccessor.convertIfNecessary(AbstractNestablePropertyAccessor.java:600)
+			at org.springframework.beans.AbstractNestablePropertyAccessor.convertForProperty(AbstractNestablePropertyAccessor.java:609)
+			at org.springframework.beans.AbstractNestablePropertyAccessor.processLocalProperty(AbstractNestablePropertyAccessor.java:458)
+	조치
+		select * From service_configuration; 데이터 삽입 
+		Insert into SERVICE_CONFIGURATION (ID,ENABLE,CAPACITY,TIMEOUT,START_TIME,END_TIME,LOG_LEVEL,LOG_ENABLED,TRACE_LOG_ENABLED,TRACE_LOG_LEVEL,RESOURCE_URL_BLOCKED,RESOURCE_URL,RESOURCE_URL_DESCRIPTION,RESOURCE_ID_BLOCKED,RESOURCE_ID,RESOURCE_ID_DESCRIPTION,RESOURCE_IP_BLOCKED,RESOURCE_IP,RESOURCE_IP_DESCRIPTION,ERROR_CODE,ERROR_MESSAGE) values ('26347efe-06d7-482e-9c17-08adce65d806','1',null,null,null,null,null,'0','0',null,'0',null,null,'0',null,null,'0',null,null,null,null);
+		Insert into SERVICE_CONFIGURATION (ID,ENABLE,CAPACITY,TIMEOUT,START_TIME,END_TIME,LOG_LEVEL,LOG_ENABLED,TRACE_LOG_ENABLED,TRACE_LOG_LEVEL,RESOURCE_URL_BLOCKED,RESOURCE_URL,RESOURCE_URL_DESCRIPTION,RESOURCE_ID_BLOCKED,RESOURCE_ID,RESOURCE_ID_DESCRIPTION,RESOURCE_IP_BLOCKED,RESOURCE_IP,RESOURCE_IP_DESCRIPTION,ERROR_CODE,ERROR_MESSAGE) values ('b7191391-81ab-4636-9367-079cc7ed0b5b','1',null,null,null,null,null,'0','0',null,'0',null,null,'0',null,null,'0',null,null,null,null);
+		commit;
+
+
+
+    PostProcessorRegistrationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor#0' of type [org.spr
+    ingframework.aop.support.DefaultBeanFactoryPointcutAdvisor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+    [2024-05-20 10:21:08] WARN  XmlWebApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreat
+    ionException: Error creating bean with name 'interceptableBeanMethodServiceExecutor' defined in file [C:\kye\eclipse\workspace\online\online_v6.1.0_0516\.metadata\.plugins\org.ecli
+    pse.wst.server.core\tmp0\wtpwebapps\anyframe-online-sample\WEB-INF\classes\spring\context-base.xml]: Instantiation of bean failed; nested exception is org.springframework.beans.Bea
+    nInstantiationException: Failed to instantiate [com.anyframe.online.runtime.ext.service.executor.InterceptableBeanMethodServiceExecutor]: Constructor threw exception; nested except
+    ion is java.lang.Error: Unresolved compilation problems: 
+
+
+
+    [2024-05-20 10:29:29] DEBUG ServiceIdMappingAnnotationServiceMappingAsm : Returning service method [ServiceMethodLazy [beanName=genreSVCImpl, methodName=listGenre, parameterTypeStr
+    ings=[]]]
+    [2024-05-20 10:29:29] ERROR DefaultServiceDispatcher : java.lang.NullPointerException
+        at com.anyframe.online.runtime.management.event.publish.ServiceEventHistoryPublisher.onApplicationEvent(ServiceEventHistoryPublisher.java:38)
+
+
+
+====================================================================================================================================================================================================
+베이스 
+	
+	-온라인은 실사용자가 사용하는 페이지로 어드민화면에서 제어 가능
+	예로 domain id 값으로 매핑된 genre, process 기능을 제어함 
+	
+	-내부 실제 비즈니스 로직은 실사용자(그 회사의 업무담당자,기술담당자) 구현하기때문에 
+	프레임워크팀은 온라인 프로젝트가 구성되는 틀을 공부하면됨 ! 
+
+
+외부 lib추가 
+	Add External JARs
+		oshi-core :: 
+			C:\kye\eclipse\apache-maven-3.8.4\repository\com\github\oshi\oshi-core\3.13.0
+		ojdbc8 :: 
+			C:\Program Files\Java\jre-1.8\lib\ext
+	Add Library
+		tomcat 
+		jdk 
+
+
+maven
+		-빌드 방법 
+		anyframe-enterprise-parent.run as.run configurations.maven build. 
+			name : parent
+			goals : clean install -Dpmd.skip=true
+			skip tests 체크 활성화 
+
+		-빌드 순서
+		anyframe-enterprise-parent 최상위부터 빌드
+			anyframe-online-core  :: 각종 Annotation, charset, 유틸리티 등 온라인 프레임워크에서 사용하는 기본 타입이나 기능제공하는 별도로 바라보는 프로젝트가 없이 자체 구성된 라이브러리
+			ㄴ> anyframe-online-runtime :: 트랜잭션, Exception, 컨텍스트 관리, 로깅, 유틸리티 등 온라인 프레임워크의 기본 기능 및 프레임워크 Flow를 제공하는 라이브러리
+					ㄴ> anyframe-online-runtime-tx :: 트랜잭션 및 관련 프레임워크 확장기능
+						ㄴ> anyframe-online-runtime-jdbc 
+								ㄴ> anyframe-online-runtime-orm :: MyBatis
+								ㄴ> anyframe-online-runtime-management :: 온라인 어드민과 연계 
+										ㄴ> anyframe-online-runtime-ext :: 상단 라이브러리에서 확장기능
+		
+		* ref : https://devops.sdsdev.co.kr/confluence/pages/viewpage.action?pageId=395987641
+	
+
+		-빌드 오류 
+				- run.common.encoding(other : MS949)수정 
+				- 자바 경로 확인
+				- 자바 환경변수 확인 
+				- classpath 없어서 추가함 
+					CLASSPATH
+					%JAVA_HOME%lib;.;
+				- 프로젝트.pom.xml overview relative path
+						../anyframe-enterprise-parent 
+						anyframe-enterprise-parent이걸로 맞추면 강제로 부모의 6.5.0-SNAPSHOT 바라보게 해줌 !!!
+				- 클린 이클립스 재실행
+
+		*메이븐빌드역할	
+			pom.xml 라이브러리 자동 다운
+
+
+404 err 
+	
+	톰켓 기동 후 화면 안보임
+	web.xml 
+	[변경 전]
+	<servlet-mapping>
+		<servlet-name>action</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+	[변경 후]
+	</servlet-mapping>
+		<servlet-mapping>
+		<servlet-name>action</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+server
+	프로젝트 
+		anyframe-online-sample
+
+	-VM arguments 추가 
+		-Dspring.profiles.active=local -Dencode.client-pwd-with-fixed-key=true
+
+	에러 
+		# java.net.SocketTimeoutException: connect timed out 
+	원인 
+		서버 방화벽을 막혀서 발생
+	조치 
+		server.xml 속성값 조정
+				<!--2024-02-26 톰켓 인코딩 속성 추가-->
+				<Connector URIEncoding="UTF-8" connectionTimeout="30000"  disableUploadTimeout="false"  keepAliveTimeout= "200000" maxParameterCount="1000" port="8090" protocol="HTTP/1.1" redirectPort="8443"/>
+				timeout늘리기 : connectionTimeout="30000"  20000-> 30000 
+				업로드시간초과 비활성화 : disableUploadTimeout="false"
+				매개변수 포함 연결수명 늘리기 : keepAliveTimeout= "200000"
+		원래 나오는거임 ㅇㅅㅇ 화면 띄우면 문제없음 ㅇㅅㅇ
+
+
+
+	에러
+		# org.apache.tomcat.util.bcel.classfile.ClassFormatException: Invalid byte tag in constant pool: 19 
+			로컬개발환경 
+				자바 8
+				톰켓 8.0
+ 
+	원인 
+		톰켓이 자바버전에 완벽히 호환되지 않는다 
+
+	설명 
+		https://tomcat.apache.org/whichversion.html
+		톰켓 8.5는 자바 7이상부터 지원됨
+		필자는 8.0 -> 8.5로 다시 패치함 
+
+	조치 
+		톰켓 8.5로 다시 세팅
+		C:\kye\eclipse\apache-tomcat-8.5.98
+
+	참고
+		Web.xml 에서 metadata-complete="true"를 추가하여 해결한다고 나와있는데..
+		metadata-complete를 true 로 설정할 경우 
+		자바 자체 서블릿 어노테이션 기능인 @WebServlet, @WebFilter, and @WebListener 등이 
+		스캔되지 않아 작동하지 않음으로 매우 위험하다.
+		출처: https://sieunlim.tistory.com/21 [개발노트:티스토리]
+
+
+
+	오류 
+		#Publishing failed File not found:  
+	조치
+			클린, 재실행
+
+
+
+
+
+톰켓 서버에서 실행
+		-에러 
+			로드 톰켓 cmd 인코딩 깨짐 
+				조치 
+					server.xml
+						<!--2024-02-26 톰켓 인코딩 속성 추가-->
+						<Connector connectionTimeout="20000" maxParameterCount="1000" port="8080" protocol="HTTP/1.1" URIEncoding="UTF-8" redirectPort="8443"/>
+					web.xml 
+						<!--2024-02-26 톰켓 인코딩 주석 품-->
+						<filter>
+							<filter-name>setCharacterEncodingFilter</filter-name>
+							<filter-class>org.apache.catalina.filters.SetCharacterEncodingFilter</filter-class>
+							<init-param>
+								<param-name>encoding</param-name>
+								<param-value>UTF-8</param-value>
+							</init-param>
+							<async-supported>true</async-supported>
+						</filter>
+
+					여전히 꺠짐,, ㅇㅅㅇ 
+					
+					window에서 설정 바꿔야함 
+					1. 레지스트리 편집기 
+					2. Console 우클릭 추가 
+						Tomcat 
+					3. 목록 우클릭 새로만들기 DWQRD(32비트)
+						값 이름 codePage 
+						값 데이터 65001 10진수 
+						
+					*https://stella-ul.tistory.com/entry/Tomcat-%EC%BD%98%EC%86%94-%ED%95%9C%EA%B8%80-%EA%B9%A8%EC%A7%90-%ED%95%B4%EA%B2%B0
+					*https://blog.itcode.dev/posts/2021/05/22/tomcat-encoding-euckr
+
+			서버 실행 후 자동꺼짐
+				# org.apache.catalina.core.StandardService.initInternal Failed to initialize connector
+				
+				조치경우1
+					톰켓 8.5 버전업
+
+				조치경우2
+					이클립스서버 끄고 톰켓서버만 재실행
+				원인 
+					cmd 창에 netstat -ano | findstr 8080    8080포트 켜져있어서 발생된 문제일수도,,
+				
+
+
+Anyframe-Online 라이센스 (필수아님)
+	anyframe-online-sample jar 추가
+	
+	build path
+
+	https://devops.sdsdev.co.kr/confluence/pages/viewpage.action?pageId=825980900
+
+
+
+ref : Onlin-sample management 지민선임 정리 
+	  https://devops.sdsdev.co.kr/confluence/pages/viewpage.action?pageId=620709300
+
+
+라이센스파일 지정 경로가 있는지 ?  -> 라이센스랑 실행이랑 관련없어서 라이센스를 차후에 해도된다고하심
+db 설정 context.properties가 맞는지,,, -> 맞음 ㅇㅇㄴ
+
+
+<<이론>>
+온라인, 배치 관리가 어드민
+어드민 : 모니터링 
+에이전트 : 중계자, 관리용, 1개만 있음 
+
+
+온라인.배치.어드민 순으로 공부권장
+
+온라인샘플 화면 띄어보기 
+ - 메타목록은 현 사용 주소 및 조회가능
+ - 서비스제어 : 실행여부 컨트롤 가능, 원래는 상시 실행 아님 
+

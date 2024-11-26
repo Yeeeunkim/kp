@@ -1,0 +1,211 @@
+리눅스  oracle 
+	oracle /app/ora21c/21c/network/admin 두개 수정 
+	listener.ora
+	tnsnames.ora
+
+	lsnrctl start
+
+	sqlplus / as sysdba
+
+	SQL>startup
+
+	SQL>shutdown immediate
+
+	oracle db log :: /app/ora21c/diag/tnslsnr/centos7/listener/alert/log.xml
+
+jdk 설치  
+	 jdk1.8.0_202  
+	 환경변수 세팅
+	 ide install jres
+
+maven 설치 
+	 apache-maven-3.8.4  
+	 환경변수 세팅
+	 settings.xml Repository 설정  <localRepository>C:/kye/eclipse/apache-maven-3.8.4/repository</localRepository>
+	 ide user settings
+
+환경변수, cmd 확인 
+	CLASS_PATH
+	변수명 : CLASSPATH
+	변수값 : %JAVA_HOME%lib;,;
+
+
+	PATH
+		%JAVA_HOME%\bin (최상위로 옮기기)
+		%MAVEN_HOME%\bin
+
+
+이클립스 설치 2017
+	eclipse-jee-oxygen-R-win32-x86_64
+	ini 체크 
+		- lombok.jar 
+		- java version
+
+
+tomcat 설치 
+	apache-tomcat-8.5.98
+
+
+lombok 설치 
+	-lombok.jar   다운로드경로 : https://projectlombok.org/all-versions
+	
+	-lombok있는 곳에서 cmd java -jar C:\kye\eclipse\lombok.jar 
+    
+	 <dependency>
+		<groupId>org.projectlombok</groupId>
+		<artifactId>lombok</artifactId>
+		<version>1.18.22</version>
+		<scope>provided</scope>
+	</dependency>		
+
+	-이클립스init 파일에 -vmargs -javaagent : lombok.jar 추가		
+			ref : https://devpad.tistory.com/65
+
+	jdk.bin에서  java -jar C:\kye\eclipse\lombok.jar command 날리기
+
+
+이클립스 세팅 		
+	- maven usersettings
+	- jdk install jres
+	- server
+
+	Encoding
+		Preferences-> General -> Workspace
+		Net text file line delimiter
+		JSON Files
+		XML
+		CSS Files
+		HTML Files
+		JSP Files
+
+	Code style
+		General -> Content Types ( Java Properties file, Java Source file)
+		Preferences.java.codestyle.codetemplate -> Code Template/Formatter/Clean Up/Organize Imports
+		Preferences.java.appearance -> Members Sort Order
+
+		* https://devops.sdsdev.co.kr/confluence/pages/viewpage.action?pageId=395849554
+	
+	깃 clone
+		branch develop
+		https://code.sdsdev.co.kr/anyframe/anyframe_enterprise_online.git
+		https://code.sdsdev.co.kr/anyframe/anyframe-batch.git
+		https://code.sdsdev.co.kr/anyframe/anyframe-enterprise-admin.git
+
+		* .jar 충돌로 worksapce online/batch/admin 각각 생성 
+
+putty 
+	ip : 70.30.17.111
+	port : 22 
+
+git 
+	C:\kye\settings\Git-2.43.0-64-bit.exe 실행
+	git --version
+	git config --global user.name "kimyeun"
+	git config --global user.email "ye98.kim@partner.samsung.com"
+
+build 
+    maven set 
+    jdk 
+    sdk 
+    server 
+    maven build -> gwt build 	
+
+ref	
+	https://devops.sdsdev.co.kr/confluence/display/ANYKPCNC/Anyframe_Admin
+
+
+
+===============================성수에서 정리===============================
+
+db  C:\developer
+orcl / @Ky52400195
+Oracle 기본 Port : 1521
+SID : orcl
+
+
+
+✅이론
+java ( jdk + jre + java se api + compact profiles ) 
+* jre : jvm + 자바클래스 라이브러리 + 자바코멘드 + 기타 인프라 컴파일 패키지등.. -> 약간 실행위주
+* bin : jvm 시작하기 위해 대표적인 javaw 포함되어 있고 유틸리티있음
+* conf : 사용자가 편집할 수 있는 configuration files 있음
+* lib : jar파일, 인증서, ★java 표준 라이브러리의 .class 파일 있음★
+* jdk : jre + javac, jdb 등 프로그램 생성 및 컴파일 가능, jre상위집합 
+
+
+
+✅설치
+1. jdk 64비트
+	설치 : https://www.oracle.com/java/technologies/java-archive-javase5-downloads.html
+	1) 설치경로확인 
+	2) 환경변수 세팅 JAVA_HOME, PATH
+
+
+2. maven
+	설치 : https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/2.2.1/
+	1) 설치경로확인 
+	2) 환경변수 세팅 MAVEN_HOME, PATH
+
+3. 이클립스 2023-12 64bit
+	설치 : https://www.eclipse.org/downloads/packages/release/2023-12/r
+	1) init 파일 vm 세팅은 open jdk로하고 이클립스 내부에서 강제변환함(?) **vmargs 위에 vm이 상위에 위치해있어 위에 세팅해야함 
+	1-1) jdk 세팅
+	preferences.installed jres.add
+	1-2) maven 세팅 
+	preferences.maven.user settings.user settings settings.xml 변경
+	2) 서버세팅 8.5 다운
+	방법 : https://xianeml.tistory.com/51
+	톰켓세팅 : https://tomcat.apache.org/download-80.cgi
+
+
+✅자주만난에러
+
+java was started but returned exit code = 1 
+	-> init 파일설정 javaw.exe 경로 확인
+	-> 메모리 줄이기 -Xms256m -> 512m / -Xmx1024m -> 512m
+	-> vm 추가 C:\Program Files\Java\jdk1.5.0_22\jre\bin\server\jvm.dll
+참고링크 : https://blog.naver.com/luckyhappyday/221838492290
+
+
+
+✅anyframe
+JIRA, 
+ew-interceptor.xml
+tiles-def.xml
+ew-servlet.xml
+ew-servlet-batch.xml
+ew-config.properties
+tradesign3280.properties
+logback-spring
+hibernate.cfg.xml
+https://m.blog.naver.com/realdulgi/140054431066
+https://anyframe1.rssing.com/chan-15120894/latest.php
+https://github.com/anyframejava/anyframe-java-core?tab=readme-ov-file
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

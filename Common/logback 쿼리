@@ -1,0 +1,111 @@
+* TRACE > DEBUG > INFO > WARN > ERROR > FATAL
+
+ref	
+	https://hwihyeon.tistory.com/25
+	https://kimvampa.tistory.com/63
+	https://security.snyk.io/vuln/SNYK-SLES151-JAVA180OPENJDK-2696471
+	
+dependency 추가 
+<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-log4j12</artifactId>
+		    <version>1.6.4</version>
+		    <scope>runtime</scope>
+		</dependency>	
+		<dependency>
+		    <groupId>log4j</groupId>
+		    <artifactId>log4j</artifactId>
+		    <version>1.2.15</version>
+	    	<exclusions>
+	        <exclusion>
+	            <groupId>javax.mail</groupId>
+	            <artifactId>mail</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>javax.jms</groupId>
+	            <artifactId>jms</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>com.sun.jdmk</groupId>
+	            <artifactId>jmxtools</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>com.sun.jmx</groupId>
+	            <artifactId>jmxri</artifactId>
+	        </exclusion>
+	    </exclusions>
+	    <scope>runtime</scope>
+	</dependency>
+<dependency>
+    	<groupId>org.bgee.log4jdbc-log4j2</groupId>
+    	<artifactId>log4jdbc-log4j2-jdbc4</artifactId>
+    	<version>1.16</version>
+	</dependency>
+
+resources/log4jdbc.log4j2.properties
+	log4jdbc.spylogdelegator.name=net.sf.log4jdbc.log.slf4j.Slf4jSpyLogDelegator
+
+
+logback.xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration scan="true" scanPeriod="60 seconds">
+	<contextName>anyframe-online</contextName>
+	<jmxConfigurator />
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>[%d{yyyy-MM-dd HH:mm:ss}] %-5level %logger{0} : %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="rollingFile"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/log/centercut/framework/admin.log</file>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>/log/centercut/framework/admin.%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss}] %-5level %logger{0} : %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="org.springframework" level="FATAL" additivity="false">
+		<appender-ref ref="console" />
+		<appender-ref ref="rollingFile" />
+	</logger>
+	
+	<logger name="springframework.beans.factory" level="FATAL" additivity="false">	
+		<appender-ref ref="console" />	
+	</logger>
+
+	<logger name="com.anyframe.centercut" level="FATAL" additivity="false">
+		<appender-ref ref="console" />
+		<appender-ref ref="rollingFile" />		
+	</logger>
+	
+	<logger name="org.jgroups" level="FATAL" additivity="false">
+		<appender-ref ref="console" />
+		<appender-ref ref="rollingFile" />		
+	</logger>
+	
+	<!-- jdbc sql 관련 log level 설정 -->
+	<logger name="jdbc" level="ERROR"/>
+	<logger name="jdbc.sqlonly" level="INFO"/>
+	<logger name="jdbc.sqltiming" level="ERROR"/>
+	<logger name="jdbc.audit" level="ERROR"/>
+	<logger name="jdbc.resultset" level="ERROR"/>
+	<logger name="jdbc.resultsettable" level="INFO"/>
+	<logger name="jdbc.connection" level="ERROR"/>
+	
+	
+	<root level="DEBUG">
+		<appender-ref ref="console" />
+		<appender-ref ref="rollingFile" />		
+	</root>
+</configuration>

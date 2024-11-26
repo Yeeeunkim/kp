@@ -1,0 +1,168 @@
+
+oracle(21c)
+   리눅스  oracle 
+    oracle /app/ora21c/21c/network/admin 두개 수정 
+    listener.ora
+    tnsnames.ora
+
+    lsnrctl start
+
+    sqlplus / as sysdba
+
+    SQL>startup
+
+    SQL>shutdown immediate
+
+    oracle db log :: /app/ora21c/diag/tnslsnr/centos7/listener/alert/log.xml
+
+    make 빌드 오류 
+    ORA-12574 TNS lost contact 
+    -> ORACLE_HOME/bin/oracle* 에서 $ chmod 6751 $ORACLE_HOME/bin/oracle 명령어 날리기
+
+
+    jdbc:oracle:thin:@70.30.17.111:1521:db21
+    anyframe/asdf1234
+    kpcnc/kpcnc8100
+    ANYFRAME5 /asdf1234   :  anyframe5 용
+    su - kpcnc
+    lsnrctl start
+    sqlplus / as sysdba
+    SQL>startup
+    SQL>shutdown immediate
+
+눅스 워크스페이 : C:\mySingle\KnoxTeams\download
+
+db 
+    sqlplus "/as sysdba"
+    
+    --c## 제거되는 session
+    ALTER SESSION SET "_ORACLE_SCRIPT" = TRUE;
+
+    --계정추가    
+    CREATE USER c##kyeibk IDENTIFIED BY kyeibk;
+
+    
+    --권한부여 
+    GRANT connect, resource, dba TO c##kyeibk;
+
+내정보 
+    깃
+    ye98.kim@partner.samsung.com
+    @Kyy52400195
+
+    knox
+    @kyy52400195
+    kpcnc8100!
+
+    otp 795859
+
+    knox portal
+    C:\mySingle
+
+#2024-02-22 수정
+biz.driver=oracle.jdbc.driver.OracleDriver
+biz.url=jdbc:oracle:thin:@70.30.17.111:1521:db21
+biz.username=kye
+biz.password=kye8100
+
+1. 보안설치 
+    - samsung.net  또는 http://70.225.0.2:15050/pds_downlist.aspx 접속 
+
+    - 관리자 권한 설치 
+        01-1. ESCORT(Windows) -
+        NASCA(Windows) ] -
+        02. V3 -
+        Ahnlab Security Agent -
+        SecuPrint -
+        QNA 설치 프로그램 ] -
+        Privacy-i 설치 프로그램 -
+        Web Proxy 설정 프로그램 
+        AD 설치프로그램 유무선랜 인증서 발급 프로그램(나중에)  -- Web Proxy 설정 프로그램 설치 후 안될시
+        10. Knox Drive
+
+
+2. samsung.net  접속 (redirect : http://kor3.samsung.net/portalapp/)
+
+3. confluence 승인 
+collaboration.confluence 
+
+4. jira
+https://devops.sdsdev.co.kr/jira/secure/WelcomeToJIRA.jspa 
+
+5. git
+https://code.sdsdev.co.kr/Anyframe
+
+
+# github
+https://code.sdsdev.co.kr
+id: anyframe
+pw: framework0$
+
+
+# nexus
+http://nexus.sdsdev.co.kr:8081/nexus
+    70.121.224.52
+id: deployment
+pw: deployment0
+
+
+# blackduck
+https://bdhub.sdsdev.co.kr
+    182.193.4.181
+id: j_h.jeong
+pw: framework0$
+
+
+# protex
+http://protex1.sdsdev.co.kr
+    182.195.89.176
+id: anyframe@samsung.com
+pw: any2020
+
+
+# svn
+http://182.195.89.102/subv
+id: afe
+pw: afe0$
+
+작업수행정보
+실행모니터링
+
+
+
+
+작업 
+
+
+# sonarqube
+http://sonar.sdsdev.co.kr/
+http://sonar.sdsdev.co.kr/second
+    70.121.224.128
+id: anyframeentadmin
+pw: anyframeentadmin5525
+
+​
+# 3rabbitz (매뉴얼)
+http://70.2.140.171:1975/ 
+id: anyframe2
+pw: 12345qwert
+
+
+
+# jenkins (build)
+
+http://build4.sdsdev.co.kr/job/AFJ_ANYFRAME
+
+
+
+# testopia (테스토피아)
+
+http://testopia.sdsdev.co.kr/#/main/project/340
+
+
+
+# jeus8.5 (서버)
+
+id: jyh0107@kpcnc.co.kr
+
+pw: kpcnc8100Anyframe

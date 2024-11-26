@@ -1,0 +1,1055 @@
+[[agent]]
+
+== 배치 에이전트
+---
+::
+
+[[agent-install]]
+
+
+=== 배치 에이전트 설치gg
+
+:: 배치 에이전트(agent)는 Spring Boot 형태의 Java 어플리케이션이다. 따라서 별도의 container 가 필요하지 않다. 본 문서는 기본 설정 기반으로 설명을 한다. 
+
+
+[NOTE]
+====
+ war 파일로 어플리케이션이 존재하여,  tomcat , weblogic 과 같은 container 에서도 기동 가능하다. 
+ 
+ 기본적으로 제공하는 war 파일 내부에는 config 폴더내에 있는 설정파일들이 빠져 있으므로, container 에 기동할 때는 config 폴더 내의 설정을 war 가 풀린 곳에 복사 해주어야 한다.
+====
+
+배치 에이전트 설치는 에이전트 배포 패키지를 풀어서 설치 디렉토리 하위에 복사한다.
+
+설치 디렉토리 하위에 구성되는 하위 디렉토리 구조는 다음과 같다.
+
+.배치 에이전트 디렉토리 구조 
+[options="header"]
+|===============
+^|설치 디렉토리 ^|디렉토리 ^|내용 
+.5+.^|[AGENT_HOME] |bin |에이전트 실행을 위한 Shell 명령어 
+|config |에이전트 설정 
+|lib |Anyframe Batch Agent war
+|logs |Tomcat 로그 (에이전트 기동에 문제가 있는 경우 확인) 
+
+|===============
+
+
+[[agent-install-bin]]
+
+
+==== 명령어 설정(bin)
+
+:: bin 폴더에는 에이전트 실행을 위한 명령어가 구성되어 있다.
+
+
+[NOTE]
+====
+
+		명령어는 윈도우(.bat)와 유닉스(.sh) 용 두가지 구성이 있으며 OS에 맞는 명령어 구성을 사용한다.
+
+
+		HA 구성을 위해 두개의 인스턴스(agent1/agent2) 실행 명령어를 제공한다.
+
+
+	
+====
+
+
+.에이전트 실행 명령어
+[options="header"]
+|===============
+^|구분 ^|명령어 ^|내용 
+.6+^.^|UNIX |startup.sh |Batch Agent 기동을 위한 공통 명령어
+|startup1.sh |agent1 기동 
+|startup2.sh |agent2 기동 
+|shutdown.sh |Batch Agent 중지를 위한 공통 명령어
+|shutdown1.sh |agent1 중지 
+|shutdown2.sh |agent2 중지 
+.6+^.^|WINDOW |startup.bat |Batch Agent 기동을 위한 공통 명령어
+|startup1.bat |agent1 기동 
+|startup2.bat |agent2 기동 
+|shutdown.bat |Batch Agent 중지를 위한 공통 명령어
+|shutdown1.bat |agent1 중지 
+|shutdown2.bat |agent2 중지 
+
+|===============
+
+
+OS 환경 및 런타임 설치 위치에 따라
+
+++startup++의 다음 항목을 설정한다.
+
+
+
+* JAVA_HOME - Java 설치 위치를 지정한다.
+
+* JAR_FILE - Batch Agent war 파일 명
+
+.startup.sh
+====
+
+----
+
+
+
+#!/bin/sh
+
+# export JAVA_HOME=
+
+if [ $# -eq 0 ]; then
+	echo "Usage:  startup.sh port [install]"
+	echo "    ex) startup.sh 15000"
+	echo "    ex) startup.sh 15000 install"
+	exit 1
+fi
+
+if [ -z "$JAVA_HOME" ]; then
+	echo "JAVA_HOME environment variable is not defined"
+	exit 1
+fi
+
+if [ "$2" = "install" ]; then
+	BOOT_OPT="--spring.datasource.initialize=true"
+fi
+
+CURRENT_DIR=$PWD
+cd ..
+AGENT_BASE=$PWD
+cd $CURRENT_DIR
+
+AGENT_PORT=$1
+AGENT_ID=agent-$AGENT_PORT
+PIDFILE=$AGENT_ID.pid
+RUNJAVA="$JAVA_HOME/bin/java"
+
+JAR_FILE=anyframe-batch-agent-5.2.0.war
+CLASSPATH=$AGENT_BASE/lib/$JAR_FILE:$AGENT_BASE/config:$AGENT_BASE/lib/*
+
+nohub $RUNJAVA -cp $CLASSPATH -Dagent.id=$AGENT_ID org.springframework.boot.loader.WarLauncher --server.port=$AGENT_PORT $BOOT_OPT &
+
+
+
+----
+
+====
+
+++startup1++ , ++startup2++ 의 다음 항목을 설정한다.
+
+* http port - Batch Agent 가 사용할 http_port [ 예 : . ./startup.sh 15000 "$@" ( port : 15000 )]
+
+
+.startup1.sh
+====
+
+----
+
+#!/bin/sh
+
+. ./startup.sh 15000 "$@"
+
+
+----
+
+====
+
+++shutdown1++ , ++shutdown2++ 의 다음 항목을 설정한다.
+
+* http port - Batch Agent 가 사용할 http_port [ 예 : . ./startup.sh 15000 "$@" ( port : 15000 )]
+
+
+
+
+.shutdown1.sh
+====
+
+----
+
+#!/bin/sh
+
+. ./shutdown.sh 15000
+
+----
+
+====
+
+
+
+
+[[agent-install-config]]
+
+
+==== 에이전트 설정(config)
+
+:: config 폴더에는 에이전트 실행 시 사용되는 설정파일(properties)이 포함되어 있다.
+
+.에이전트 설정
+[options="header"]
+|===============
+^|구분 ^|항목 ^|내용 
+.3+^.^|properties |application.properties |에이전트 구동에 필요한 각종 속성값을 정의 
+|policy.properties |작업 실행 정책을 정의 
+|logback.xml |에이전트 로깅정책을 정의 
+.2+^.^|clustering |agent-tcp.xml |에이전트 HA 구성에 필요한 JGroup 정보(TCP) 
+|agent-udp.xml |에이전트 HA 구성에 필요한 JGroup 정보(UDP) 
+
+|===============
+
+
+[[agent-install-config-agent]]
+
+
+===== application.properties
+
+:: application.properties 파일에는 에이전트가 작업실행 실행제어에 필요한 런타임 설치 정보와 배치 매니저에서 조회할 작업정의(CFG), 로그파일, 데이터파일에 대한 접근 경로 및 필터 정보를 설정한다. 또한, 에이전트 클러스터링 구성 시 필요한 정보와 작업정책을 설정한다
+
+에이전트 설치 후 필수적으로 설정되어야 하는 항목은 다음과 같다.
+
+
+* Batch Agent 접속 url 정보
+
+** server.context-path - Batch Agent 가 사용할 context path [ default : /batch-agent ]
+
+* DB 연결 정보
+
+** spring.datasource.platform - datasource 로 사용할 DB 종류
+
+** spring.datasource.driver-class-name - datasource 로 사용할 jdbc driver
+
+** spring.datasource.url - datasource 로 사용할 jdbc url
+
+** spring.datasource.username - datasource 로 사용할 jdbc username
+
+** spring.datasource.password - datasource 로 사용할 jdbc password
+
+** spring.datasource.validationQuery - datasource 로의 validation Query
+
+* 런타임 설치 정보
+
+** runtime.working.directory - 배치 런타임의 bin 디렉토리 위치
+
+** runtime.run.batch - 배치 실행 명령어([RUNTIME_HOME]/dist/bin/runjob.sh)
+
+** runtime.kill.batch - 배치 중지 명령어([RUNTIME_HOME]/dist/bin/killjob.sh)
+
+** runtime.run.daemon - 데몬 실행 명령어([RUNTIME_HOME]/dist/bin/rundaemon.sh)
+
+** runtime.kill.daemon - 데몬 중지 명령어([RUNTIME_HOME]/dist/bin/killdaemon.sh)
+
+* 작업정의(CFG) 위치
+** resource.job.directories - 배치 작업이 배포되는 위치([RUNTIME_HOME]/target/classes)
+
+* 로그 파일 위치
+** resource.log.directories - 배치 매니저의 로그뷰어에서 조회할 수 있는 Parent 디렉토리를 지정 (콤마 구분자를 사용하여 복수 디렉토리 지정 가능)
+
+** resource.log.includes - 파일 필터링 패턴 (콤마 구분자를 사용하여 복수 지정 가능 ex:*.log, *.out)
+
+* 배치 데이터 파일 위치
+** resource.file.directories - 배치 매니저의 파일뷰어에서 조회할 수 있는 Parent 디렉토리를 지정 (콤마 구분자를 사용하여 복수 디렉토리 지정 가능)
+
+** resource.file.includes - 파일 필터링 패턴 (콤마 구분자를 사용하여 복수 지정 가능 ex:*.txt, *.out)
+
+* 에이전트 클러스터링
+** agent.cluster.mode - 클러스터링 방법을 지정함. nio: 파일기반 클러스터링, jgroup: 네트웍 기반 클러스터링
+
+* 작업 실행 정책
+** policy.provider - 실행정책을 어디서 획득할지 지정함. property: agent.property 파일, jdbc: DB(배치 어드민 연계)
+
+.agent.properties
+[options="header"]
+|===============
+^|항목 ^|내용 
+|server.context-path |Batch Agent 가 사용할 context path [ default : /batch-agent ]
+|spring.pid.fail-on-write-error |pid 파일 에러 여부
+|spring.pid.file |pid 파일 위치 ( Batch Agent 종료시 필요 )
+|spring.datasource.platform |datasource 로 사용할 DB 종류
+|spring.datasource.driver-class-name |datasource 로 사용할 jdbc driver
+|spring.datasource.url |datasource 로 사용할 jdbc url
+|spring.datasource.username |datasource 로 사용할 jdbc username
+|spring.datasource.password |datasource 로 사용할 jdbc password
+|spring.datasource.validationQuery |datasource 로의 validation Query
+|spring.datasource.test-on-borrow |datasource 사용시 validation Query 실행 후 실제 Query 수행
+|spring.datasource.initial-size |datasource connection pool 초기 사이즈
+|spring.datasource.max-active |datasource connection pool 최대 active connection 개수
+|spring.datasource.max-idle |datasource connection pool 최대 idle connection 개수
+|spring.datasource.max-wait |datasource connection pool 을 가져올 수 없는 경우 최대 대기 시간
+|spring.datasource.initialize |datasource 생성시 초기 script 실행 여부
+|runtime.working.directory |배치 Job을 구동시키기 위한 쉘이나 커맨드의 위치 
+|runtime.run.batch |배치 Job 구동 쉘이나 커맨드
+
+
+
+(예: /app/batch/runtime/bin/runjob.sh)
+
+
+ |runtime.kill.batch |배치 Job 중지 쉘이나 커맨드
+
+
+
+(예: /app/batch/runtime/bin/killjob.sh)
+
+
+ |runtime.run.daemon |배치 데몬 구동 쉘이나 커맨드
+
+
+
+(예:/app/batch/runtime/bin/rundaemon.sh)
+
+
+ |runtime.kill.daemon |배치 데몬 중지 쉘이나 커맨드
+
+
+
+(예: /app/batch/runtime/bin/killdaemon.sh)
+
+
+ |resource.job.directories |배치 Job의 XML 들이 빌드되어 위치하는 시작경로
+
+
+
+(예: /app/batch/runtime/target/classes)
+
+
+ |resource.job.includes |배치 Job XML에 포함되는 파일의 확장명
+
+
+
+(예: *_cfg.xml,*_cfg.tmp.xml)
+
+ |resource.job.excludes |배치 Job XML에 포함되지 않는 파일의 확장명
+
+
+
+(예: *_cfg1.xml,*_cfg1.tmp1.xml [ default : 없음 ])
+
+
+ |resource.job.suffix |배치 Job XML 파일명 중 Job명 뒤에 붙는 suffix
+
+
+
+(예: _cfg)
+
+
+ |resource.job.encoding |Job 처리 시 기본 인코딩 
+|resource.log.directories |로그 조회를 위한 base 디렉토리. 복수 지정 가능
+
+
+
+(예: /log/batch/runtime,/log/online/app)
+
+
+ |resource.log.includes |조회대상이 되는 로그 파일의 확장자 
+ |resource.log.excludes |조회대상에서 제외할 로그 파일의 확장자  
+ |resource.log.suffix |로그 파일명 중 뒤에 붙는 suffix
+|resource.log.encoding |로그파일의 기본 인코딩 
+|resource.file.directories |배치 작업에서 처리하는 파일의 base 디렉토리 
+|resource.file.includes |작업 대상 파일의 확장자 
+|resource.file.excludes |작업 대상 제외할 파일의 확장자 
+|resource.file.suffix |작업 대상 파일 중 뒤에 붙는 suffix
+|resource.file.encoding |파일의 기본 인코딩 
+
+|resource.reset.command |파일 reset 시 사용되는 command 
+
+* Unix: /bin/sh -c cp /dev/null >
+
+* Windows: cmd /c copy NUL
+
+ |agent.name |clustering 위한 agent 명령어
+ |agent.address |Batch Agent ip address ( 설정되어 있지 않는 경우 auto-detect )
+|agent.cluster.mode |클러스터링(lock) 설정 방식
+
+* jgroup - jgroup으로 묶인 agent 들간 rank에 따른 locking
+
+* nio - 파일 기반 locking
+
+ |agent.cluster.jgroup.config |Jgroup 방식으로 lock 제어를 하는 경우에 대한 설정파일  
+|agent.cluster.nio.directory |nio 방식으로 lock 제어를 하는 경우, lock 파일의 위치 
+|agent.policy.mode |Agent policy 설정 방법
+
+* property - agent 실행 정책을 policy.properties 파일에 정의
+
+* jdbc - agent 실행 정책을 DB 테이블에 정의
+
+ |agent.policy.property.location |property 기반 policy 정책 설정 시, property 파일의 위치 
+ |agent.policy.refresh |policy refresh 여부
+ |agent.policy.refresh.interval |policy refresh interval
+ |agent.job.type |agent 에서 실행하는 작업의 기본 타입정보
+ |agent.job.config.suffix |배치 Job XML 파일명 중 Job명 뒤에 붙는 suffix
+ |agent.job.incrementer.name |배치 Job Sequence 
+ |batch.admin.use |작업 성공시 Batch Admin 으로 성공여부 전달 필요여부 [ default: false ]
+ |batch.admin.urls |작업 성공시 Batch Admin 으로 성공여부 전달시 admin url
+ |batch.online.runtime.urls |Thread Batch( WAS 내에서 Batch 작업 수행 ) 사용시 해당 WAS URL
+ |batch.profile.thread |Thread Batch 수행시 사용할 profile 명
+ |batch.profile.process |Process Batch 수행시 사용할 profile 명
+ |batch.default.execution |default 실행 구분 ( thread / process )
+ |batch.shell.log.dir |Anyframe Batch 외에 일반 shell 실행시 쉘 로그 Base 경로
+ |batch.key.generator |Batch Sub Key 생성 타입 ( none / option / parameter )
+ |batch.key.generator.keys |Batch Sub Key 생성시 필요한 key 값
+
+|===============
+
+
+.agent.properties
+====
+
+----
+
+
+
+server.context-path=/batch-agent
+
+spring.pid.fail-on-write-error=true
+spring.pid.file=${PIDFILE}
+
+#vendor name of database. oracle|hsqldb 
+spring.datasource.platform=oracle
+spring.datasource.driver-class-name=oracle.jdbc.driver.OracleDriver
+spring.datasource.url=jdbc:oracle:thin:@127.0.0.1:1521:xe
+spring.datasource.username=system
+spring.datasource.password=manager
+spring.datasource.validationQuery=SELECT 1 FROM DUAL
+spring.datasource.test-on-borrow=true
+spring.datasource.initial-size=10
+spring.datasource.max-active=100
+spring.datasource.max-idle=5
+spring.datasource.max-wait=60000
+spring.datasource.initialize=false
+
+
+runtime.working.directory=/data/batch/runtime/dist/bin
+runtime.run.batch=/data/batch/runtime/dist/bin/runjob.cmd
+runtime.kill.batch=/data/batch/runtime/dist/bin/killjob.cmd
+runtime.run.daemon=/data/batch/runtime/dist/bin/rundaemon.cmd
+runtime.kill.daemon=/data/batch/runtime/dist/bin/killdaemon.cmd
+
+
+# configuration for job explorer
+resource.job.directories=/data/batch/runtime/target/classes
+resource.job.includes=*_cfg.xml,*_tmp.xml
+resource.job.excludes=
+resource.job.suffix=_cfg
+resource.job.encoding=EUC-KR
+
+# configuration for log explorer
+resource.log.directories=/data/batch/log
+resource.log.includes=*.log
+resource.log.excludes=
+resource.log.suffix=
+resource.log.encoding=EUC-KR
+
+# configuration for file explorer
+resource.file.directories=/data
+resource.file.includes=*.txt
+resource.file.excludes=
+resource.file.suffix=
+resource.file.encoding=EUC-KR
+
+resource.reset.command=/bin/sh -c cp /dev/null >
+
+# agent name for clustering
+agent.name=batch
+# ip address. auto-detect if not defined
+agent.address=
+
+# cluster lock mode. (jgroup|nio) default nio
+agent.cluster.mode=nio
+agent.cluster.jgroup.config=classpath:agent-udp.xml
+agent.cluster.nio.directory=.
+
+# agent policy provider mode. (jdbc|property) default property
+agent.policy.mode=jdbc
+agent.policy.property.location=classpath:policy.properties
+agent.policy.refresh=true
+agent.policy.refresh.interval=10000
+
+agent.job.type=normal
+agent.job.config.suffix=_cfg
+agent.job.incrementer.name=BATCH_JOB_EXECUTION_SEQ
+
+batch.admin.use=false
+batch.admin.urls=localhost:8680/batchadmin
+
+batch.online.runtime.urls=localhost:8880/batch-runtime
+
+batch.profile.thread=default
+batch.profile.process=processBatch
+
+# default execution type ( thread / process )
+batch.default.execution=thread
+
+batch.shell.log.dir=D:/DATA/batch50/log/Shell
+
+# default key generator type ( none / option / parameter )
+batch.key.generator = option
+batch.key.generator.keys = TENANTKEY,KEY1
+
+
+----
+
+
+====
+
+
+
+[[agent-install-config-policy]]
+
+
+===== policy.properties
+
+:: policy.properties 에이전트를 통해 요청되는 배치 작업에 대한 실행 정책을 정의한다.
+
+
+[NOTE]
+====
+
+		policy.properties 파일은
+
+<<agent-install-config-agent>>의
+
+++policy.provider++가 "property" 인 경우에만 적용된다.
+
+
+
+
+		policy.properties의 내용을 변경하면 10초 내로 변경된 내용이 적용된다.
+
+
+	
+====
+
+
+.policy.properties
+[options="header"]
+|===============
+^|항목 ^|내용 
+|block |Agent로 유입되는 배치 작업의 요청을 Blocking할 것인지 여부
+
+
+
+이 값이 true이면, 이후에 요청되는 모든 작업 요청은 suspend 된다.
+
+
+ |maxJob |해당 Agent에서 수행해야 하는 Job의 최대수
+
+
+
+값이 -1인 경우, 실행 작업 수에 대한 제한이 없다.
+
+
+ |allowRun |Agent를 통한 Job의 실행 가능여부.
+
+
+
+이 값이 false인 경우, Job 실행 요청 시 exception이 발생함
+
+
+ |allowStop |Agent를 통한 Job의 Stop 가능여부 
+|allowKill |Agent를 통한 Job의 Kill 가능여부 
+|allowAddress |Agent를 통해 Job의 run, stop, kill 요청을 할 수 있는 서버의 IP 주소
+
+
+
+세미콜론으로 여러 서버를 지정할 수 있으며, 값이 없는 경우 요청 서버를 제한하지 않는다.
+
+
+ 
+|===============
+
+
+.policy.properties
+====
+
+----
+
+
+
+#########################################################
+# Agent Policy Properties
+#  - this property file is used in PropertyPolicyProvider 
+#########################################################
+
+# block agent. if agent is blocked, all new requested jobs are suspended until agent is unblocked
+block=false
+
+# the maximum number of job to execute. -1 is unlimited
+maxJob=-1
+
+# allow to run job. if false, request to run job causes exception.
+allowRun=true
+
+# allow to stop job. if false, request to stop job causes exception. 
+allowStop=true
+
+# allow to kill job. if false, request to kill job causes exception. 
+allowKill=true
+
+# list of IP addresses separated with semi-colon (for example "127.0.0.1;127.0.0.2;127.0.0.3")
+# all requests from those address are allowed. (run, stop, kill)   
+allowAddress=
+
+
+----
+
+
+====
+
+[[agent-install-config-log]]
+
+
+===== logback.xml
+
+:: 에이전트 로그를 설정한다.
+
+에이전트 로그가 저장된 디렉토리(Parent)를 지정한다.
+
+
+[source, xml]
+----
+
+<property name="base.directory" value="/log/batch/agent"/>
+
+----
+
+로그파일의 백업 개수와 롤링 크기를 지정한다.
+
+
+[source, xml]
+----
+
+<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+<fileNamePattern>${base.directory}/${agent.name}.%i.log.zip</fileNamePattern>
+<minIndex>1</minIndex>
+<maxIndex>10</maxIndex>
+</rollingPolicy>
+
+<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+<maxFileSize>5MB</maxFileSize>
+</triggeringPolicy>
+
+----
+
+.logback.xml
+====
+
+----
+
+
+
+<configuration>
+
+<property name="base.directory" value="/log/batch/agent"/>
+
+<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+<encoder>
+<pattern>[%d{yyyy-MM-dd HH:mm:ss}] %-5level %logger{0} : %msg%n</pattern>
+</encoder>
+</appender>
+ 
+ <appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<file>${base.directory}/${agent.name}.log</file>
+
+<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+<fileNamePattern>${base.directory}/${agent.name}.%i.log.zip</fileNamePattern>
+<minIndex>1</minIndex>
+<maxIndex>10</maxIndex>
+</rollingPolicy>
+
+<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+<maxFileSize>5MB</maxFileSize>
+</triggeringPolicy>
+<encoder>
+<pattern>[%d] %-5level %logger{0} : %msg%n</pattern>
+</encoder>
+</appender>
+ 
+<logger name="org.springframework" additivity="false">
+<level value="info" />
+<appender-ref ref="rollingFile" />
+</logger>
+
+<logger name="processLogger" additivity="false">
+<level value="debug" />
+<appender-ref ref="rollingFile" />
+</logger>
+
+<root level="info">
+<appender-ref ref="rollingFile" />
+</root>
+</configuration>
+
+
+----
+
+
+====
+
+[[agent-run]]
+
+
+=== 기동 및 중지
+
+:: 다음 명령어(쉘)를 실행함으로써 에이전트를 기동/중지할 수 있다.
+
+.에이전트 기동
+====
+
+----
+
+
+
+AGENT_HOME/bin/startup1.sh
+AGENT_HOME/bin/startup2.sh
+
+
+----
+
+
+====
+
+.에이전트 중지
+====
+
+----
+
+
+
+AGENT_HOME/bin/shutdown1.sh
+AGENT_HOME/bin/shutdown2.sh
+
+
+----
+
+
+====
+
+[[agent-architecture]]
+
+
+=== Agent Reference
+
+:: [[agent-architecture-policy]]
+
+
+==== Policy 설정
+
+:: * Batch Agent의 동작에 필요한 각종 정책에 대한 설정값은 property 파일로 관리하거나, DB 테이블로 관리할 수 있다.
+
+* 정책(policy) 설정 값을 관리하는 방식에 대한 구분은 agent.properties에서 다음과 같이 정의하며, 이 값은 Batch Agent의 application-context.xml 파일에서 Bean 정의 시 참조한다.
+
+* agent.properties 에서
+** ‘agent.policy.mode=proerty '인 경우, PolicyProviderFactory가 참고하는 policy 값은 ‘policy.properties ' 파일에서 관리되며,
+
+** ‘agent.policy.mode=jdbc '인 경우, PolicyProviderFactory가 참고하는 policy 값은 BATCH_SERVER 테이블에서 관리되며, AgentDaoImpl.getPolicy() 메소드를 활용하여 policy 값을 load한다.
+
+.application.properties
+====
+
+----
+
+
+
+# agent policy provider mode. 
+# -jdbc      : get policy from data base 
+# -property: get policy from property file
+policy.provider=property
+policy.provider.property.location=classpath:policy.properties
+... ...
+
+
+----
+
+
+====
+
+.policy.properties
+====
+
+----
+
+
+
+# block agent. if agent is blocked, all new requested jobs are suspended until agent is unblocked
+block=false
+
+# the maximum number of job to execute. -1 is unlimited
+maxJob=-1
+... ...
+
+
+----
+
+
+====
+
+
+[[agent-architecture-clustering]]
+
+
+==== Clustering 설정
+
+:: * Batch Agent는 Batch Runtime이 설치된 각 서버에 설치되며, 이 Agent들은 GMS나 nio file 기반으로 Clustering 될 수 있다.
+
+* Batch Admin이나 Batch Manager에서 Job 구동에 대한 요청 시 처리를 담당할 Agent가 랜덤하게 지정되어, 구동될 Job에 대한 정보를 BATCH_JOB_EXECUTION 테이블에 insert한다.
+
+* 클러스터링으로 묶인 Agent 들 중 하나의 Agent가 해당 테이블을 polling하며, 정해진 정책에 맞게 Job을 구동시킨다.
+
+* 클러스터링 방식은 JGroup을 활용한 GMS 방식과 Nio 를 활용한 File 기반 방식을 제공한다.
+
+* 둘 중 어떤 방식을 적용할지 여부는 agent.properties 파일에서 설정한다.
+** agent.cluster.mode=jgroup : ClusterLockFactory에 의해 생성되는 ClusterLock 객체의 종류는 JGroup을 사용하여 GMS 기반으로 클러스터링하는 JGroupClusterLock이 된다.
+
+** agent.cluster.mode=nio : ClusterLockFactory에 의해 생성되는 ClusterLock 객체의 종류는 File Locking 기반으로 클러스터링하는 NioFileClustLock이 된다.
+
+.application.properties
+====
+
+----
+
+
+
+# cluster lock mode
+# -jgoup: network base locking
+# -nio   : file base locking
+agent.cluster.mode=nio
+agent.cluster.jgroup.config=classpath:agent-udp.xml
+agent.cluster.nio.directory=.
+... ...
+
+
+----
+
+
+====
+
+
+[[agent-architecture-clustering-nio]]
+
+
+===== NioFileClusterLock
+
+:: * Java Nio는 jdk 1.3 이후로 Java I/O의 속도를 개선하기 위해 만들어진 클래스들로 Java Nio의 파일 Lock 기능을 활용하여 클러스터링 메커니즘을 구현한다. Java Nio에서 File Locking은 외부 프로세스 사이에서 파일 접근을 제어하기 위해 사용 가능하다.
+
+* NioFileClusterLock에서 사용하는 File의 위치는 agent.properties에서 정의된다.
+
+* 만약, 정의된 디렉토리가 없는 경우, 시스템의 ‘user.home '에 File이 생성된다. 파일명은 ‘서버명.lock ' 이다.
+
+* Agent의 JobExecutionManagerImpl에서 Polling 수행 시, 이 NioFileClusterLock 클래스의 lock() 메소드를 호출한다.
+
+* lock() 메소드에서는 정해진 File의 채널을 획득하고, 파일 채널의 lock() 메소드를 호출한다. 파일 채널의 lock() 메소드는 파일에 Lock을 획득하며, 이미 Lock이 걸려 있으면 Blocking된다.
+
+[[agent-architecture-clustering-jgroup]]
+
+
+===== JGroupClusterLock
+
+:: * JGroup은 상호 메시지를 주고 받을 수 있는 노드들간의 클러스터를 생성하기 위해 사용이 가능한 메시징 Toolkit이다.
+
+* JGroup으로 클러스터링된 Agent 중 처음으로 기동된 Agent가 Job 정보 Polling 및 구동에 대한 역할을 담당한다.
+
+* GMS 관련 설정은 다음과 같다.
+
+.agent-tcp.xml
+====
+
+----
+
+
+
+<config xmlns="urn:org:jgroups"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:org:jgroups http://www.jgroups.org/schema/JGroups-3.0.xsd">
+    <TCP 
+     bind_addr="127.0.0.1"
+         bind_port="8800"
+         loopback="true"
+         recv_buf_size="${tcp.recv_buf_size:20M}"
+         send_buf_size="${tcp.send_buf_size:640K}"
+         discard_incompatible_packets="true"
+         max_bundle_size="64K"
+         max_bundle_timeout="30"
+         enable_bundling="true"
+         use_send_queues="true"
+         sock_conn_timeout="300"
+         
+         thread_pool.enabled="true"
+         thread_pool.min_threads="1"
+         thread_pool.max_threads="25"
+         thread_pool.keep_alive_time="5000"
+         thread_pool.queue_enabled="false"
+         thread_pool.queue_max_size="100"
+         thread_pool.rejection_policy="discard"
+
+         oob_thread_pool.enabled="true"
+         oob_thread_pool.min_threads="1"
+         oob_thread_pool.max_threads="8"
+         oob_thread_pool.keep_alive_time="5000"
+         oob_thread_pool.queue_enabled="false"
+         oob_thread_pool.queue_max_size="100"
+         oob_thread_pool.rejection_policy="discard"/>
+                         
+    <TCPPING timeout="3000"
+             initial_hosts="${jgroups.tcpping.initial_hosts:127.0.0.1[8800]}"
+             port_range="2"
+             num_initial_members="2"/>
+    <MERGE2  min_interval="10000"
+             max_interval="30000"/>
+    <FD_SOCK/>
+    <FD timeout="3000" max_tries="3" />
+    <VERIFY_SUSPECT timeout="1500"  />
+    <BARRIER />
+    <pbcast.NAKACK
+                   use_mcast_xmit="false" 
+                   retransmit_timeout="300,600,1200,2400,4800"
+                   discard_delivered_msgs="true"/>
+    <UNICAST timeout="300,600,1200" />
+    <pbcast.STABLE stability_delay="1000" desired_avg_gossip="50000"
+                   max_bytes="400K"/>
+    <pbcast.GMS print_local_addr="true" join_timeout="3000"
+                view_bundling="true"/>
+    <FC max_credits="2M"
+        min_threshold="0.10"/>
+    <FRAG2 frag_size="60K"  />
+    <pbcast.STATE_TRANSFER/>
+    <CENTRAL_LOCK/>
+</config>
+
+
+----
+
+
+====
+
+.agent-udp.xml
+====
+
+----
+
+
+
+<config xmlns="urn:org:jgroups"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:org:jgroups http://www.jgroups.org/schema/JGroups-3.1.xsd">
+    <UDP
+     bind_addr="127.0.0.1"
+         bind_port="8800"
+         mcast_port="${jgroups.udp.mcast_port:45588}"
+         tos="8"
+         ucast_recv_buf_size="20M"
+         ucast_send_buf_size="640K"
+         mcast_recv_buf_size="25M"
+         mcast_send_buf_size="640K"
+         loopback="true"
+         max_bundle_size="64K"
+         max_bundle_timeout="30"
+         ip_ttl="${jgroups.udp.ip_ttl:8}"
+         enable_bundling="true"
+         enable_diagnostics="true"
+         thread_naming_pattern="cl"
+
+         timer_type="old"
+         timer.min_threads="4"
+         timer.max_threads="10"
+         timer.keep_alive_time="3000"
+         timer.queue_max_size="500"
+
+         thread_pool.enabled="true"
+         thread_pool.min_threads="2"
+         thread_pool.max_threads="8"
+         thread_pool.keep_alive_time="5000"
+         thread_pool.queue_enabled="true"
+         thread_pool.queue_max_size="10000"
+         thread_pool.rejection_policy="discard"
+
+         oob_thread_pool.enabled="true"
+         oob_thread_pool.min_threads="1"
+         oob_thread_pool.max_threads="8"
+         oob_thread_pool.keep_alive_time="5000"
+         oob_thread_pool.queue_enabled="false"
+         oob_thread_pool.queue_max_size="100"
+         oob_thread_pool.rejection_policy="Run"/>
+
+    <PING timeout="2000"
+            num_initial_members="20"/>
+    <MERGE2 max_interval="30000"
+            min_interval="10000"/>
+    <FD_SOCK/>
+    <FD_ALL/>
+    <VERIFY_SUSPECT timeout="1500"  />
+    <BARRIER />
+    <pbcast.NAKACK2 xmit_interval="1000"
+                    xmit_table_num_rows="100"
+                    xmit_table_msgs_per_row="2000"
+                    xmit_table_max_compaction_time="30000"
+                    max_msg_batch_size="500"
+                    use_mcast_xmit="false"
+                    discard_delivered_msgs="true"/>
+    <UNICAST  xmit_interval="2000"
+              xmit_table_num_rows="100"
+              xmit_table_msgs_per_row="2000"
+              xmit_table_max_compaction_time="60000"
+              conn_expiry_timeout="60000"
+              max_msg_batch_size="500"/>
+    <pbcast.STABLE stability_delay="1000" desired_avg_gossip="50000"
+                   max_bytes="4M"/>
+    <pbcast.GMS print_local_addr="true" join_timeout="3000"
+                view_bundling="true"/>
+    <UFC max_credits="2M"
+         min_threshold="0.4"/>
+    <MFC max_credits="2M"
+         min_threshold="0.4"/>
+    <FRAG2 frag_size="60K"  />
+    <RSVP resend_interval="2000" timeout="10000"/>
+    <pbcast.STATE_TRANSFER />
+    <CENTRAL_LOCK/>
+    <!-- pbcast.FLUSH  /-->
+</config>
+
+
+----
+
+
+====
+
+===== Weblogic 배포시 참고사항
+
+[NOTE]
+====
+ war 형태로 weblogic 상에 배포할 때 아래의 weblogic.xml 파일을 war 내부에 같이 포함시켜야 한다. 
+====
+
+.weblogic.xml
+====
+
+----
+<?xml version="1.0" ?>
+<weblogic-web-app xmlns="http://xmlns.oracle.com/weblogic/weblogic-web-app">
+ 
+ <container-descriptor>
+  <servlet-reload-check-secs>-1</servlet-reload-check-secs>
+    <prefer-application-packages>
+        <package-name>org.springframework.*</package-name>
+        <package-name>org.hibernate.*</package-name>
+        <package-name>javax.validation.*</package-name>
+        <package-name>javax.validation.spi.*</package-name>
+        <package-name>org.slf4j.*</package-name>
+        <package-name>org.apache.commons.*</package-name>
+    </prefer-application-packages>
+    <show-archived-real-path-enabled>true</show-archived-real-path-enabled>
+</container-descriptor>
+ 
+ <charset-params> 
+  <input-charset> 
+   <resource-path>/*</resource-path> 
+   <java-charset-name>UTF-8</java-charset-name> 
+  </input-charset> 
+ </charset-params>
+ 
+ <context-root>/batchagent</context-root>
+
+</weblogic-web-app>
+
+
+
+----
+
+====

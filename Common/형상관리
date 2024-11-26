@@ -1,0 +1,73 @@
+git commit 
+1. git repository new 생성 
+
+2. eclipse git repositories clone 
+working tree 안에 .git 생성 확인하기 
+
+3. 프로젝트 우클릭 share project
+
+4. add index commit and push 
+
+https://m.blog.naver.com/kimnx9006/220574853888
+https://winterandsnow.tistory.com/3
+
+maven goals 
+    .jar 추출 시 , install :: local repository upload
+    nexus 배포 시, deploy ::  nexus upload 
+
+anyframe 형상관리 깃이랑 넥서스 두 개 다 해야함 !
+    깃 소스 pom.xml 소스 패치 
+    넥서스 바이너리 source.jar 소스 패치  
+
+취약점관련 사이트  : mvn repository
+
+<nexus 배포 >
+    1. pom.xml 
+        <pluginRepositories>
+            <pluginRepository>
+                <id>TeamStafInternalRepository</id>
+                <url>http://70.121.224.52:8081/nexus/content/repositories/public/</url>
+            </pluginRepository>
+        </pluginRepositories>
+        
+        <distributionManagement>
+            <repository>
+                <id>anyframe-repository</id>
+                <url>http://70.121.224.52:8081/nexus/content/repositories/anyframe-releases</url>
+            </repository>
+            <snapshotRepository>
+                <id>anyframe-snapshot-repository</id>
+                <url>http://70.121.224.52:8081/nexus/content/repositories/anyframe-snapshots</url>
+            </snapshotRepository>
+        </distributionManagement>
+
+
+
+    2. settings.xml
+    <servers>
+            <server> 
+                <id>anyframe-repository</id> <username>deployment</username> <password>deployment0</password> 
+            </server> 
+            <server> 
+                <id>anyframe-snapshot-repository</id> <username>deployment</username> <password>deployment0</password> 
+            </server> 
+
+            <!-- Another sample, using keys to authenticate. <server> <id>siteServer</id> 
+                <privateKey>/path/to/private/key</privateKey> <passphrase>optional; leave 
+                empty if not used.</passphrase> </server> -->
+        </servers>
+
+
+    3. clean deploy -Dpmd.skip=true
+        
+    [INFO] Uploading: http://70.121.224.52:8081/nexus/content/repositories/anyframe-snapshots/com/anyframe/anyframe-online-runtime-ext/6.5.0-SNAPSHOT/maven-metadata.xml
+    [INFO] Uploaded: http://70.121.224.52:8081/nexus/content/repositories/anyframe-snapshots/com/anyframe/anyframe-online-runtime-ext/6.5.0-SNAPSHOT/maven-metadata.xml (1003 B at 54.4 
+    KB/sec)
+
+    uploaded 되면 끝 경로가서 확인해보기 
+
+
+<git 배포> 
+    pom.xml 패치해야해서 commit 
+
+

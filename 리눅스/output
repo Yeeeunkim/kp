@@ -1,0 +1,106 @@
+ online 8094 / server port 8044
+       anyframe-online-sample\src\main\resources\properties\management.properties db, port 변경
+       anyframe-online-sample\src\main\resources\properties\context.properties
+       anyframe-online-sample\src\main\resources\spring\context-base.xml management 주석풀기 
+       anyframe-online-sample\src\main\resources\spring\context-management.xml dbcp2 변경
+
+       테이블 
+       instance_configuration 
+        
+
+       /home/kpcnc/output/online/conf/server.xml context.xml management.xml
+       server 8044, connector 8094
+       /home/kpcnc/output/online/conf/catalina.sh
+       JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk-1.8.0.322.b06-1.el7_9.x86_64
+
+       파일권한 
+       chmod u+rwx startup.sh
+       chmod u+rwx shutdown.sh
+       chmod u+rwx catalina.sh
+       https://ittrue.tistory.com/83
+
+        
+       
+       err
+       Application Error] Error: [aui.rootView][ViewInstanceContainer]sample/movie/view class is not defined. Please, check a JavaScript file is properly loaded with include or loadResource function.
+       at viewInstanceContainer._createView (aui-camellia-1.0.0.min.js:600:233)
+       조치 -> webapp 안에 anyframe-online-sample-6.5.0-SNAPSHOT.war -> anyframe-online-sample.war 변경
+       docdase 기준으로 연결되는데, .war 말때 이미 이클립스 서버의 documentBase 가 /anyframe-online-sample 세팅되어 있어서 변경함 
+
+
+admin 8095 / server port 8055
+
+       로컬경로
+       : anyframe-enterprise-admin-core
+       > anyframe-enterprise-admin-common        
+           > anyframe-enterprise-admin-batch
+           > anyframe-enterprise-admin-online 	
+           > anyframe-enterprise-admin-centercut  anyframe-enterprise-admin-centercut\src\main\webapp\bin
+
+       node_modules 설치 
+       directory is ready to be deployed 
+       static, templates 
+
+       리눅스 경로 
+       C:\Users\kpcnc\git\linux\anyframe-enterprise-admin\anyframe-enterprise-admin-centercut\src\main\webapp\bin\
+
+       /home/kpcnc/output/online/conf/server.xml context.xml management.xml
+       server 8055, connector 8095
+       /home/kpcnc/output/online/conf/catalina.sh
+       JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk-1.8.0.322.b06-1.el7_9.x86_64
+
+batch  8096
+
+        batch-sample source  :: /home/kpcnc/output/batch-sample/target
+
+        -에러
+        배치작업이력 조회 inner server err 
+         WARN  RemoteInvocationTraceInterceptor : Processing of HessianServiceExporter remote call resulted in fatal exception: com.anyframe.batch.agent.service.FileService.getFile
+        com.anyframe.batch.agent.exception.RemoteAgentException: Can not access /home/kpcnc/output/batch-sample/src-log/sample/batch/blob/cfg/hello_cfg/ base directory is {/home/kpcnc/output/log/batchlogs/}
+        at com.anyframe.batch.agent.service.FileServiceImpl.getAndValidateBaseDirectory(FileServiceImpl.java:336)
+
+        -조치 
+        batch-agent 
+                application.properties 
+                resource.log.directories=/home/kpcnc/output/batch-sample/src-log      
+        batch-sample 
+                batch.properties
+                batch.log.directory=/home/kpcnc/output/batch-sample/src-log/
+
+-에러
+        java.io.IOException: Cannot run program "/home/kpcnc/output/batch-sample/dist/bin/runjob.sh" 
+        (in directory "/home/kpcnc/output/batch-sample/dist/bin"):
+        error=13, 허가 거부 at java.lang.ProcessBuilder.start(ProcessBuilder.java:1048) 
+        at com.anyframe.batch.agent.utils.ProcessUtils.buildProcess(ProcessUtils.java:26) 
+        at com.anyframe.batch.agent.launch.JobExecutionManagerImpl$2.run(JobExecutionManagerImpl.java:267) 
+        Caused by: java.io.IOException: error=13, 허가 거부 at java.lang.UNIXProcess.forkAndExec(Native Method) 
+        at java.lang.UNIXProcess.<init>(UNIXProcess.java:247) at java.lang.ProcessImpl.start(ProcessImpl.java:134) ... 5 more
+
+-조치 
+        -rw-r--r-- chmod -R 755 
+
+ Scheduler meta-data: Quartz Scheduler (v2.3.2) 'jobScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+-에러
+        he connection at oracle.jdbc.driver.T4CConnection.logon(T4CConnection.java:458) at oracle.jdbc.driver.PhysicalConnection.<init>(PhysicalConnection.java:546) at oracle.jdbc.driver.T4CConnection.<init>(T4CConnection.java:236) at oracle.jdbc.driver.T4CDriverExtension.getConnection(T4CDriverExtension.java:32) at oracle.jdbc.driver.OracleDriver.connect(OracleDriver.java:521) at org.apache.commons.dbcp2.DriverConnectionFactory.createConnection(DriverConnectionFactory.java:39) at org.apache.commons.dbcp2.PoolableConnectionFactory.makeObject(PoolableConnectionFactory.java:256) at org.apache.commons.dbcp2.BasicDataSource.validateConnectionFactory(BasicDataSource.java:2304) at org.apache.commons.dbcp2.BasicDataSource.createPoolableConnectionFactory(BasicDataSource.java:2290)
+-조치 
+        /home/kpcnc/output/batch-sample/target/classes/jdbc.properties  수정
+
+
+24-06-11 17:30:11] ERROR SimpleRetryPolicy : Couldn't connect to agent. [agentId : AGENT, retryCount : 5 ] : Could not connect to HTTP invoker remote service at [http://localhost:8091/anyframe-online-aui-mybatis-pi/integration/centerCutAgent]; nested exception is java.net.ConnectException: 연결이 거부됨 (Connection refused)
+[2024-06-11 17:30:14] ERROR ErrorControllerAdvice : Can not access D:/DATA/batch50/log/App/test/batch/hello/cfg/hello_cfg/ base directory is {/home/kpcnc/output/log/batchlogs/}
+com.anyframe.batch.agent.exception.RemoteAgentException: Can not access D:/DATA/batch50/log/App/test/batch/hello/cfg/hello_cfg/ base directory is {/home/kpcnc/output/log/batchlogs/}
+        at com.anyframe.batch.agent.service.FileServiceImpl.getAndValidateBaseDirectory(FileServiceImpl.java:336)
+        at com.anyframe.batch.agent.service.FileServiceImpl.getFile(FileServiceImpl.java:314)
+        at sun.reflect.GeneratedMethodAccessor89.invoke(Unknown Source)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:498)
+        at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:344)
+        at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:198)
+        at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163

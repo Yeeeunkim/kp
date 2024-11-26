@@ -1,0 +1,4 @@
+ 문제사항
+     유병종 <byungjong.yu@samsung.com> Change Agent/보상IT파트(화재IT)/삼성SDS
+     작업관리 > 작업실행 에서 검색조건을 "수행일시" 로 From ~ To 기간 검색을 하면 선택된 기간이 아닌 다른 조건으로 조회됩니다.
+ 조치 

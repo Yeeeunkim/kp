@@ -1,0 +1,306 @@
+
+anyframe 4 이하 부터 제품성이 아닌 si 식으로 사업해서 버전관리 안되있음
+anyframe 5 이상 부터 제품성되서 git 버전관리 중 
+
+NexprimeHCM  sds 급여관련솔루션 
+
+[윈도우 배치파일 문법]
+echo 명령어 표시 
+rem 설명문 
+pause 배치파일 멈주고 조건적인 메세지 보여줌 
+setlocal endlocal 배치파일 환경설정으로 환경변수 변경해도 배치파일 종료되면 그 환경변수 사용 못함 
+구분자;
+
+
+
+
+[리눅스 배치파일 문법]
+$0 실행명령어 저장
+$# $1~$N 위치 매개변수저장
+$$ pid 저장
+awk 
+awk '{print $0}' application.properties
+awk '{ print }' application.properties
+awk '/kye/' application.properties
+awk '{print NR, $0}' application.properties 레코드 보이게 조회 
+
+>>>>리눅스 연산자 
+-gt 보다큼 
+-ge 크거나 같음 
+-lt 보다 작음 
+-le 작거나 같음 
+
+trimmed1=$(echo "$text" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
+^행시작
+\t 탭
+
+[vue 문법 ]
+axios http 비동기 통신 라이브러리 
+
+
+[단축키 ]
+static 메모리에 고정적으로 할당되서 객체생성없이 사용 가능 
+ctrl + shrit + o : 안쓰는 객체들 지워주는 역할 
+스택 마지막들어간게 나가는 것 
+큐 먼저들어온게 나가는 것
+
+
+
+jar 독립적인 Java 애플리케이션을 구성 , jvm 직접 실행, 웹컨테이너, 서버 필요 x (단일기능)
+war 웹 구성요소(jsp,servlet)로 웹 애플리케이션 실행하기 위한 웹컨테이너 필요한 설정 포함 한번에 배포, 실행 o (종속성)
+
+netstat 
+-n : ip, port 
+-a : 모든거 
+-l : 리슨
+-t : tcp 
+-u : udp 
+-p : pid 
+-r : 라우팅 테이블
+-c : 1초단위로 연속적 호출 
+
+
+모든 멤버변수 public static final 이며 생략가능
+모든 메소드 public abstract 생략가능 
+인터페이스 다중상속가능 
+
+추상클래스는 자식클래스에서 무조건 구현 , 부모클래스에서 구현 불필요 
+
+private static final을 선언한 변수를 사용하면 재할당하지 못하며, 메모리에 한 번 올라가면 같은 값을 클래스 내부의 전체 필드, 메서드에서 공유한다.
+private final을 선언한 변수를 사용하면 재할당하지 못하며, 해당 필드, 메서드 별로 호출할 때마다 새로이 값이 할당(인스턴스화)한다.
+한 번 메모리에 올려놓고 계속 같은 값을 가져다 쓰면 될 일이다.
+
+
+ 
+✅질문 :pom.xml 관련
+  1. maven 라이프사이클 (pom.xml 설정안해도 maven에 default 라이프사이클이 내장되어 있음 )
+     [goals] 
+    package -> target 아래 compile 
+    install -> repository 참조된 것 전부 compile 
+    deploy -> nexus와 같은 외부저장소 compile 
+     
+     [lifecycle]
+      clean     : 빌드 시 생성되었던 파일들 삭제하는 단계
+      compile   : 프로젝트의 소스 코드를 컴파일하는 단계
+      test      : 단위테스트를 수행하는 단계 (테스트 실패시 빌드 실패로 처리, 스킵 가능)
+      package   : 실제 컴파일된 소스 코드와 리소스 .jar .war 파일 배포를 위한 패키지로 만드는 단계
+      verify    : 통합 테스트 결과에 대한 검사를 실행하여 품질 기준을 충족하는지 확인하는 단계
+      install   : 패키지를 로컬 저장소에 설치하는 단계 (compile + package)
+      deploy    : 만들어진 package 원격 저장소에 release 하는 단계
+
+  2. plugin vs dependency 
+     plugin - build 역할 , class compile 시 필요한 
+     dependency - 프로젝트 전체 주입할 기준으로 어떠한 lib 쓸거다 하는 것 
+
+  3. pmd 이슈 
+      parent 패키지에서 pmd 제외 시켜 repository안에 .pom 최신화 시킨 후 상속 프로젝트 build 
+      pmd 는 은행권에서 스페로우를 사용함 !
+
+  4. spring.context-xxx.xml 객체만드는 역할로 재활용 가능한 객체 정의해주는 것 
+
+  5. 애니프레임과 관련없는 lib
+  - Testopia   : test code 자동 만들어줌 
+  - Sonar Qube : 소스코드분석 
+  - 커버리지
+
+✅질문 : exception 종류 및 처리
+exception 는 두 가지로 나눠서 볼 수 있음 ! 
+1. spring에서 정의한 exception 
+    *spring boot execption 원리 
+        메소드 옆에 throws Throwable 처리해주며 특정 service layer 에서 전부 execption 처리해주는게 원리임 ! 
+        throws Throwable -> throws Throwable -> throws Throwable -> 특정 service layer exception 처리 
+
+    * 특정 service layer exception 처리 :: global execption handler 
+
+    -RuntimeException
+    -rollbackOnException
+2. business에서 정의한 exception 
+    -interruptedException
+        interruptedException는 thread.sleep 진행 시 예외처리를 해주는 Exception 
+        thread는 외부로 빠져나가는 역할로 jvm 밖에 외부로 처리되는 예외를 잡아줌! 
+
+    -ServiceIdNotFoundException
+        수행시 해당 온라인서비스ID를 찾을 수 없을 경우 발생하는 Exception이다
+
+thread 외부로 빠져나가는 역할도함 
+global execption handler 
+exception - spring에서 정의한 
+
+
+✅spring jar 정리
+    - spring-aop-5.2.24.jar
+
+
+✅ContextLoaderListener 
+    service 클래스
+    repository 클래스
+    mybatis
+
+✅DispatcherServlet
+
+
+✅autoCommit 
+    anyframe 두가지 종류의 autoCommit 케이스가 있다
+    1. 직접 호출 
+        commit-interval 
+        commit() 식으로 호출 
+
+    2. commit 건수 지정 후 호출 
+        AbstractTask.java
+         -setCommitInterval   
+         -checkCommit
+
+✅err
+
+GWT compilation failed
+
+
+Compiling module com.anyframe.online.admin.OnlineAdmin
+   Validating newly compiled units
+      Ignored 66 units with compilation errors in first pass.
+Compile with -strict or with -logLevel set to TRACE or DEBUG to see all errors.
+   Finding entry point classes
+      [ERROR] Errors in 'file:/C:/kye/eclipse/workspace/ibk/online/anyframe-online-admin/src/main/java/com/anyframe/online/admin/client/AdminApplication.java'
+         [ERROR] Line 43: No source code is available for type com.anyframe.admin.common.widget.StatusBar; did you forget to inherit a required module?
+      [ERROR] Unable to find type 'com.anyframe.online.admin.client.AdminApplication'
+         [ERROR] Hint: Previous compiler errors may have made this type unavailable
+         [ERROR] Hint: Check the inheritance chain from your module; it may not be inheriting a required module or a module may not be adding its source path entries properly
+Exception in thread "UnitWriteThread" java.lang.RuntimeException: Unable to read from byte cache
+	at com.google.gwt.dev.util.DiskCache.transferToStream(DiskCache.java:196)
+	at com.google.gwt.dev.util.DiskCacheToken.writeObject(DiskCacheToken.java:91)
+	at sun.reflect.GeneratedMethodAccessor21.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+
+
+
+
+batch프로그램 log 호출되도록 개선
+gwt통신 anyframe 5 프로젝트 세팅
+rpc통신 gwt통신 비교
+
+
+✅library 설명
+
+<maven 관련>
+*maven은 apache ant 대안으로 만들어짐, 
+ant는 많은 스크립트 작성과 라이브러리 의존관리가 되지 않아 불편했기 떄문이다
+
+maven-compiler-plugin : maven 컴파일 lib 
+maven-war-plugin : maven 시 .war 만들어주는 lib
+maven-antrun-plugin : ssh를 통해서 원격에 위치한 WAS를 재기동
+maven-replacer-plugin : vue의 index.html의 내용을 변경하는데 사용 
+
+frontend-maven-plugin :  frontend를 빌드시켜주는 작업을 도와주는 플러그인
+maven-resources-plugin은 frontend-maven-plugin이 빌드한 결과를 target 디랙토리에 병합시키는 역할
+
+<servlet 관련>
+javax.servlet : WAS의 Servlet 라이브러리를 사용
+javax.validation : Hibernate는 표준 JSR 380-bean 검증 클래스를 선호하여 여러 특정 검증 제약 클래스를 사용하지 않게 되었다는 점에 유의
+예로 hibernate 최신버전에는 javax.validation.constraints.NotBlank 대신에 import org.hibernate.validator.constraints.NotBlank 사용해야함 !
+*하이버네이트는 자바 언어를 위한 ORM 프레임워크
+
+
+commons-dbcp
+httpclient-4.5.13 : 간편하게 http request 보낼 수 있는 플러그인 get, post요청 방법
+httpclient-4.3 이전 버전 : CloseableHttpClient 사용함 
+
+
+<gwt관련>
+smartGWT : GWT MVP패턴의 setup code를 대량으로 줄여
+
+
+
+
+^|라이브러리 ^|설명 
+|activation-1.1.jar |임의 데이터의 타입을 정의하기 위한 표준 서비스를 제공 
+|anyframe-batch-interface-5.2.0.jar |batch runtime, agent, admin에서 공용으로 사용하는 interface 
+|anyframe-core.jar |Anyframe 코어 라이브러리 
+|anyframe-online-core.jar |Annotation, charset, 유틸리티 등 온라인 프레임워크에서 사용하는 기본 타입이나 기능을 정의 
+|anyframe-platform-monitoring-sun-1.0.jar |SUN JVM을 모니터링하기 위한 기능을 제공 
+|aopalliance-1.0.jar |AOP를 사용하기 위해 필요한 라이브러리로 Advice용 Class 작성 시 사용됨 *aop : 적은 소스수정으로 전체변경하는 목적으로 업무로직 + 횡단처리(트랜잭션/로그/보안/인증)관심의 분리를 실현
+|asm-4.2.jar |Java bytecode 조작을 위한 기능을 제공 
+|aspectjweaver-1.6.11.jar |AOP를 사용하기 위해 필요한 라이브러리 
+|cal10n-api-0.8.1.jar |국제화(Internationalization) 관련 기능 제공 
+|cglib-nodep-2.2.jar |ASM 모듈이 포함되어 있는 코드 생성 라이브러리. 런타임에 동적으로 Java 클래스의 프록시를 생성함 
+|commons-collections-3.2.2.jar |Java Collection 지원 라이브러리 
+|commons-compiler-2.6.1.jar |Java 클래스 파일이나 Java Expression을 컴파일할 수 있는 컴파일러 
+|commons-dbcp2-2.0.jar |DB connection pool 사용을 위한 라이브러리 
+|commons-io-2.4.jar |I/O 기능 개발을 지원하기 위한 유틸리티 라이브러리 
+|commons-lang-2.6.jar |Java Data Type별 유틸리티 라이브러리 
+|commons-logging-1.2.jar |log API 라이브러리 
+|commons-pool2-2.2.jar |DB connection pool 사용을 위한 라이브러리 
+|ehcache-core-2.5.0.jar |데이터 캐슁을 위해 EhCache를 사용하기위한 기능을 제공 
+|guava-12.0.jar |spring integration jdbc 라이브러리 사용을 위해 필요한 기능을 제공
+|hessian-3.2.0.jar |agent와 communication을 위한 hessian 프로토콜 라이브러리 
+|hsqldb-2.3.2.jar |HSQLDB 사용을 위한 라이브러리 
+|jackson-core-asl-2.2.2.jar |JSON 처리를 위한 라이브러리 (parser, generator) 
+|jackson-mapper-asl-1.9.7.jar |JSON 처리를 위한 라이브러리 (data binding) 
+|jackson-xc-1.9.7.jar |JSON 처리를 위한 라이브러리 (JSON processor의 data binding의 상호운용성을 제공하는 확장 라이브러리) 
+|janino-2.6.1.jar |Java Compiler 
+|jasypt-1.7.jar |암복호화 라이브러리(jdbc.properties의 패스워드 암호화) 
+|jaxb-api-2.2.jar |XML과 Java 객체간의 변환을 위한 기능 제공 
+|jcl-over-slf4j-1.6.4.jar |JCL(Jakarta commons logging)에 종속적인 클래스에 영향없이 로깅 API가 slf4j API를 호출하도록 해주는어댑터 
+|jettison-1.1.jar |spring batch core 라이브러리 사용을 위해 필요한 기능을 제공 
+|joda-time-2.4.jar |Advanced Java Date/Time API를 제공 
+|jsr305-1.3.9.jar |spring integration jdbc 라이브러리 사용을 위해 필요한 기능을 제공
+|junit-4.4.jar |단위 테스트 프레임워크  
+|log4j-over-slf4j-1.6.4.jar |log4j에 의존적인 코드를 내부적으로는 slf4j가 동작하도록 해주는 라이브러리 
+|logback-classic-1.0.7.jar |slf4j에서 Logback 사용이 가능하도록 만든 플러그인 컴포넌트 
+|logback-core-1.0.7.jar |Logback의 핵심 기능을 제공하는 라이브러리 
+|mysql-connector-java-5.1.37.jar |Mysql JDBC 드라이버 
+|ojdbc6-11.2.0.2.0.jar |Oracle JDBC 드라이버 
+|postgresql-9.0-801.jar |Postgresql JDBC 드라이버 
+|servlet-api-3.0-alpha-1.jar |서블릿 API를 제공하는 라이브러리 3.0
+|servlet-api.jar |서블릿 API를 제공하는 라이브러리 2.5
+|slf4j-api-1.7.19.jar |slf4j 의 API를 제공하는 라이브러리 
+|slf4j-ext-1.7.19.jar |SLF4J 확장 기능 제공 (Profiler, Extended Logger 등) 
+|spring-aop-4.2.3.RELEASE.jar |Spring AOP 라이브러리 
+|spring-aspects-4.2.3.RELEASE.jar |Spring Aspect 관련 기능 제공  
+|spring-batch-core-2.2.6.jar |Spring 배치 핵심 기능 제공 
+|spring-batch-infrastructure-2.2.6.jar |배치 어플리케이션과 최적화를 위한 low-level 컴포넌트, 인터페이스, Tool을 제공 
+|spring-beans-4.2.3.RELEASE.jar |Java Bean, Bean 컨테이너 관련 라이브러리 
+|spring-context-4.2.3.RELEASE.jar |어플리케이션 컨텍스트 관련 라이브러리 
+|spring-context-support-4.2.3.RELEASE.jar |Quartz와 CommonJ 스케쥴링, UI 템플릿, 메일, 캐슁 관련 라이브러리  
+|spring-core-4.2.3.RELEASE.jar |Spring 코어, 소스레벨의 메타데이터 및 ASM 라이브러리 재패키징 
+|spring-expression-4.2.3.RELEASE.jar |Spring 표현언어 (SpEL) 지원 클래스 포함 
+|spring-integration-core-3.0.2.RELEASE.jar |Spring Integration의 코어 모듈 
+|spring-integration-file-3.0.2.RELEASE.jar |Spring Integration File 어댑터 
+|spring-integration-http-3.0.2.RELEASE.jar |Spring Integration Http 어댑터 
+|spring-integration-jdbc-3.0.2.RELEASE.jar |Spring Integration JDBC support 
+|spring-jdbc-4.2.3.RELEASE.jar |JDBC 지원 
+|spring-orm-4.2.3.RELEASE.jar |JDO, JPA, Hibernate, iBatis등 지원 
+|spring-oxm-4.2.3.RELEASE.jar |XML과 Java 객체간의 serialize 기능을 제공  
+|spring-retry-1.0.2.RELEASE.jar |retry 관련 기능을 제공
+|spring-test-4.2.3.RELEASE.jar |테스트 컨텍스트 프레임워크 다양한 Mock 지원 클래스 (Servlet API, JUnit 지원) 
+|spring-tx-4.2.3.RELEASE.jar |트랜잭션 인프라 JCA 지원, DAO 지원 
+|spring-web-4.2.3.RELEASE.jar |웹 어플리케이션 컨텍스트, 파일 업로드 처리, HTTP 기반 원격지원 
+|spring-webmvc-4.2.3.RELEASE.jar |프레임워크 서블릿, MVC 프레임워크, WEB 컨트롤러와 뷰 제공 
+|validation-api-1.0.0.GA.jar |Bean에 대한 validation API 
+|xpp3_min-1.1.3.3.jar |XML Full Parser 
+|xstream-1.3.1.jar |XML과 Java 객체간의 serialize 기능을 제공  
+
+
+-----------------------------------------
+---------------온라인 공부----------------
+-----------------------------------------
+
+1. DispatcherServlet
+요청을 처리할 핸들러(컨트롤러)를 찾고 해당 객체의 메소드를 호출
+
+2. spring-webmvc-5.2.24 (프레임워크 서블릿, MVC 프레임워크, WEB 컨트롤러와 뷰 제공 )
+- HttpRequestHandlerAdapter
+
+
+3.spring-integration-http-3.0.2 (Spring Integration Http 어댑터 )
+- HttpRequestHandlingMessagingGateway
+- HttpRequestHandlingEndpointSupport
+
+4. anyframe-online-runtime 
+- AUIHttpMessageConverter
+
+5. spring-integration-core-3.0.2 (Spring Integration의 코어 모듈 )
+MessagingGatewaySupport
+
+6. spring-messaging-5.2.24 
+- AbstractMessageChannel.ChannelInterceptorChain 에서 this.interceptor 가리키는 것은 ? 
+context-http-inbound의 <bean class="com.anyframe.online.runtime.ext.integration.interceptor.UrlServicedMappingInterceptor" />

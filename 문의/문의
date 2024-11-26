@@ -1,0 +1,1367 @@
+- error message  job operation error "" 들어간 경우 발생됨 
+    policy.prop ALLOW_ADDRESS 
+
+- call SYS.DBMS_APPLICATION_INFO.SET_MODULE('[${JOB_NAME}]${STEP_NAME}','BATCH')}
+    <property name="ignoreUnresolvablePlaceholders" value="false는"/> false는 파라미터 없어도 무시함
+
+- _CFG 로 보이도록 수정 
+    방법1. BatchJobAddModel의 text: _.replace(name, '_CFG', '') 수정
+    방법2. 
+        /anyframe-batch-agent/src/main/resources/application.properties 
+        suffix=_CFG 변경 
+       
+- 방카 따옴표 배치 에이전트 정책 파일
+    AgentDaoImpl 
+    - 구분자는 ; 입니다. ex) 127.0.0.1;0.0.0.0;
+
+- GPS 테이블 안말들고, context-management.xml 에 서비스 로그 남기는 빈 삭제 (SLPGSPAL01 서버 내 파일)
+    - context-management.xml 설정에서
+
+        <bean class="com.anyframe.online.runtime.management.event.publish.ServiceEventHistoryPublisher">
+                <property name="historyHandler" ref="historyHandler" />
+        </bean>
+    ** 2718 번째 줄 
+    
+주석처리 하면 SERVICE_HISTORY 테이블에 생성 안함
+- 사랑온 서비스 로그 확인 (1번 gps와 동일하게 DB에 로그  안남기는 방법)
+
+
+- 예전 요청사항 bnk, gps 로그 삭제 배치 구현 등록
+
+
+- 운영 GA 배치 작업이력 안보이는 현상
+    ex) tanentid = "GPS"   / batch-job_exection = gps
+    tanentid 는 대소문자를 구별함으로 batch-job_exection = GPS 로 동일하게 설정
+
+- Transaction timeout 일어나면서 롤백 문제 
+    TransactionUtil.executeRequiresNew(new TransactionCallback<T>() {
+    public <T> doInTransaction(TransactionStatus transactionstatus) {
+            // 비지니스 로직
+            return result;
+        }
+    }, 30, "onlineTransactionManager");
+
+- 240422 동시설정여부 허용 후 변경 문의
+    **원리**
+        batch 프로젝트 
+            1. DefaultJobLauncher.java  createJobExecution에서 id, key 를 execution 으로 반환 해준 뒤 stared 상태가 됨 
+            2. 이미 stared라서 count를 하여 실행중인 서비스 제어라하고 안내함 
+    조치사항 
+        execute 내부에서 체크를 하시려면 
+        -JOB_EXECUTION_KEY(jobKey)가 없을 경우
+                SELECT COUNT(1) FROM BATCH_JOB_EXECUTION WHERE JOB_NAME = {jobName} AND STATUS= 'STARTED' AND JOB_EXECUTION_KEY IS NULL ORDER BY JOB_ID DESC;
+        -JOB_EXECUTION_KEY(jobKey)가 있을 경우
+                SELECT COUNT(1) FROM BATCH_JOB_EXECUTION WHERE JOB_NAME = {jobName} AND JOB_EXECUTION_KEY = {jobKey} AND STATUS= 'STARTED' ORDER BY JOB_ID DESC;
+
+- 어드민 api 산출물 작성 
+    세팅 
+        1. admin 서버 args  -Dencode.response-body=false 추가 
+        2. anyframe-enterprise-admin-web main.js 
+                주석
+                import util from '@/utils/util'; 
+                const decodedContent = util.decodeBase64(response.data.content);
+                const contentObj = JSON.parse(decodedContent);
+                추가
+                const contentObj = JSON.parse(response.data.content);
+        3.  npm run dev         
+    postman tool 사용 
+    authorization 권한의 bearer token 넣기 
+    get방식이면 params 인자 넣고 send
+    post방식이면 body raw json 넣고 send 
+
+    조회 안되는 부분들은 직접 URL 만들어줌 
+    EX. http://localhost:8088/anyframe-batch-admin/batch/user/for/batch?tenantId=tenantIdA
+    설명 : 브라우저는 VUE 3000번으로 연결했지만 실제 데이터 확인은 localhost:8088/anyframe-batch-admin 해야함 
+
+
+- 배치에서 온라인 호출 통지 제어 문의
+    MonitorExecutorImpl
+    JobExecutionMonitorServiceImpl
+    JobExecutionDao
+    https://devops.sdsdev.co.kr/confluence/pages/viewpage.action?pageId=1097686334
+
+
+
+- 배치 온라인유형 통지설정 문의 #FW: RE: Anyframe admin 에러 통지 관련 문의드립니다.
+    온라인유형은 독립적으로 호출되는 존재이므로 
+    실제 통보는 DefaultJobOperator jobMetaResolver.getMetaData가 해줌 
+    문제는 배치의 작업명을 가져오는게 아닌 배치경로를 가져와서 작업명으로 가져오도록 안내함 
+    RemoteJobLauncher launcher = new RemoteJobLauncher("localhost:15000/batch-agent");
+     launcher.launch("JOB:{배치 작업명}");
+
+
+- admin 제품성으로 .war만
+  sample 커스텀 필요해서 프로젝트 통으로 말기 
+    dist/lib settings.xml 따로 만들어서 dist/lib 경로 잡아주기
+
+
+
+
+-  
+문의주신 오류는 AFI자바 버전과 postgreSql 호환 문제로 보입니다  
+해당 AFI ADMIN의 설정된 java-version, javax.servlet-vesion 사양 확인이 필요하여 정보 공유부탁드립니다 
+
+<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
+ <dependency>
+        <groupId>postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>9.0-801.jdbc4</version>
+        </dependency>
+
+
+=====cfg=====	
+패키지는 프레임워크 기본기능 flow제공해서 영향이 있을 수있겠다 싶어서 확인 
+샘플 소스 내에서는 getJobConfigSuffix  사용하는 곳은 없어서 
+로컬에서는 문제가 되진 않지만 
+운영환경에서 반영하기 전에 확인필요 
+
+로컬 
+로그 :: 	C:\anyframe_log\admin\batchlogs\target\classes\sample\batch\hello2\cfg\hello_CFG
+
+BatchDefine.java
+JobOperatorImpl.java
+if (str.endsWith('_cfg.xml')) {
+        this.treeItem.selectNode = _.replace(general.location, '_cfg.xml', '');
+        console.log(this.treeItem.selectNode);
+      }.
+
+
+
+const str = general.location;
+      console.log(str);
+      con
+      console.log(general.location.endsWith('_cfg.xml'));
+
+
+FileServiceImpl
+        @Override
+		protected void handleFile(File file, int i, Collection<FileItem> collection) {
+			FileItem item = new FileItem(file, baseDir);
+			
+			String name = item.getName();
+			for(int n=0; n < suffixes.length; n++) {
+    			if(StringUtils.hasText(suffixes[n]) && name.endsWith(suffixes[n])) {
+    				name = name.substring(0, name.length() - suffixes[n].length());
+    				item.setName(name);
+    			}
+			}
+			
+			item.setEncoding(encoding);
+			collection.add(item);
+		}
+
+=====batch 5=====
+ORA-02289: 시퀀스가 존재하지 않습니다.
+
+CREATE TABLE SAMPLE
+   (	NO NUMBER NOT NULL PRIMARY KEY, 
+	NAME VARCHAR2(10), 
+	AGE NUMBER(6), 
+	SALARY NUMBER(20), 
+	BIRTHDAY DATE,
+	ADDRESS VARCHAR2(100), 
+	DESCRIPTION VARCHAR2(30), 
+   ) ;
+
+SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+
+
+======240411======
+배치 중지되면 실제 배치는 안꺼지는 문제로 
+배치 중지되는 로직 부터 파악 
+
+batch-agent prop 수정하기
+
+ps -ef | grep /kang 
+
+kill -9 pid
+
+
+netstat -ano | findstr [포트]
+
+taskkill /FI "PID eq [PID]"
+
+
+batch-sample build 안됨 ㅇㅅㅇ 
+
+======240415======
+데몬프로세스 죽이기
+C:\Users\kpcnc\git\anyframe-batch-0311\anyframe-batch-sample\src\main\java\test\batch\transaction\ProcessData.java
+배치샘플 오류 -- 해결 
+ide 오류 
+======240415======
+데몬 배치의 경우 작업 이력 조회 가능 여부
+ref : https://devops.sdsdev.co.kr/confluence/pages/viewpage.action?pageId=545361589
+3000번 err
+linux kill err 
+
+
+exception 주석걸로 test 
+
+
+
+
+ Job Run Command: C:/Users/kpcnc/git/anyframe-batch-0311/anyframe-batch-sample/dist/bin/runjob.cmd JOB:CrdtDbToFile_TestServer -JOBID=4311 TENANTID
+=tenantId TENANTID=tenantIdA -PROFILE=processBatch
+
+command: JOB:240414 -JOBID=4313 TENANTID=tenantId TENANTID=tenantIdA -PROFILE=processBatch
+
+Daemon Run Command: C:/Users/kpcnc/git/anyframe-batch-0311/anyframe-batch-sample/dist/bin/rundaemon.cmd -ID=240412 -SERVER=TestServer -PROFILE=
+processBatch -TENANTID=tenantIdA
+
+
+배치 
+Job Run Command: C:/Users/kpcnc/git/anyframe-batch-0311/anyframe-batch-sample/dist/bin/runjob.cmd JOB:240414 -JOBID=4631 TENANTID=tenantId TENANTI
+D=tenantIdA -PROFILE=processBatch
+
+데몬
+aemonExecutionManagerImpl : Daemon Run Command: C:/Users/kpcnc/git/anyframe-batch-0311/anyframe-batch-sample/dist/bin/rundaemon.cmd -ID=240411 -SERVER=TestServer -PROFILE=
+processBatch -TENANTID=tenantIdA
+[2024-04-17 13:46:23] DEBUG processL
+
+동시성 x
+예로 1분 어드민배치 세팅 1분30초 배치 실행 
+started 상태에서 fail
+
+동시성o 
+1분 어드민배치 세팅  1분30초 배치 실행 
+started 상태에서 배치 종료되는 방향 
+
+===================0422
+
+util import 제거 
+손책임님 엑셀 ㅇbase64 주석
+
+===================0429
+센터컷 api 
+리눅스 부트 다시 파서 해보기 
+
+===================0503
+센터컷로컬세팅
+센터컷api작성
+
+
+
+/home/kpcnc/output/edu/shell]$ find ./ -type f -not -name "*.log"
+
+
+
+diff -u a.txt b.txt
+
+/home/kpcnc/output/sample/etc_ori /home/kpcnc/output/sample/etc 
+
+sed -e 's/\/etc/\/etc_ori/g' -e s/^M//g`
+
+find: paths must precede expression: *.class
+Usage: find [-H] [-L] [-P] [-Olevel] [-D help|tree|search|stat|rates|opt|exec] [path..            .] [expression]
+
+https://github.com/deathmarine/Luyten/releases
+
+
+https://contradicto-lee.tistory.com/45
+i
+sed -e 's/\/home/kpcnc/output/sample/etc_ori/\/home/kpcnc/output/sample/etc/g' -e s/^M//g`
+
+https://non-stop.tistory.com/101
+
+diff -r /home/kpcnc/output/sample/etc_ori /home/kpcnc/output/sample/etc | sed '/Binary\ files\ /d' >outputfile
+
+
+diff -rq /home/kpcnc/output/sample/etc_ori /home/kpcnc/output/sample/etc | grep -E "^Only in /dir1*" | sed -n 's/://p' | awk '{print $3"/"$4}' xargs -I {} rm -r {}
+
+diff -rq /home/kpcnc/output/sample/local /home/kpcnc/output/sample/real | grep -E "^Only in /home/kpcnc/output/sample/etc_ori*" | sed -n 's/://p' | awk '{print $3"/"$4}'
+
+
+diff -r /home/kpcnc/output/sample/realSample /home/kpcnc/output/sample/localSample
+
+diff -rq /home/kpcnc/output/sample/realSample /home/kpcnc/output/sample/etc_ori | grep -E "^Only in /home/kpcnc/output/sample/etc*"
+
+1. 하위디렉토리 비교 
+2. 로컬변경시 , 운영변경 시 
+
+
+
+colordiff -ur /home/kpcnc/output/sample/local /home/kpcnc/output/sample/real
+
+===================0717
+[Anyframe Admin]업무 ID 정렬 관련 문의
+
+/anyframe-enterprise-admin-common/src/main/resources/mappings/tenantadmin-queries.xml
+쿼리 id tenantAdminDAO.selectTenantList, tenantAdminDAO.selectTenantListByUserId
+
+===================0716
+Anyframe 배치 로그(log) 관련 문의드립니다.
+
+ANYFRAME.INTERFACE_SYSTEM_LOG테이블을 조회했을때 아래 캡쳐와 같이 PGM_ID항목이 공백으로 표시되어 있는것으로 보입니다.
+동일한 STTD_UUID기준으로 보면 해당 영역의 PGM_ID값이 최종처리 결과에만 비어있는것으로 보여서 
+해당 항목에 값을 등록할 수 있도록 수정하는 방법 가이드 부탁드립니다.
+
+===================0722
+배치서버의 디스크 증가로 로그 파일 정리 작업 후에도 디스크 사이즈가 줄지 않아 확인결과
+아래 /home/mes30bat/batch/agent/tomcat/logs 하위 catalina.out 파일 사이즈가 29G 까지 증가한 것을 확인하였습니다.
+
+1. 해당 파일에 log를 쌓지않는 방법 
+>> /dev/null 2>&1 &
+
+2. 임시조치를 위해 배치서버 재기동 없이 해당 파일 삭제처리하는 방법
+# cat /dev/null > catalina.out
+
+===================0724
+INTERFACE_SYSTEM_LOG 테이블 PGM_ID 안쌓이는 문제
+-> PGM_ID가 안쌓이는 이유가 인터페이스(EAI OR FEP)에서 리턴받는 값에 PGM_ID가 없어서 업데이트 로직을 추가
+
+->  HttpMessageSender.send  jobName을 추가 후 리턴값으로 인풋값을 바로 받아도 되는지 추가 문의
+===================0812 한국산업은행
+문의 : 
+        agent batch server 실행 오류 
+        WARN  [08/12 08:39:21] Connection factory returned null from createConnection - uli83t-7085
+        java.lang.IllegalStateException: Connection factory returned null from createConnection
+
+원인 : 
+        [ps -ef | grep agent 결과물]
+        anyframe 13726     1  0  8▒▒  3  ?        1387:16 /opt/java6/bin/IA64N/java -Djava.util.logging.config.file=/usropt83/anyframe/batch/agent/tomcat-agent-p/conf/logging.properties
+        anyframe 13736     1  0  8▒▒  3  ?        2185:03 /opt/java6/bin/IA64N/java -Djava.util.logging.config.file=/usropt83/anyframe/batch/agent/tomcat-agentn-s/conf/logging.properties
+            jeus 26601     1  0  4▒▒  6  ?        408:18 /opt/java6/bin/IA64N/java -Dname=mwagent.jeus -Xms128m -Xmx128m -jar /usropt83/jeus/MWAgent/mwmanager4j6.jar
+        anyframe  3709  3422  0 11:10:42 pts/1     0:00 grep agent
+        anyframe 19590     1  0  8▒▒ 12  ?         3:09 /opt/java6/bin/IA64N/java -Djava.util.logging.config.file=/usropt83/NGS/anyframe_cs/batch/agent/tomcat-agent-p/conf/logging.pro
+        anyframe 19632     1  0  8▒▒ 12  ?         3:06 /opt/java6/bin/IA64N/java -Djava.util.logging.config.file=/usropt83/NGS/anyframe_cs/batch/agent/tomcat-agent-s/conf/logging.pro
+
+        /usropt83/anyframe/batch/agent/tomcat-agent-P
+        /usropt83/anyframe/batch/agent/tomcat-agent-s
+        /usropt83/NGS/anyframe_cs/batch/agent/tomcat-agent-p
+        /usropt83/NGS/anyframe_cs/batch/agent/tomcat-agent-s
+
+        총 4개 agent 띄어져 있음 
+
+        [ 차세대 이전에 사용했던 프로세스로 현재 사용  x]
+        /usropt83/anyframe/batch/agent/tomcat-agent-p
+        /usropt83/anyframe/batch/agent/tomcat-agent-s
+
+        [현재 사용 o]
+        /usropt83/NGS/anyframe_cs/batch/agent/tomcat-agent-p 
+        /usropt83/NGS/anyframe_cs/batch/agent/tomcat-agent-s
+
+조치 :    
+        차세대 agent tomcat 서버 kill 하여 조치 
+        jgroup agent 2개를 하나로 묶어 클러스터링 목적
+        agent-primary, agent-secondary로 구분하여 주 agent(primary)가 동작을 멈추거나 오류가 나면 다른 에이전트(secondary)가 대신 수행함.
+
+
+execute cfg java 파일 
+context-batch-runtime.xml
+
+
+    -> batch.properties 
+        batch.database.persist=true
+
+
+안녕하세요 Anyframe 기술지원 김예은입니다. 
+
+보내주신  jdbc 연계 중 Step execution error 오류조치를 위해서 anyframe 설정 및 소스 확인이 필요합니다. 
+
+- step id GateRcvDBIntegrationTask의 java 파일 
+- context-batch-runtime.xml
+- context-batch-transaction.xml
+
+
+
+===================240829
+Anyframe Online에서 제공받았던 "xercesImpl-2.12.0.jar"에 대해 "CVE-2020-14338" 취약점이 존재함이 확인되었습니다.
+안전버전은 2.12.2 버전이 확인되며, 해당 lib와 연관되는 lib들이 있다면, 같이 제공부탁드립니다.
+보안취약점 상세내용은 첨부파일 참고바랍니다.
+조치 : anyframe-online-runtime-ext xercesImpl-2.12.0 - > 2.12.2 버전업
+
+2024.10.31 보안취약점 변경 (xercesImpl-2.12.0 > 2.12.2)
+
+x프라임 ext 소스 커스텀 여부 확인 후 제공
+
+
+maven goals 
+    .jar 추출 시 , install :: local repository upload
+    nexus 배포 시, deploy ::  nexus upload 
+
+anyframe 형상관리 깃이랑 넥서스 두 개 다 해야함 !
+    깃 소스 pom.xml 소스 패치 
+    넥서스 바이너리 source.jar 소스 패치  
+
+취약점관련 사이트  : mvn repository
+
+<nexus 배포 >
+    1. pom.xml 
+    <pluginRepositories>
+            <pluginRepository>
+                <id>TeamStafInternalRepository</id>
+                <url>http://70.121.224.52:8081/nexus/content/repositories/public/</url>
+            </pluginRepository>
+        </pluginRepositories>
+        
+        <distributionManagement>
+            <repository>
+                <id>anyframe-repository</id>
+                <url>http://70.121.224.52:8081/nexus/content/repositories/anyframe-releases</url>
+            </repository>
+            <snapshotRepository>
+                <id>anyframe-snapshot-repository</id>
+                <url>http://70.121.224.52:8081/nexus/content/repositories/anyframe-snapshots</url>
+            </snapshotRepository>
+        </distributionManagement>
+
+
+
+    2. settings.xml
+    <servers>
+            <server> 
+                <id>anyframe-repository</id> <username>deployment</username> <password>deployment0</password> 
+            </server> 
+            <server> 
+                <id>anyframe-snapshot-repository</id> <username>deployment</username> <password>deployment0</password> 
+            </server> 
+
+            <!-- Another sample, using keys to authenticate. <server> <id>siteServer</id> 
+                <privateKey>/path/to/private/key</privateKey> <passphrase>optional; leave 
+                empty if not used.</passphrase> </server> -->
+        </servers>
+
+
+    3. clean deploy -Dpmd.skip=true
+        
+    [INFO] Uploading: http://70.121.224.52:8081/nexus/content/repositories/anyframe-snapshots/com/anyframe/anyframe-online-runtime-ext/6.5.0-SNAPSHOT/maven-metadata.xml
+    [INFO] Uploaded: http://70.121.224.52:8081/nexus/content/repositories/anyframe-snapshots/com/anyframe/anyframe-online-runtime-ext/6.5.0-SNAPSHOT/maven-metadata.xml (1003 B at 54.4 
+    KB/sec)
+
+    uploaded 되면 끝 경로가서 확인해보기 
+
+
+<git 배포> 
+    pom.xml 패치해야해서 commit 
+
+==================================240829
+left 메뉴 안나오는 이슈 
+-> history 테이블에  200x 년 데이터까지 남아있어서 로딩 시 오래 걸림 
+db 삭제 후 처리 
+==================================240830
+문의 : 센터컷 commit response되는 부분 확인 
+
+1. 
+final int transactionStatus = synchronization.getStatus(); -> 1 완료값
+
+2.
+mainprocesshandler.java
+chunkRepository.saveStatus(chunk); // MAIN_PROCESS_START-> MAIN_PROCESS_COMPLETE
+
+3.
+chunkserviceImpl
+96 postProcessHandler.handle(chunk, chunkItems); //COMPLET -> POST_PROCESS_COMPLETE
+
+4.
+104 ChunkStatus status = chunkStatusChecker.getChunkStatus(chunk);  COMPLETE -> COMPLETE_ALL [afcc_chunk]
+chunkDao 36 updatestatus update 함
+
+5.
+jobexecutionmanagerimpl 
+147 return jobinstance.getInstancestatus()
+
+6.
+finishJobInstance
+complete all 
+TransactionAspectSupport	transactioninterceptor() ->COMPLETE ALL [afcc_job_instance ]
+ 
+
+수석님 오전에 말씀하신 COMPLETE response 받는 부분 공유드립니다.
+
+1. anyframe-centercut-runtime 프로젝트의 chunkserviceImpl.java 104 라인에서 COMPLETE 값 추출
+2. 106라인에서 AFCC_CHUNK테이블의 COMPLETE_ALL 하여 UPDATE 
+3. anyframe-centercut-engine 프로젝트의 208라인 finishjobInstance메소드 타면서 
+4. TransactionAspectSupport안에 transactioninterceptor() 함수에서 AFCC_JOB_INSTANCE 테이블에 COMPLETE ALL 해줍니다
+
+centercut
+
+
+runJobAsync 
+com\anyframe\centercut\interfaces\invocation\CenterCutInvocationUtil.java
+
+perpareJob
+
+
+인스턴스 : 병렬처리의 단위가 되는 단위작업 리스트 
+단위작업 : 병렬처리 수행단위
+단위작업(Chunk)이란 병렬처리의 수행단위가 됩니다. 센터컷 엔진(Engine)에서는 항상 단위작업 정보를 기준으로
+요청을 센터컷 실행환경(Runtime)으로 전송합니다
+
+job실행 디버깅 
+1. runtime 
+	com.anyframe.centercut.runtime.service.ChunkServiceImpl - execute
+	선처리 : preProcessHandler.handle(chunk, chunkItems);
+	본처리 : mainProcessHandler.handle(chunk, chunkItems);
+	후처리 : postProcessHandler.handle(chunk, chunkItems);
+	
+	chunkRepository.saveStatus(chunk); : ChunkStatus : COMPLETE
+
+
+2. engine
+	com.anyframe.centercut.engine.execution.manager.JobExecutionManagerImpl - finishJobInstance ✅ instance 변경 !
+	com.anyframe.centercut.engine.execution.event.JobFinishEvent - handle
+	JobExecutionEventListener - onApplicationEvent
+	com.anyframe.centercut.engine.core.event.handler.JobExecutionEventHanlderImpl - handleEvent
+
+
+
+3. runtime 
+	com.anyframe.centercut.runtime.service.ChunkServiceImpl - execute ( return chunk.getChunkStatus().isSucceed(); )
+	com.anyframe.centercut.runtime.agent.CenterCutAgentImpl - executeChunk
+
+
+
+
+4. spring	
+	org.springframework.transaction.support.TransactionTemplate - T execute(TransactionCallback<T> action)
+	java.util.concurrent.ThreadPoolExecutor - runWorker(Worker w)
+
+
+--------------------------------------0902 최수석님 변경사항 
+CenterCutAgentImpl.java 소스의 
+  public boolean executeChunk(Chunk chunk) 해당 메소드 부분 수정
+
+          변경전
+          CenterCutAgentImpl.this.chunkService.execute(this.val$chunk);
+          변경후
+          if (!CenterCutAgentImpl.this.chunkService.execute(this.val$chunk)
+          {
+            CenterCutAgentImpl.logger.error("Chunk execution failed. : ", throwable);
+            this.val$chunk.setExitMessage(ExceptionUtils.getStackTrace(throwable));
+            this.val$chunk.setChunkStatus(ChunkStatus.FAIL);
+            CenterCutAgentImpl.this.chunkRepository.saveExitMessage(this.val$chunk);
+          {
+
+
+MainProcessHandler.java 소스의
+  public ChunkAction handle(Chunk chunk, ChunkItems chunkItems) 해당 메소드 부분 수정
+  
+      변경전
+      this.sameErrorInfoChecker.setMaxErrorCount(chunk.getJobConfig().getJobExecutionPolicy().getMaxErrorRepeatCount());
+      변경후
+      this.sameErrorInfoChecker.setMaxErrorCount(chunk.getJobConfig().getJobExecutionPolicy().getMaxErrorRate());
+
+      해당 부분은 3곳이 있음
+      변경전
+            if ((!item.getItemStatus().isSystemError()) || (!item.isProcessable()) || (action != null)) break;
+            doInterval(interval, item.getRetryCount(), autoRetryCount);
+      변경후
+  	        if (item.getItemStatus().isSystemError() && item.isProcessable() && action == null) {							
+							doInterval(interval, item.getRetryCount(), autoRetryCount);							
+							continue;
+						} else {
+							break;
+						}
+
+변경사항을 보내드립니다.
+확인하시고 수정 테스트 부탁드립니다.
+
+⭐🌞⭐🌞
+1. anyframe-centercut-engine-5.0.2 JobInstanceDao 반영 
+2. online runtime ext  취약점 버전업 반영 ==
+========================================
+
+
+SELECT * fROM AFCC_ERROR_INFO 
+WHERE JOB_ID IN ('sample1')
+and exec_date = 20240904
+;
+SELECT * fROM AFCC_EXEC_EVENT 
+WHERE JOB_ID IN ('sample1')
+and exec_date = 20240904
+;
+SELECT * fROM AFCC_JOB_CONFIG
+WHERE JOB_ID IN ('sample2', 'sample1')
+--and exec_date = 20240904
+;
+select * from afcc_application_jobs;
+select *  
+fROM AFCC_JOB_INSTANCE 
+WHERE JOB_ID IN ('sample2', 'sample1')
+and exec_date = 20240904
+;
+select *  fROM AFCC_CHUNK
+WHERE JOB_ID IN ('sample2', 'sample1')
+and exec_date = 20240904
+;
+
+//0919
+delete fROM AFCC_JOB_INSTANCE WHERE JOB_ID IN ('sample2');
+delete  fROM AFCC_CHUNK WHERE JOB_ID IN ('sample2');
+
+commit;
+
+
+SELECT /*+ LEADING(CHUNK, INSTANCE) USE_NL(CHUNK INSTANCE)  */ 
+    CHUNK.JOB_ID, CHUNK.EXEC_DATE, CHUNK.EXEC_SEQ, CHUNK_SEQ, START_INDEX, 
+    END_INDEX, THREAD_GROUP, CHUNK_STATUS, AGENT.AGENT_ID, MONITOR_CHECK, 
+    CHUNK.PRE_START_TIME, CHUNK.PRE_END_TIME, CHUNK.MAIN_START_TIME, CHUNK.MAIN_END_TIME, 
+    CHUNK.POST_START_TIME, CHUNK.POST_END_TIME, CHUNK.INPUT_COUNT, CHUNK.INPUT_TOTAL, 
+    CHUNK.SUCCESS_COUNT, CHUNK.SUCCESS_TOTAL, CHUNK.FAIL_COUNT, CHUNK.FAIL_TOTAL, 
+    CHUNK.BIZ_FAIL_COUNT, CHUNK.BIZ_FAIL_TOTAL, INSTANCE.DOMAIN_ID, HEAD_SERVICE_ID, 
+    BODY_SERVICE_ID, TAIL_SERVICE_ID, TARGET_INPUT_TABLE, JOB_PRE_PROCESSOR, 
+    JOB_POST_PROCESSOR, CHUNK_PRE_PROCESSOR, CHUNK_POST_PROCESSOR, HEAD_INTERCEPTOR, 
+    BODY_INTERCEPTOR, TAIL_INTERCEPTOR, ITEM_READER, EXECUTION_POLICY, PARTITION_POLICY, 
+    CHUNK_SIZE, INSTANCE.MAX_THREAD_COUNT, MAX_ERROR_RATE, MAX_ERROR_REPEAT_COUNT, AUTO_RETRY_COUNT, 
+    PROCESSING_INTERVAL, TIMEOUT, LOGGING, SIMULATION, LOG_LEVEL, SYSTEM_ERROR_RETRY 
+    FROM AFCC_AGENT_CONFIG AGENT, 
+    AFCC_CHUNK CHUNK, 
+    AFCC_JOB_INSTANCE INSTANCE 
+ WHERE RTRIM(CHUNK.JOB_ID) = INSTANCE.JOB_ID 
+ AND RTRIM(CHUNK.EXEC_DATE) = INSTANCE.EXEC_DATE 
+ AND CHUNK.EXEC_SEQ = INSTANCE.EXEC_SEQ 
+ AND CHUNK_STATUS IN (?, ?, ?, ?, ?, ?, ?, ?) 
+ AND AGENT.AGENT_ID = CHUNK.AGENT_ID AND MONITOR_CHECK = ? 
+ AND CHUNK_SEQ NOT IN (0,2147483647)]
+CenterCutAgentImpl.java  113 -> mainProcessHandle.java 103 handle -> Itemprocesshandle.java 149 ->  Itemprocesshandle.java return 281 -> Itemprocesshandle.java finally 151 -> Itemprocesshandle.java catch 문 194
+-> mainProcessHandle.java 152 MAIN_PROCESS_start -> MAIN_PROCESS_COMPLETE
+
+--00 ready 
+--33 complete all 
+-- 34
+
+
+
+--1
+select * From
+(
+select a.JOB_ID, a.EXEC_DATE, b.JOB_NAME
+from afcc_job_instance a left outer join afcc_job_config b
+on a.job_id = b.job_id
+)
+where exec_date = 20240904
+;
+--2
+select * from AFCC_JOB_INSTANCE_PARAMS;
+--3
+select * From
+(
+select a.JOB_ID, a.EXEC_DATE
+from AFCC_CHUNK a left outer join AFCC_JOB_INSTANCE b
+on a.job_id = b.job_id
+AND a.EXEC_DATE = b.EXEC_DATE AND a.EXEC_SEQ = b.EXEC_SEQ
+)
+where exec_date = 20240904
+;
+
+
+024-09-02 17:11:47] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [33]
+[2024-09-02 17:11:48] ERROR MainProcessHandler : Chunk main process could not be executed.[jobId=sample2, execDate=20240902, execSeq=1, chunkSeq=1]
+org.springframework.beans.factory.NoSuchBeanDefinitionException: No bean named 'preProcess' available
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.getBeanDefinition(DefaultListableBeanFactory.java:816) ~[spring-beans-5.2.21.RELEASE.jar:5.2.21.RELEASE]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getMergedLocalBeanDefinition(AbstractBeanFactory.java:1288) ~[spring-beans-5.2.21.RELEASE.jar:5.2.21.RELEASE]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:298) ~[spring-beans-5.2.21.RELEASE.jar:5.2.21.RELEASE]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-5.2.21.RELEASE.jar:5.2.21.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1109) ~[spring-context-5.2.21.RELEASE.jar:5.2.21.RELEASE]
+	at com.anyframe.centercut.runtime.factory.BeanProcessorFactory.createInstance(BeanProcessorFactory.java:23) ~[anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+	at com.anyframe.centercut.runtime.service.handler.ItemProcessHandler.handle(ItemProcessHandler.java:206) ~[anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+	at com.anyframe.centercut.runtime.service.handler.MainProcessHandler.handle(MainProcessHandler.java:103) ~[anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+	at com.anyframe.centercut.runtime.service.ChunkServiceImpl.execute(ChunkServiceImpl.java:94) [anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+	at com.anyframe.centercut.runtime.agent.CenterCutAgentImpl$1.run(CenterCutAgentImpl.java:113) [anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [na:1.8.0_202]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [na:1.8.0_202]
+	at java.lang.Thread.run(Thread.java:748) [na:1.8.0_202]
+[2024-09-02 17:11:50] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100000]
+[2024-09-02 17:11:50] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [32]
+[2024-09-02 17:11:50] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [32]
+
+`nono
+
+---------------------------------------------------------------------------------------------------------------
+
+[2024-09-02 17:25:35] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100001]
+[2024-09-02 17:25:35] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [33]
+[2024-09-02 17:25:35] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [33]
+[2024-09-02 17:25:36] ERROR ChunkServiceImpl : Chunk execution failed.
+com.anyframe.centercut.runtime.exception.ChunkMainProcessException: Chunk main process could not be executed.[jobId=sample2, execDate=20240902, execSeq=1, chunkSeq=1]
+	at com.anyframe.centercut.runtime.service.handler.MainProcessHandler.handle(MainProcessHandler.java:169) ~[anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+	at com.anyframe.centercut.runtime.service.ChunkServiceImpl.execute(ChunkServiceImpl.java:94) ~[anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+	at com.anyframe.centercut.runtime.agent.CenterCutAgentImpl$1.run(CenterCutAgentImpl.java:113) [anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [na:1.8.0_202]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [na:1.8.0_202]
+	at java.lang.Thread.run(Thread.java:748) [na:1.8.0_202]dd
+Caused by: java.lang.ClassCastException: com.anyframe.centercut.runtime.service.ChunkServiceImpl cannot be cast to com.anyframe.centercut.runtime.service.interceptor.OnlineServiceI
+nterceptor
+	at com.anyframe.centercut.runtime.service.handler.ItemProcessHandler.handle(ItemProcessHandler.java:206) ~[anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+	at com.anyframe.centercut.runtime.service.handler.MainProcessHandler.handle(MainProcessHandler.java:103) ~[anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+	... 5 common frames omitted
+[2024-09-02 17:25:38] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [100000]
+[2024-09-02 17:25:38] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [32]
+[2024-09-02 17:25:38] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [32]
+[2024-09-02 17:25:41] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11010]
+[2024-09-02 17:25:41] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [26]
+[2024-09-02 17:25:41] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [26]
+[2024-09-02 17:25:45] DEBUG ServiceContextClearInterceptor : ■ ThreadLocal(MDC, ServiceContext) cleared. Current Thread ID [11111]
+[2024-09-02 17:25:45] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear SGC. Current Thread ID of SGC [31]
+[2024-09-02 17:25:45] DEBUG ServiceContextHolder : [FRAMEWORK_OLT]__________ ■ Clear all SLC. Current Thread ID of SGC [31]
+[2024-09-02 17:25:48] DEBUG ServiceContextClea
+================================================0909
+최수석님 요청 건  : 화재소스 비교 후 포팅
+
+interfaces
+runtime
+engine
+
+input table 
+jobinstance 
+chunk
+
+/home/kpcnc/output/sample/tar/interface/local
+/home/kpcnc/output/sample/tar/interface/real
+
+/home/kpcnc/output/sample/tar/engine/local
+/home/kpcnc/output/sample/tar/engine/real
+
+/home/kpcnc/output/sample/tar/runtime/local
+/home/kpcnc/output/sample/tar/runtime/real
+
+
+C:\Users\kpcnc\git\anyframe-centercut-v5.0.0\anyframe-centercut-runtime\src\main\java\com\anyframe\centercut\runtime\service\handler\OnlineResultHolder.java_
+
+<<변경사항>>
+centerCutAgentImpl.java 소스의 
+  public boolean executeChunk(Chunk chunk) 해당 메소드 부분 수정
+
+          변경전
+          CenterCutAgentImpl.this.chunkService.execute(this.val$chunk);
+          변경후
+          if (!CenterCutAgentImpl.this.chunkService.execute(this.val$chunk)
+          {
+            CenterCutAgentImpl.logger.error("Chunk execution failed. : ", throwable);
+            this.val$chunk.setExitMessage(ExceptionUtils.getStackTrace(throwable));
+            this.val$chunk.setChunkStatus(ChunkStatus.FAIL);
+            CenterCutAgentImpl.this.chunkRepository.saveExitMessage(this.val$chunk);
+          {
+
+
+MainProcessHandler.java 소스의
+  public ChunkAction handle(Chunk chunk, ChunkItems chunkItems) 해당 메소드 부분 수정
+  
+      변경전
+      this.sameErrorInfoChecker.setMaxErrorCount(chunk.getJobConfig().getJobExecutionPolicy().getMaxErrorRepeatCount());
+      변경후
+      this.sameErrorInfoChecker.setMaxErrorCount(chunk.getJobConfig().getJobExecutionPolicy().getMaxErrorRate());
+
+
+
+에이전트 실행 후 첫 로직 ? executeChunk
+
+rror creating bean with name 'urlMapping' defined in file [C:\kye\eclipse\workspace\centercut_v5.0.0\.metadata\.plugins\or
+g.eclipse.wst.server.core\tmp0\wtpwebapps\anyframe-online-aui-mybatis-pi\WEB-INF\classes\spring\context-base.xml]: Initialization of bean failed; nested exception is org.springfram
+ework.beans.factory.BeanCreationException: Error creating bean with name '/centerCutAgent'
+
+
+문제 : 
+<dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-core</artifactId>
+            <!-- <version>3.0.1.RELEASE</version> -->
+            <version>${spring.integration.version}</version>
+<!--             <version>1.0.3.RELEASE</version> -->
+        </dependency>
+
+낮은 버전은 <spring.integration.version>5.3.10.RELEASE</spring.integration.version> 안쓰고 더 낮은거 씀
+
+spring message 로 통신 하는데 
+
+1. 오류 : 
+Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:2.0.2:compile (default-compile) on project anyframe-online-aui-mybatis-pi: Compilation failure
+[ERROR] C:\Users\kpcnc\git\anyframe-centercut-v5.0.0\anyframe-online-aui-mybatis-pi\src\main\java\com\anyframe\centercut\runtime\executor\SampleOnlineServiceExecutor.java:[77,19] e
+rror: cannot access Message
+[ERROR] -> [Help 1]
+[ERROR] 
+
+2.
+화재는 낮은 버전 message (package org.springframework.integration.core;) => spring-integration-core-1.0.3.release.jar
+현재 소스는 6버전 message (package org.springframework.messaging;) => spring-messaging-5.2.19.release.jar
+
+상이해서 서버 오류 나오는 거임 
+
+3.
+낮은거 찾음
+http://182.195.89.102/subv/temp/anyframe-online-aui-mybatis-pi/anyframe-online-aui-mybatis-pi
+
+
+
+com.anyframe.online.runtime.integration.channel.interceptor.GlobalIdSettingInterceptor
+
+<변경전>
+import org.springframework.integration.Message;
+import org.springframework.integration.MessageChannel;
+
+<변경전>
+import org.springframework.integration.core.Message;
+import org.springframework.integration.core.MessageChannel;
+
+anyframe-online-aui-mybatis-pi\src\main\resources\management.properties
+eventlog.partition.value=D
+servicelog.partition.value=D
+
+
+<!-- <?xml version="1.0" encoding="UTF-8"?> -->
+<!-- <beans xmlns="http://www.springframework.org/schema/beans" -->
+<!--        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" -->
+<!--        xmlns:context="http://www.springframework.org/schema/context" -->
+<!--        xmlns:int-jmx="http://www.springframework.org/schema/integration/jmx" -->
+<!--        xmlns:jee="http://www.springframework.org/schema/jee" -->
+<!--        xmlns:task="http://www.springframework.org/schema/task" -->
+<!--        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd -->
+<!--  		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd -->
+<!--  		http://www.springframework.org/schema/integration/jmx http://www.springframework.org/schema/integration/jmx/spring-integration-jmx.xsd  -->
+<!-- 		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd  -->
+<!--  		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">  -->
+
+
+속성공부 
+xmlns:xsi  :: xml schema instance , xml 문서가 스키마를 따르도록 설정 
+xmlns:tx   :: spring 트랜잭션 관리 네임스페이스 
+xmlns:util :: util은 spring 유틸리티 네임스페이스로 컬렉션이나 상수와 같은 유틸리티 빈을 정의
+xmlns:jee  :: java ee 통합을 위한 spring 네임스페이스 
+xsi:schemaLocation :: xml파일이 여러 네임스페이스를 사용할 때, 해당 네임스페이스에 대한 스키마 파일의 위치를 정의 ㅋ+
+
+
+pre main post 타는지 
+
+강제로 exception 
+
+chunkserviceimpl 값 반환 받는지 
+
+chunkserviceimpl
+ 
+ buildStatus
+
+centercutagentimpl
+
+threadpoolexecutor
+
+
+
+
+select * fROM AFCC_JOB_INSTANCE WHERE JOB_ID IN ('sample1') and exec_date = 20240919;
+select *   fROM AFCC_CHUNK WHERE JOB_ID IN ('sample1') and exec_date = 20240919;
+
+수석님 요청하신 강제 exception 발생경우 공유드립니다 
+1. chunkserviceimpl.java preProcessHandler.handle 에서 강제 exception 처리 전 [ chunkStatus=ASSIGN ]
+Chunk [jobId=sample5, execDate=20240919, execSeq=1, chunkSeq=1, startIndex=1, endIndex=3, threadGroup=null, agentId=agent, chunkStatus=ASSIGN, jobConfig=JobConfiguration [jobId=sample5, jobName=null, description=null, groupId=null, jobDefinition=JobDefinition [domainId=domain, headServiceId=null, bodyServiceId=movieSvc_getList, tailServiceId=null, targetInputTable=sample_input_table, itemReader=centercutItemReader, jobPreProcessor=null, jobPostProcessor=null, chunkPreProcessor=null, chunkPostProcessor=null, headServiceInterceptor=null, bodyServiceInterceptor=null, tailServiceInterceptor=null], jobDistributionPolicy=JobDistributionPolicy [executionPolicy=PARALLEL, chunkPartitionPolicy=UNIT_COUNT, chunkSize=99], jobExecutionPolicy=JobExecutionPolicy [maxThreadCount=1, maxErrorRate=100, maxErrorRepeatCount=-1, autoRetryCount=1, processingInterval=0, timeout=-1, logging=true, logLevel=ERROR, simulation=false, systemErrorRetry=false]], chunkStats=ChunkStats [inputCount=3, inputTotal=0, successCount=0, successTotal=0, failCount=0, failTotal=0, bizFailCount=0, bizFailTotal=0], reprocessCount=0, exitMessage=, chunkHistory=ChunkHistory [preProcessStartTime=0, preProcessEndTime=0, mainProcessStartTime=0, mainProcessEndTime=0, postProcessStartTime=0, postProcessEndTime=0], parameters={}, startTime=1726723255097]
+
+2.chunkserviceimpl.java preProcessHandler.handle 에서 강제 exception 처리 후 [chunkStatus=PRE_PROCESS_FAIL]
+Chunk [jobId=sample5, execDate=20240919, execSeq=1, chunkSeq=1, startIndex=1, endIndex=3, threadGroup=null, agentId=agent, chunkStatus=PRE_PROCESS_FAIL, jobConfig=JobConfiguration [jobId=sample5, jobName=null, description=null, groupId=null, jobDefinition=JobDefinition [domainId=domain, headServiceId=null, bodyServiceId=movieSvc_getList, tailServiceId=null, targetInputTable=sample_input_table, itemReader=centercutItemReader, jobPreProcessor=null, jobPostProcessor=null, chunkPreProcessor=null, chunkPostProcessor=null, headServiceInterceptor=null, bodyServiceInterceptor=null, tailServiceInterceptor=null], jobDistributionPolicy=JobDistributionPolicy [executionPolicy=PARALLEL, chunkPartitionPolicy=UNIT_COUNT, chunkSize=99], jobExecutionPolicy=JobExecutionPolicy [maxThreadCount=1, maxErrorRate=100, maxErrorRepeatCount=-1, autoRetryCount=1, processingInterval=0, timeout=-1, logging=true, logLevel=ERROR, simulation=false, systemErrorRetry=false]], chunkStats=ChunkStats [inputCount=3, inputTotal=0, successCount=0, successTotal=0, failCount=0, failTotal=0, bizFailCount=0, bizFailTotal=0], reprocessCount=0, exitMessage=, chunkHistory=ChunkHistory [preProcessStartTime=0, preProcessEndTime=0, mainProcessStartTime=0, mainProcessEndTime=0, postProcessStartTime=0, postProcessEndTime=0], parameters={}, startTime=1726723255097]
+
+3. AFCC_CHUNK 테이블의 PRE_PROCESS_FAIL 상태값 변경됩니다.
+select * From AFCC_JOB_INSTANCE
+ WHERE JOB_ID IN ('sample5')
+ ;
+ 
+
+
+수석님 요청하신 강제 exception 발생경우 공유드립니다 
+1. chunkserviceimpl.java preProcessHandler.handle 에서 강제 exception 처리 전 [ chunkStatus=ASSIGN ]
+
+2. chunkserviceimpl.java preProcessHandler.handle 에서 강제 exception 처리 후 [chunkStatus=PRE_PROCESS_FAIL]
+
+3. AFCC_CHUNK 테이블의 PRE_PROCESS_FAIL 상태값 변경됩니다
+
+4. 수석님이 말씀하신것 처럼 chunk 에서 오류가 발생되면 
+   다음 프로세스 안타고 바로 fail로 떨어진 후 
+   centercutagentimpl.java 의 execute메소스에서 catch 문 타면서 프로세스 종료 됩니다.
+   
+select * From AFCC_JOB_INSTANCE
+ WHERE JOB_ID IN ('sample5')
+ ;
+ 
+ select * fROM AFCC_CHUNK WHERE JOB_ID IN ('sample5');
+ 
+delete fROM AFCC_JOB_INSTANCE WHERE JOB_ID IN ('sample4');
+++++++++++++++++++++++++++++++++++++++++
+delete  fROM AFCC_CHUNK WHERE JOB_ID IN ('sample4');
+commit;
+
+===============================================0923
+수석님 decompiler에서 추가하신 logger 부분 소스가 안찍히는 이유는 
+
+수석님이 추가하신 catch 문 타기 전에 throw 처리가 되서 
+소스 로직이 끝난걸로 보입니다 
+추가하신 catch 문 타기 전에 위에 있는 소스 로직에서 
+프로세스가 정상적으로 종료되어 decompiler 툴에서도 출력이 안된걸로 보입니다.
+
+✅문의 : compile 시 java 소스 전부가 아닌 일부만 compiler 로 출력되는지 궁금 
+
+조치 : 이중 for문에서 TransactionSynchronizationManager.registerSynchronization(synchronization) 위에있는 try catch 문 제거 후 compiler 해보니 handler 메소드의 소스코드 전부가 출력됨 ! 
+
+설명 : compiler 는 java 의 소스전부를 compile 하지 않음 ! 
+compiler 가 시스템로직으로 봤을 때 의미없는 소스 ( try catch 를 할 필요로 없는데 하는 경우 등)
+는 출력하지 않기 때문에 compiler 에서 유효한 소스만 출력된거임 ! 
+
+
+===============================================0924
+
+✅문의: hcm anyframe-online-runtime-ext-6.1.0  취약점 조치 
+
+답변: hcm 소스받은 후 pom.xml 수정함 
+ <dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<version>2.12.2</version>
+		</dependency>
+
+설명 : hcm 이랑 기술지원 소스차이는 ServiceIdMappingAnnotationServiceMappingAsmExt파일 하나만 다르고 
+xercesImpl의 영향도는 없어서  pom.xml 에서 수정 후 전달함 ! 
+
+=============로컬에만있는소스
+
+=============운영에만 있는 소스
+/home/kpcnc/output/sample/real/com/anyframe/online/runtime/ext/service/mapping/ServiceIdMappingAnnotationServiceMappingAsmExt.class
+[kpcnc@centos7][/home/kpcnc/output/sample/log]$
+
+
+===============================================0925
+문의 : 
+    서비스선후처리 chunkService 로 실행하면 오류나는 부분 
+답변 : 
+    MainProcessHandler 에서 오류 남 
+    java.lang.ClassCastException: com.anyframe.centercut.runtime.service.ChunkServiceImpl cannot be cast to com.anyframe.centercut.runtime.service.interceptor.OnlineServiceInterceptor
+    at com.anyframe.centercut.runtime.service.handler.ItemProcessHandler.handle(ItemProcessHandler.java:147) ~[anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+    at com.anyframe.centercut.runtime.service.handler.MainProcessHandler.handle(MainProcessHandler.java:106) ~[anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+    at com.anyframe.centercut.runtime.service.ChunkServiceImpl.execute(ChunkServiceImpl.java:94) [anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+    at com.anyframe.centercut.runtime.agent.CenterCutAgentImpl$1.run(CenterCutAgentImpl.java:112) [anyframe-centercut-runtime-6.5.0-SNAPSHOT.jar:na]
+    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [na:1.8.0_202]
+    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [na:1.8.0_202]
+    at java.lang.Thread.run(Thread.java:748) [na:1.8.0_202]
+
+    ItemProcessHandler.java
+    final OnlineServiceInterceptor onlineServiceInterceptor = (OnlineServiceInterceptor) processorFactory
+					.createInstance(onlineServiceInterceptorId);
+
+문의 : 
+    [이기주] 09-24 13:42
+    원인 : 처리 상태값 변경 중 Lock 발생
+    Caused by: org.springframework.dao.DeadlockLoserDataAccessException: PreparedStatementCallback; 
+    SQL [UPDATE BATCH_RESOURCE_EXECUTION SET URL=?, STATUS = ?, UPDATE_TIME=? WHERE JOB_ID = ? 
+    AND STEP_ID = ? AND RESOURCE_NAME = ?]; 
+    (conn=4866290) Deadlock found when trying to get lock; try restarting transaction; 
+    nested exception is java.sql.BatchUpdateException: (conn=4866290) Deadlock found when trying to get lock; try restarting transaction
+
+조치 : 
+    특정 job 수행이 700000ms 이상 13분 이상 수행되서 lock 걸림 
+
+    mariadb 는 in memory 구조로 데이터와 인데스를 메모리에 캐싱하기 위한 버퍼풀 
+    oracle - mvcc 
+
+    -트랜잭션 격리 수준
+    SERIALIZABLE    : 트랜잭션이 순차적으로 처리되어야 하므로 동시 처리 성능이 떨어짐 
+    REPEATABLE READ : mvcc를 이용해 한 트랜잭션 내에서 동일한 결과를 보장하지만, 새로운 레코드가 추가되는 경우에 부정합 생길 수 있음 
+    READ COMMITTED  : 커밋된 데이터만 조회, 반복 읽기 불가능,,
+    READ UNCOMMITED : 커밋하지 않는 데이터 조차도 접근할 수 있는 격리 수준
+    https://mangkyu.tistory.com/299 
+
+    트랜잭션 격리 수준 확인 방법
+    show variables like '%isolation%';
+
+    autocommit 여부 확인 방법 
+    show variables like 'autocommit%';
+    *매 문장마다 commit 처리를 위한 부하가 과다해져서 db전체 성능에 악영향을 줄 수 있음 => off 권장 
+
+===============================================0927
+engine
+JobExecutionServiceImpl
+JobInstanceRepositoryImpl
+
+runtime
+CenterCutAgentImpl.java
+ChunkServiceImpl.java
+ItemProcessHandler.java
+MainProcessHandler.java
+PostProcessHandler.java
+
+
+ChunkServiceImpl.java () 110
+
+
+class OnlineResultHolder {
+	private Object result;
+
+	public Object getResult() {
+		return result;
+	}
+
+	public void setResult(Object result) {
+		this.result = result;
+	}
+}
+
+------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 4.720 s
+[INFO] Finished at: 2024-09-27T10:28:03+09:00
+[INFO] Final Memory: 31M/414M
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:2.3.2:compile (default-compile) on project anyframe-centercut-runtime: Compilation failure: Compilation failure:
+[ERROR] \Users\kpcnc\git\anyframe-centercut-samfire-agent.5.0.2\anyframe-centercut-runtime\src\main\java\com\anyframe\centercut\runtime\service\handler\ItemProcessHandler.java:[126,9] error: cannot find symbol
+[ERROR] \Users\kpcnc\git\anyframe-centercut-samfire-agent.5.0.2\anyframe-centercut-runtime\src\main\java\com\anyframe\centercut\runtime\service\handler\ItemProcessHandler.java:[126,41] error: cannot find symbol
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------------------241004 
+문의 : ext 소스비교
+
+
+----------:: 로컬샘플
+++++++++++:: 운영샘플
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/CBOMessageBuilder.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/CBOMessageBuilder.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/CentercutMessageBuilder.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/CentercutMessageBuilder.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/CommonConstants.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/CommonConstants.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/dao/CentercutInputTableDao.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/dao/CentercutInputTableDao.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/dao/InputTableParameterSource.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/dao/InputTableParameterSource.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/dao/InputTableRowMapper.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/dao/InputTableRowMapper.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/dao/ItemRepositoryImpl.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/dao/ItemRepositoryImpl.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/dao/JobInstanceDao.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/dao/JobInstanceDao.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/dao/JobInstanceRowMapper.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/dao/JobInstanceRowMapper.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/dao/JobInstanceStatsRowMapper.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/dao/JobInstanceStatsRowMapper.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/dao/vo/InputTableVo.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/dao/vo/InputTableVo.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/executor/CBOOnlineServiceExecutor.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/executor/CBOOnlineServiceExecutor.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/factory/CBOBeanProcessorFactory.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/factory/CBOBeanProcessorFactory.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/factory/CommonChunkPostProcessor.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/factory/CommonChunkPostProcessor.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/factory/CommonChunkPreProcessor.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/factory/CommonChunkPreProcessor.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/factory/CommonJobPostProcessor.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/factory/CommonJobPostProcessor.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/factory/CommonJobPreProcessor.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/factory/CommonJobPreProcessor.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/factory/CommonOnlineServiceInterceptor.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/factory/CommonOnlineServiceInterceptor.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/service/DummyDataSource.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/service/DummyDataSource.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/service/handler/ChunkStatusCheckerImpl.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/service/handler/ChunkStatusCheckerImpl.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/service/interceptor/ItemExecutionInterceptor.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/service/interceptor/ItemExecutionInterceptor.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/service/reader/CentercutItemReader.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/service/reader/CentercutItemReader.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/service/SampleDummyService.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/service/SampleDummyService.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/stats/CentercutChunkStatsBuilder.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/stats/CentercutChunkStatsBuilder.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/stats/ChunkStatsInfo.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/stats/ChunkStatsInfo.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/stats/JobInstanceStatsInfo.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/stats/JobInstanceStatsInfo.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/status/CentercutItemStatus.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/status/CentercutItemStatus.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/util/CentercutCommonUtil.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/util/CentercutCommonUtil.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/centercut/runtime/ext/util/JobStatusUtil.class and /home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/util/JobStatusUtil.class differ
+Binary files /home/kpcnc/output/sample/local/com/anyframe/plugin/processor/SampleJobPreProcessor.class and /home/kpcnc/output/sample/real/com/anyframe/plugin/processor/SampleJobPreProcessor.class differ
+=============로컬에만있는소스
+
+=============운영에만 있는 소스
+/home/kpcnc/output/sample/real/com/anyframe/centercut/runtime/ext/service/interceptor/CBOOnlineExecutionInterceptor.class
+[kpcnc@centos7][/home/kpcnc/output/sample/log]$
+
+
+
+
+
+
+
+------------------------------------------------------------------------241004 
+문의 : ibk controller 정리
+
+방법 : 
+K:\Shared files\Anyframe Study\김예은\업무\241004 ibk controller
+
+1.svn check out 
+
+    온라인
+    http://182.195.89.102/subv/anyframe-enterprise/anyframe-enterprise-online-site/ibk/release/anyframe-online-admin
+
+
+    공통
+    http://182.195.89.102/subv/anyframe-enterprise/anyframe-enterprise-admin-site/ibk/release
+
+
+    배치 
+    http://182.195.89.102/subv/anyframe-enterprise/anyframe-enterprise-batch-5.0/trunk/anyframe-batch-admin
+    --http://182.195.89.102/subv/anyframe-enterprise/anyframe-enterprise-batch-5.0/tags/5.1.0/anyframe-batch-admin-5.1.0
+
+
+    센터컷
+    http://182.195.89.102/subv/anyframe-enterprise/anyframe-enterprise-bto/trunk/anyframe-centercut-admin
+
+2. 양식에 맞게 작성
+
+
+agent
+centercut
+
+==================
+INSERT INTO AFT_APPLICATION (APPL_ID,APPL_NAME,APPL_URL,CREATE_ID) VALUES ('6000','Anyframe Java Admin','/anyframe-online-admin/index.html','system');
+
+Insert into AFT_MENU (MENU_ID,PARENT_MENU_ID,MENU_NAME,MENU_TYPE,MENU_LOAD_TYPE,MENU_LEVEL,MENU_SEQ,MENU_URL,LEAF_YN,USE_YN,CREATE_ID,CREATE_DATE,UPDATE_ID,UPDATE_DATE,APPL_ID) values ('6000',null,'온라인','MENU',null,null,null,null,'Y','Y','system',null,null,null,'6000');
+Insert into AFT_MENU (MENU_ID,PARENT_MENU_ID,MENU_NAME,MENU_TYPE,MENU_LOAD_TYPE,MENU_LEVEL,MENU_SEQ,MENU_URL,LEAF_YN,USE_YN,CREATE_ID,CREATE_DATE,UPDATE_ID,UPDATE_DATE,APPL_ID) values ('6100','6000','Server Execution','MENU',null,null,null,null,'Y','Y','system',null,null,null,'6000');
+Insert into AFT_MENU (MENU_ID,PARENT_MENU_ID,MENU_NAME,MENU_TYPE,MENU_LOAD_TYPE,MENU_LEVEL,MENU_SEQ,MENU_URL,LEAF_YN,USE_YN,CREATE_ID,CREATE_DATE,UPDATE_ID,UPDATE_DATE,APPL_ID) values ('6200','6000','Domain Management','MENU',null,null,null,null,'Y','Y','system',null,null,null,'6000');
+Insert into AFT_MENU (MENU_ID,PARENT_MENU_ID,MENU_NAME,MENU_TYPE,MENU_LOAD_TYPE,MENU_LEVEL,MENU_SEQ,MENU_URL,LEAF_YN,USE_YN,CREATE_ID,CREATE_DATE,UPDATE_ID,UPDATE_DATE,APPL_ID) values ('6300','6000','Service Meta','MENU',null,null,null,null,'Y','Y','system',null,null,null,'6000');
+Insert into AFT_MENU (MENU_ID,PARENT_MENU_ID,MENU_NAME,MENU_TYPE,MENU_LOAD_TYPE,MENU_LEVEL,MENU_SEQ,MENU_URL,LEAF_YN,USE_YN,CREATE_ID,CREATE_DATE,UPDATE_ID,UPDATE_DATE,APPL_ID) values ('6400','6000','Service Control','MENU',null,null,null,null,'Y','Y','system',null,null,null,'6000');
+Insert into AFT_MENU (MENU_ID,PARENT_MENU_ID,MENU_NAME,MENU_TYPE,MENU_LOAD_TYPE,MENU_LEVEL,MENU_SEQ,MENU_URL,LEAF_YN,USE_YN,CREATE_ID,CREATE_DATE,UPDATE_ID,UPDATE_DATE,APPL_ID) values ('6500','6000','Error Trace','MENU',null,null,null,null,'Y','Y','system',null,null,null,'6000');
+Insert into AFT_MENU (MENU_ID,PARENT_MENU_ID,MENU_NAME,MENU_TYPE,MENU_LOAD_TYPE,MENU_LEVEL,MENU_SEQ,MENU_URL,LEAF_YN,USE_YN,CREATE_ID,CREATE_DATE,UPDATE_ID,UPDATE_DATE,APPL_ID) values ('6610','6000','송수신로그 조회','MENU',null,null,null,null,'Y','Y','system',null,'admin',null,'6000');
+Insert into AFT_MENU (MENU_ID,PARENT_MENU_ID,MENU_NAME,MENU_TYPE,MENU_LOAD_TYPE,MENU_LEVEL,MENU_SEQ,MENU_URL,LEAF_YN,USE_YN,CREATE_ID,CREATE_DATE,UPDATE_ID,UPDATE_DATE,APPL_ID) values ('6620','6000','거래전문 로그','MENU',null,null,null,null,'Y','Y','system',null,'admin',null,'6000');
+Insert into AFT_MENU (MENU_ID,PARENT_MENU_ID,MENU_NAME,MENU_TYPE,MENU_LOAD_TYPE,MENU_LEVEL,MENU_SEQ,MENU_URL,LEAF_YN,USE_YN,CREATE_ID,CREATE_DATE,UPDATE_ID,UPDATE_DATE,APPL_ID) values ('6700','6000','DWIO 관리','MENU',null,null,null,null,'Y','Y','system',null,null,null,'6000');
+
+INSERT INTO AFT_ROLE_MENU(ROLE_ID,MENU_ID) VALUES ('9000','6000');
+INSERT INTO AFT_ROLE_MENU(ROLE_ID,MENU_ID) VALUES ('9000','6100');
+INSERT INTO AFT_ROLE_MENU(ROLE_ID,MENU_ID) VALUES ('9000','6200');
+INSERT INTO AFT_ROLE_MENU(ROLE_ID,MENU_ID) VALUES ('9000','6300');
+INSERT INTO AFT_ROLE_MENU(ROLE_ID,MENU_ID) VALUES ('9000','6400');
+INSERT INTO AFT_ROLE_MENU(ROLE_ID,MENU_ID) VALUES ('9000','6500');
+INSERT INTO AFT_ROLE_MENU(ROLE_ID,MENU_ID) VALUES ('9000','6610');
+INSERT INTO AFT_ROLE_MENU(ROLE_ID,MENU_ID) VALUES ('9000','6620');
+INSERT INTO AFT_ROLE_MENU(ROLE_ID,MENU_ID) VALUES ('9000','6700'); 
+관련 테이블 삭제하기 
+
+
+
+<spring.version>4.3.6.RELEASE</spring.version> 다시해보기 ~
+
+
+https://devops.sdsdev.co.kr/confluence/pages/viewpage.action?pageId=1218802352
+
+1. agent 세팅
+2. centercut 프로세스 확인
+3. centercut admin git pull 받기
+
+
+
+
+===============================1018
+sghkkk5777@hanmail.net : api 담당자
+qjawns0618@naver.com : 범준책임님
+
+
+SELECT * FROM INSTANCE_CONFIGURATION A LEFT OUTER JOIN SERVER_CONFIGURATION B ON A.SERVER_CONFIG_ID = B.ID
+;
+Insert into INSTANCE_CONFIGURATION (ID,DOMAIN_ID,INSTANCE_ID,IP,PORT,START_TIME,JMX_URL,SERVER_CONFIG_ID,SERVICE_CONFIG_ID,INVOKE_URL) values ('tenantIdA_domain_instance1','domain1','instance1','localhost','8081','20240911172115','service:jmx:rmi://localhost:8081/jndi/rmi://localhost:8081/jmxrmi',null,null,'http://localhost:8081/anyframe-online-aui-mybatis-pi/management');
+select * From domain_configuration;
+select * From INSTANCE_CONFIGURATION;
+
+select * from domain_configuration ;
+select * from SERVER_CONFIGURATION;
+
+SELECT * FROM INSTANCE_CONFIGURATION A LEFT OUTER JOIN SERVER_CONFIGURATION B ON A.SERVER_CONFIG_ID = B.ID
+;
+invoke_url : online 호출 시 
+SELECT * FROM DOMAIN_CONFIGURATION A LEFT OUTER JOIN SERVER_CONFIGURATION B ON A.SERVER_CONFIG_ID = B.ID 
+;
+
+SELECT * FROM SERVER_CONFIGURATION_PATTERN
+;
+
+--CREATE TABLE SERVER_CONFIGURATION_PATTERN (
+--  ID VARCHAR(200),
+--  SERVER_CONFIGURATION_ID VARCHAR(200),
+--  DATE_UNIT VARCHAR(10),
+--  DAY CHAR(2),
+--  START_TIME CHAR(5),
+--  END_TIME CHAR(5),
+--  CONSTRAINT SERVER_CONFIG_PATTERN_PK PRIMARY KEY ( ID,SERVER_CONFIGURATION_ID )
+--);
+select * From BATCH_SERVER;
+
+select * from BATCH_JOB_EXECUTION;
+
+select * from AFT_CODE_GROUP;
+
+===============================1101
+batch manager jobmonitor 쿼리 확인
+
+
+관리 레벨로 올라가기 전까지 기술인력으로서 가장 높이 올라갈 수 있는 역할이 AA
+비용관리
+일정 관리
+요구 사항정의
+명세 수립
+소프트웨어 설계
+프로그래밍
+개발 방법론
+인프라 구축
+테스트 방법
+품질 관리
+
+1. shell 활용한 batch 프로그렘 내부개발
+- 금융사 카드정보를 DBTOFILE 형식으로 출력될 수 있도록 구현 
+
+2. api 통신 
+REST API 통신 명세화
+
+3. gwt 통신으로된 anyframe 5버전 구성을 위한 공통 설정
+online, batch, common, manager 설정 
+spring version, gwt 2.4, maven pmd 생략 등..
+
+4.계정계, 운영계, 정보계 미들웨어 구축/운영
+-정기점검
+취약점 검출 도모 & 개선 
+
+https://iseop.tistory.com/63
+
+SELECT * FROM ( SELECT INNER_TABLE.* , ROWNUM AS ROW_SEQ FROM ( 
+SELECT * FROM ( 
+	SELECT  
+	INSTANCE.JOB_ID, INSTANCE.EXEC_DATE, INSTANCE.EXEC_SEQ, INSTANCE.INSTANCE_STATUS, INSTANCE.APP_ID, INSTANCE.APP_SEQ, 
+	INSTANCE.DOMAIN_ID, INSTANCE.HEAD_SERVICE_ID, INSTANCE.BODY_SERVICE_ID, INSTANCE.TAIL_SERVICE_ID, INSTANCE.TARGET_INPUT_TABLE, 
+	INSTANCE.JOB_PRE_PROCESSOR, INSTANCE.JOB_POST_PROCESSOR,  
+	INSTANCE.CHUNK_PRE_PROCESSOR, INSTANCE.CHUNK_POST_PROCESSOR, 	
+	INSTANCE.HEAD_INTERCEPTOR, INSTANCE.BODY_INTERCEPTOR, INSTANCE.TAIL_INTERCEPTOR, INSTANCE.ITEM_READER, 
+	INSTANCE.EXECUTION_POLICY, INSTANCE.PARTITION_POLICY, INSTANCE.CHUNK_SIZE, 
+	INSTANCE.MAX_THREAD_COUNT, INSTANCE.MAX_ERROR_RATE, INSTANCE.MAX_ERROR_REPEAT_COUNT, INSTANCE.AUTO_RETRY_COUNT, INSTANCE.PROCESSING_INTERVAL, INSTANCE.TIMEOUT, INSTANCE.LOGGING, INSTANCE.LOG_LEVEL, 
+	INSTANCE.INPUT_COUNT, INSTANCE.INPUT_TOTAL, INSTANCE.SUCCESS_COUNT, INSTANCE.SUCCESS_TOTAL, INSTANCE.FAIL_COUNT, INSTANCE.FAIL_TOTAL, INSTANCE.BIZ_FAIL_COUNT, INSTANCE.BIZ_FAIL_TOTAL, INSTANCE.REPROCESS_COUNT, 
+	INSTANCE.PRE_START_TIME, INSTANCE.PRE_END_TIME, INSTANCE.MAIN_START_TIME, INSTANCE.MAIN_END_TIME, INSTANCE.POST_START_TIME, INSTANCE.POST_END_TIME, INSTANCE.SIMULATION, INSTANCE.SYSTEM_ERROR_RETRY, 
+	CONFIG.JOB_NAME, CONFIG.GROUP_ID 
+	FROM   
+	AFCC_JOB_INSTANCE INSTANCE LEFT OUTER JOIN AFCC_JOB_CONFIG CONFIG ON INSTANCE.JOB_ID = CONFIG.JOB_ID 
+)  
+ WHERE 
+ (PRE_START_TIME BETWEEN :fromTime AND :toTime ) and PRE_START_TIME is not null
+ ORDER BY PRE_START_TIME DESC, JOB_ID ASC ;
+ 
+  select * from AFCC_JOB_INSTANCE
+ where exec_date = 20241029
+ and PRE_START_TIME is null;
+ 24/10/29 10:44:08.567000000
+24/10/29 10:15:54.510000000
+24/10/29 10:20:48.416000000
+24/10/29 10:30:11.027000000
+24/10/29 11:07:12.360000000
+
+js파일
+--------------------------241111
+문의 : [삼성서울병원] Unexpected error occured in scheduled task 에러 관련 문의드립니다.
+원인 : 
+    22, 27모듈에서 7:40 nullponintexception 
+    
+    받은 로그에서는 7시 10부터 timeout, connect 오류 계속 발생 
+    30분동안 7:40까지 세션이 아예 끊어져서 발생한 오류로 판단 
+
+    의심스러운 건 
+    2024-11-09 07:34:23.636 [1 ocessor-46|   MinaRecvIoHandler] [INFO ] Closed.. (0x00000009: nio socket, client, /119.6.6.56:51702 => /119.2.200.110:8000)
+    2024-11-09 07:34:29.101 [1 ECV_2210-1|ClientSessionManager] [ERROR] org.apache.mina.core.RuntimeIoException: Failed to get the session. : CHAN000096 : /119.2.200.110:8000
+
+
+    2024-11-09 07:37:31.092 [1 cessor-147|   MinaRecvIoHandler] [INFO ] Closed.. (0x00000014: nio socket, client, /119.6.6.56:51721 => /203.249.202.89:8000)
+    2024-11-09 07:37:59.591 [1 ECV_2289-1|ClientSessionManager] [ERROR] org.apache.mina.core.RuntimeIoException: Failed to get the session. : CHAN000103 : /203.249.202.89:8000 : 세션 연결 차단된 상태라서 발생한 에러
+    Session Closed.. 
+
+    2024-11-09 07:39:13.785 [1 cessor-157|   MinaRecvIoHandler] [INFO ] Closed.. (0x00000015: nio socket, client, /119.6.6.56:51726 => /203.249.202.90:8000)
+    2024-11-09 07:39:29.638 [1 ECV_2290-1|ClientSessionManager] [ERROR] org.apache.mina.core.RuntimeIoException: Failed to get the session. : CHAN000104 : /203.249.202.90:8000
+    
+    2024-11-09 07:40:07.219 [1 cessor-171|   MinaRecvIoHandler] [INFO ] Closed.. (0x00000194: nio socket, client, /119.6.6.56:52941 => /119.2.202.71:8000)
+    2024-11-09 07:40:35.749 [1 ECV_2291-1|ClientSessionManager] [ERROR] org.apache.mina.core.RuntimeIoException: Failed to get the session. : CHAN000203 : /119.2.202.71:8000
+
+    ? Session Closed..  vs Closed 차이가 뭔지..
+    ? Unexpected error occurred in scheduled task.java.lang.NullPointerException 에서 null 참조가 되서 발생된건데,, 어디서.. ??
+
+조치 : afi 는 앞으로 상용화?가 안될 예정이라서 팀장님이 확인하신다고 함! 
+
+============================================1114 
+문의 : 최수석님 오류 문의 
+ERROR TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task 
+java.lang.NullPointerException: null
+at com.anyframe.centercut.engine.execution.monitor.JobExecutionMonitorImpl.checkFinishChunks(JobExecutionMonitorImpl.java:61)
+
+원인 : 모니터링에서 걸림 
+
+조치 : selectFinishedChunks 쿼리 db 조회 
+ SELECT /*+ LEADING(CHUNK, INSTANCE) USE_NL(CHUNK INSTANCE)  */ 
+    CHUNK.JOB_ID, CHUNK.EXEC_DATE, CHUNK.EXEC_SEQ, CHUNK_SEQ, START_INDEX, 
+    END_INDEX, THREAD_GROUP, CHUNK_STATUS, AGENT.AGENT_ID, MONITOR_CHECK, 
+    CHUNK.PRE_START_TIME, CHUNK.PRE_END_TIME, CHUNK.MAIN_START_TIME, CHUNK.MAIN_END_TIME, 
+    CHUNK.POST_START_TIME, CHUNK.POST_END_TIME, CHUNK.INPUT_COUNT, CHUNK.INPUT_TOTAL, 
+    CHUNK.SUCCESS_COUNT, CHUNK.SUCCESS_TOTAL, CHUNK.FAIL_COUNT, CHUNK.FAIL_TOTAL, 
+    CHUNK.BIZ_FAIL_COUNT, CHUNK.BIZ_FAIL_TOTAL, INSTANCE.DOMAIN_ID, HEAD_SERVICE_ID, 
+    BODY_SERVICE_ID, TAIL_SERVICE_ID, TARGET_INPUT_TABLE, JOB_PRE_PROCESSOR, 
+    JOB_POST_PROCESSOR, CHUNK_PRE_PROCESSOR, CHUNK_POST_PROCESSOR, HEAD_INTERCEPTOR, 
+    BODY_INTERCEPTOR, TAIL_INTERCEPTOR, ITEM_READER, EXECUTION_POLICY, PARTITION_POLICY, 
+    CHUNK_SIZE, INSTANCE.MAX_THREAD_COUNT, MAX_ERROR_RATE, MAX_ERROR_REPEAT_COUNT, AUTO_RETRY_COUNT, 
+    PROCESSING_INTERVAL, TIMEOUT, LOGGING, SIMULATION, LOG_LEVEL, SYSTEM_ERROR_RETRY 
+    FROM AFCC_AGENT_CONFIG AGENT, 
+    AFCC_CHUNK CHUNK, 
+    AFCC_JOB_INSTANCE INSTANCE 
+ WHERE RTRIM(CHUNK.JOB_ID) = INSTANCE.JOB_ID 
+ AND RTRIM(CHUNK.EXEC_DATE) = INSTANCE.EXEC_DATE 
+ AND CHUNK.EXEC_SEQ = INSTANCE.EXEC_SEQ 
+ AND CHUNK_STATUS IN (:chunkStatus) 
+ AND AGENT.AGENT_ID = CHUNK.AGENT_ID AND MONITOR_CHECK = :monitorCheck 
+
+
+SELECT /*+ LEADING(CHUNK, INSTANCE) USE_NL(CHUNK INSTANCE)  */ 
+    CHUNK.JOB_ID, CHUNK.EXEC_DATE, CHUNK.EXEC_SEQ, CHUNK_SEQ, START_INDEX, 
+    END_INDEX, THREAD_GROUP, CHUNK_STATUS, AGENT.AGENT_ID, MONITOR_CHECK, 
+    CHUNK.PRE_START_TIME, CHUNK.PRE_END_TIME, CHUNK.MAIN_START_TIME, CHUNK.MAIN_END_TIME, 
+    CHUNK.POST_START_TIME, CHUNK.POST_END_TIME, CHUNK.INPUT_COUNT, CHUNK.INPUT_TOTAL, 
+    CHUNK.SUCCESS_COUNT, CHUNK.SUCCESS_TOTAL, CHUNK.FAIL_COUNT, CHUNK.FAIL_TOTAL, 
+    CHUNK.BIZ_FAIL_COUNT, CHUNK.BIZ_FAIL_TOTAL, INSTANCE.DOMAIN_ID, HEAD_SERVICE_ID, 
+    BODY_SERVICE_ID, TAIL_SERVICE_ID, TARGET_INPUT_TABLE, JOB_PRE_PROCESSOR, 
+    JOB_POST_PROCESSOR, CHUNK_PRE_PROCESSOR, CHUNK_POST_PROCESSOR, HEAD_INTERCEPTOR, 
+    BODY_INTERCEPTOR, TAIL_INTERCEPTOR, ITEM_READER, EXECUTION_POLICY, PARTITION_POLICY, 
+    CHUNK_SIZE, INSTANCE.MAX_THREAD_COUNT, MAX_ERROR_RATE, MAX_ERROR_REPEAT_COUNT, AUTO_RETRY_COUNT, 
+    PROCESSING_INTERVAL, TIMEOUT, LOGGING, SIMULATION, LOG_LEVEL, SYSTEM_ERROR_RETRY 
+    FROM AFCC_AGENT_CONFIG AGENT, 
+    AFCC_CHUNK CHUNK, 
+    AFCC_JOB_INSTANCE INSTANCE 
+ WHERE RTRIM(CHUNK.JOB_ID) = INSTANCE.JOB_ID 
+ AND RTRIM(CHUNK.EXEC_DATE) = INSTANCE.EXEC_DATE 
+ AND CHUNK.EXEC_SEQ = INSTANCE.EXEC_SEQ 
+ AND CHUNK_STATUS IN (?, ?, ?, ?, ?, ?, ?, ?) 
+ AND AGENT.AGENT_ID = CHUNK.AGENT_ID AND MONITOR_CHECK = ? 
+
+ jobmonitorexception 
+
+ ORA-28002: 4 일안에 비밀번호가 만기될 것입니다
+ -> https://heannim-world.tistory.com/93
+
+================================================1115
+ - anyframe-xplatform-1.5.1.jar
+
+ - anyframe-tiles-1.0.4.jar
+http://182.195.89.102/subv/anyframe-opensource/anyframe/tags/plugin/optional/tiles
+https://repository.jboss.org/nexus/content/repositories/releases/org/jboss/el/jboss-el/2.0.1.GA/
+
+ - anyframe-logmanager-1.0.4.jar
+
+ - anyframe-jdbc-support-1.0.4.jar
+http://www.java2s.com/Code/Jar/l/Downloadlog4jdbc3121sourcesjar.htm
+https://github.com/leopallas/vieo/blob/master/java/ORION%2011J/net/sf/log4jdbc/log4jdbc3/1.2.1/log4jdbc3-1.2.1.pom.lastUpdated
+
+
+ - anyframe-core-1.5.1.jar
+http://182.195.89.102/subv/anyframe-opensource/anyframe/tags/plugin/essential/core/1.5.1/projects
+<dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>jsp-api</artifactId>
+    <version>2.0</version> 2.1 -> 2.0
+    <scope>provided</scope>
+</dependency>
+
+ - spring 3.2.2 버전
+	<properties>
+		<spring.version>3.2.18.RELEASE</spring.version>
+		<targetJdk>1.8</targetJdk>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+
+1. 추가
+core : jsp-api-2.1.jar -> javax.servlet.jsp-api.jar
+support :  log4jdbc3-1.2beta2.jar -> log4jdbc4-1.2.jar
+titles : jboss-el-2.0.1.GA.jar  .jar 추가 

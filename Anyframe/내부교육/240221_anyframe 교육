@@ -1,0 +1,69 @@
+batch
+
+        - 센터컷 : 대용량 배치처리로 list 받아와서 병렬처리 배치돌림 ex.급여처리, 거리내역
+        - 온라인 : 파라미터 들어오면 바로 실행하는 즉발성 배치 , was설정 재기동필요, 테스트하려면 ui 세팅필요 
+        - 데몬 : 항상 실행 중인 배치작업 ex.로그파일 모니터링하여 새로운 로그 메세지 처리 
+        - 일반 : 일괄처리기능으로 일정주기에 따라 실행
+
+온라인 어드민
+
+        - 프로세스 succ/fail 확인
+        - 배치, 데몬 등 모니터링
+        - 로그확인
+        https://projectlombok.org/download
+        출처: https://dololak.tistory.com/783 [코끼리를 냉장고에 넣는 방법:티스토리]
+
+
+
+anyframe-batch
+    어드민 <-> 에이전드 <-> 배치 
+     
+    anyframe-enterprise-admin-common  어드민 : 모니터링
+    anyframe-batch-agent 에이전트 : 배치를 실행하기 위한 중계자역할로 고객사마다 커스텀필요  => 에이전트로 배치 실행 
+    anyframe-enterprise-admin-batch 배치 
+
+    anyframe-batch-sample
+
+    hdt파일은 
+                header ex. 거래날짜 
+                body(?) ex. 거래내역
+                tail ex. 거래내역갯수
+
+
+배치는 어드민, 매니저(서버단)로 제공가능 
+에이전트는 하나만 제공됨 
+test방법 : hello 로 하면됨 
+
+어떤 고객사는 bath.manger 배치파일만 가지고 적용하는 경우도 있음 ! 
+에이전트만  run실행할 수 있음
+
+
+anyframe-enterprise-admin
+    anyframe-enterprise-admin-web 은 화면단만 존재 view js, node,js(웹서버역할도됨) 사용 
+        *서버 관련설정 : .environment
+    anyframe-enterprise-admin-common : 메인화면 
+    anyframe-enterprise-admin-online 
+
+
+
+anyframe_enterprise_online
+    anyframe-online-admin 
+    anyframe-online-sample : 에이전트와 유사 
+
+    공부방향 : 온라인 샘플 만들기 
+
+
+온라인.배치.어드민 순으로 공부권장
+
+
+온라인샘플 화면 띄어보기 
+    - 메타목록은 현 사용 주소 및 조회가능
+    - 서비스제어 : 실행여부 컨트롤 가능, 원래는 상시 실행 아님 
+
+prop 실행 순서
+    server VM arguments -Dspring.profiles.active=local -Dencode.client-pwd-with-fixed-key=true 세팅 기준
+    1. application.properties
+    2. application_local.properties
+
+core : 공통
+common : 메인

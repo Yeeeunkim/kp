@@ -1,0 +1,74 @@
+history 
+    ibk프로젝트에서 anyframe버전6 rpc , 버전5 gwt 통신방식이 달라서 
+    online, common, batch 등 화면비교, 매핑작업이 필요했음
+     
+    서비스 제어 밑으로 메뉴들에는 추가 매칭 할 기능 없는걸로 보여요
+
+1. 설치파일
+    apache-maven-3.8.4
+    jdk1.7.0_80
+    apache-tomcat-7.0.10
+    encoding, code style, 
+    context type default encoding utf-8
+
+2. db 
+    db online5 버전에 맞는 계정생성
+    
+    1. c## 제거되는 session
+    ALTER SESSION SET "_ORACLE_SCRIPT" = TRUE;
+
+    2. 계정추가    
+    CREATE USER c##kyeibk IDENTIFIED BY kyeibk;
+
+    
+    3. 권한부여 
+    GRANT connect, resource, dba TO c##kyeibk;
+
+    4. ddl dml 추가
+    관리자, 어드민
+        anyframe-enterprise-admin-manager\src\main\resources\dbscript
+        01_MANAGER_DDL.SQL
+        02_MANAGER_BasicData_for_Admin.sql
+    온라인
+        anyframe-online-admin\src\main\resources\dbscript
+        003_admin-ddl.sql
+        005_admin-initialize.sql
+
+
+
+1.svn check out 
+    온라인
+    http://182.195.89.102/subv/anyframe-enterprise/anyframe-enterprise-online-site/ibk/release/anyframe-online-admin
+    anyframe-online-admin
+    anyframe-batch-interfaces
+
+
+    공통
+    http://182.195.89.102/subv/anyframe-enterprise/anyframe-enterprise-admin-site/ibk/release
+
+    maven build 
+   anyframe-enterprise-parent
+   anyframe-online-core 
+   anyframe-online-runtime
+   anyframe-online-runtime-tx
+   anyframe-online-runtime-jdbc 
+   anyframe-online-runtime-orm 
+   anyframe-online-runtime-management
+   anyframe-online-runtime-ext
+   anyframe-online-admin
+   dao
+   d
+배치 
+http://182.195.89.102/subv/anyframe-enterprise/anyframe-enterprise-batch-5.0/trunk/anyframe-batch-admin
+
+http://182.195.89.102/subv/anyframe-enterprise/admin/trunk/projects/anyframe-enterprise-admin-core
+
+
+ibkframe-online-core
+
+<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.0</version>
+			<scope>provided</scope>
+		</dependency>

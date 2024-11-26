@@ -1,0 +1,449 @@
+[kpcnc@centos7][/home/kpcnc/output/sample]$ compare.sh
+비교할 소스 경로를 입력하세요. : /home/kpcnc/output/sample/local
+비교할 타겟 경로를 입력하세요. : /home/kpcnc/output/sample/real
+로컬샘플  경로:[/home/kpcnc/output/sample/local]
+운영샘플  경로:[/home/kpcnc/output/sample/real]
+[kpcnc@centos7][/home/kpcnc/output/sample]$ cd log
+[kpcnc@centos7][/home/kpcnc/output/sample/log]$ ll
+합계 192
+-rw-rw-r-- 1 kpcnc kpcnc 98133  6월 19 13:33 log_240619.log
+[kpcnc@centos7][/home/kpcnc/output/sample/log]$ clear
+[kpcnc@centos7][/home/kpcnc/output/sample/log]$ cat log_240619.log
+----------:: 로컬샘플
+++++++++++:: 운영샘플
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/agent/dto/AgentInfoDto.java        2024-06-18 11:29:33.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/agent/dto/AgentInfoDto.java 2024-06-19 09:01:09.000000000 +0900
+@@ -66,4 +65,0 @@
+-       public AgentInfoDto() {
+-
+-       }
+-
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/agent/dto/AgentType.java   2024-06-18 11:29:33.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/agent/dto/AgentType.java    2024-06-18 10:12:49.000000000 +0900
+@@ -6 +6,5 @@
+-       DOMAIN, AGENT
++       DOMAIN("DOMAIN", 0),
++    AGENT("AGENT", 1);
++
++    private AgentType(final String s, final int n) {
++    }
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/agent/widget/AgentGrid.java        2024-06-18 11:29:32.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/agent/widget/AgentGrid.java 2024-06-19 13:17:48.000000000 +0900
+@@ -111 +111 @@
+-                       return this.getSelectedRecord().getAttribute("agentId");
++                       return getSelectedRecord().getAttribute("agentId");
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/agent/widget/AgentTab.java 2024-06-18 11:29:32.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/agent/widget/AgentTab.java  2024-06-19 10:34:11.000000000 +0900
+@@ -161 +161 @@
+-                                       if (value != null && value) {
++                                       if (value != null && value.booleanValue())
+@@ -164,2 +164,2 @@
+-                               }
+-                       });
++                   });
++               }
+@@ -167,2 +167,2 @@
+-               }
+-       }
++       }
++}
+@@ -170 +169,0 @@
+-}
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/agent/widget/AgentToolStrip.java   2024-06-18 11:29:33.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/agent/widget/AgentToolStrip.java    2024-06-19 10:34:46.000000000 +0900
+@@ -34,7 +34,7 @@
+-               this.addButton(addButton);
+-               this.addButton(removeButton);
+-               this.addSeparator();
+-               this.addMember(new BlankLabel());
+-               this.addFormItem(searchSelect);
+-               this.addFormItem(searchText);
+-               this.setMembersMargin(5);
++        this.addButton(addButton);
++        this.addButton(removeButton);
++        this.addSeparator();
++        this.addMember(new BlankLabel());
++        this.addFormItem(searchSelect);
++        this.addFormItem(searchText);
++        this.setMembersMargin(5);
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/appconfig/dto/ApplicationType.java 2024-06-18 11:29:30.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/appconfig/dto/ApplicationType.java  2024-06-18 11:29:47.000000000 +0900
+@@ -6 +6,5 @@
+-       APPLICATION, APPLICATION_JOB
++       APPLICATION("APPLICATION", 0),
++    APPLICATION_JOB("APPLICATION_JOB", 1);
++
++    private ApplicationType(final String s, final int n) {
++    }
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/appconfig/widget/AppConfigGrid.java        2024-06-18 11:29:30.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/appconfig/widget/AppConfigGrid.java 2024-06-19 13:19:28.000000000 +0900
+@@ -63 +63 @@
+-                       return this.getSelectedRecord().getAttribute("appId");
++                       return getSelectedRecord().getAttribute("appId");
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/appconfig/widget/AppConfigSectionStack.java        2024-06-18 11:29:30.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/appconfig/widget/AppConfigSectionStack.java 2024-06-19 10:38:07.000000000 +0900
+@@ -60 +60,2 @@
+-               }
++               }else
++               {
+@@ -61,0 +63 @@
++               }
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/appconfig/widget/AppConfigToolStrip.java   2024-06-18 11:29:30.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/appconfig/widget/AppConfigToolStrip.java    2024-06-19 10:38:35.000000000 +0900
+@@ -77 +77 @@
+-        this.setMembersMargin(5);
++               this.setMembersMargin(5);
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/appexec/dto/ApplicationInstanceDto.java    2024-06-18 11:29:29.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/appexec/dto/ApplicationInstanceDto.java     2024-06-19 09:02:56.000000000 +0900
+@@ -27 +26,0 @@
+-
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/appexec/widget/AppExecGrid.java    2024-06-18 11:29:29.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/appexec/widget/AppExecGrid.java     2024-06-19 13:20:55.000000000 +0900
+@@ -77,2 +77,2 @@
+-                       records[i].setAttribute("startTime", dto.getStartTime()!=0?new Date(dto.getStartTime()):null);
+-                       records[i].setAttribute("endTime", dto.getEndTime()!=0?new Date(dto.getEndTime()):null);
++                       records[i].setAttribute("startTime", dto.getStartTime() == 0L ? null : new Date(dto.getStartTime()));
++            records[i].setAttribute("endTime", dto.getEndTime() == 0L ? null : new Date(dto.getEndTime()));
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/appexec/widget/AppExecJobGrid.java 2024-06-18 11:29:29.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/appexec/widget/AppExecJobGrid.java  2024-06-19 10:46:11.000000000 +0900
+@@ -52,2 +52,2 @@
+-                       records[i].setAttribute("startTime", historyDto.getPreProcessStartTime()!=0?new Date(historyDto.getPreProcessStartTime()):null);
+-                       records[i].setAttribute("endTime", historyDto.getPostProcessEndTime()!=0?new Date(historyDto.getPostProcessEndTime()):null);
++                       records[i].setAttribute("startTime", historyDto.getPreProcessStartTime() == 0L ? null : new Date(historyDto.getPreProcessStartTime()));
++            records[i].setAttribute("endTime", historyDto.getPostProcessEndTime() == 0L ? null : new Date(historyDto.getPostProcessEndTime()));
+
+
+
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/common/dto/SearchConditionDto.java 2024-06-18 11:29:31.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/common/dto/SearchConditionDto.java  2024-06-18 14:54:11.000000000 +0900
+@@ -26,4 +25,0 @@
+-       public SearchConditionDto() {
+-
+-       }
+-
+
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/common/grid/StatusBar.java 2024-06-18 11:29:31.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/common/grid/StatusBar.java  2024-06-18 15:03:11.000000000 +0900
+@@ -4 +4 @@
+-       private final static StatusBar instance = new StatusBar();
++       private static final StatusBar instance = new StatusBar();
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/common/service/CommonInfoRemoteService.java        2024-06-18 11:29:31.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/common/service/CommonInfoRemoteService.java 2024-06-18 15:06:14.000000000 +0900
+@@ -10 +10 @@
+-       public InvocationResult<CommonInfoDto> getCommonInfo();
++       InvocationResult<CommonInfoDto> getCommonInfo();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/common/widget/TabLayout.java       2024-06-18 11:29:31.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/common/widget/TabLayout.java        2024-06-18 15:29:44.000000000 +0900
+@@ -6 +6,3 @@
+-
++    public TabLayout()
++    {
++    }
+
+
+
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/config/widget/JobConfigColleague.java      2024-06-18 11:29:29.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/config/widget/JobConfigColleague.java       2024-06-19 11:08:31.000000000 +0900
+@@ -4 +4 @@
+-       public void setMediator(JobConfigMediator mediator);
++       void setMediator(JobConfigMediator mediator);
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/config/widget/JobConfigMediator.java       2024-06-18 11:29:29.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/config/widget/JobConfigMediator.java        2024-06-19 11:15:56.000000000 +0900
+@@ -4,16 +4,17 @@
+-public interface JobConfigMediator {
+-       public void createColleagues();
+-
+-       public void saveConfig();
+-
+-       public void getConfigs();
+-
+-       public void initDetail();
+-
+-       public void removeConfig();
+-
+-       public void prepareJob();
+-
+-       public void getConfig();
+-
+-       public void setGroupId(String groupId);
++public interface JobConfigMediator
++{
++    void createColleagues();
++
++    void saveConfig();
++
++    void getConfigs();
++
++    void initDetail();
++
++    void removeConfig();
++
++    void prepareJob();
++
++    void getConfig();
++
++    void setGroupId(final String p0);
+
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/constants/CentercutRole.java       2024-06-18 11:29:32.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/constants/CentercutRole.java        2024-06-18 16:31:39.000000000 +0900
+@@ -4,3 +4,3 @@
+-       ADMIN("3000"),
+-       DEV("3100"),
+-       TESTER("3200");
++       ADMIN("ADMIN", 0, "3000"),
++    DEV("DEV", 1, "3100"),
++    TESTER("TESTER", 2, "3200");
+@@ -10 +10 @@
+-       private CentercutRole(String roleId) {
++       private CentercutRole(final String s, final int n, final String roleId){
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/constants/ModifyType.java  2024-06-18 11:29:32.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/constants/ModifyType.java   2024-06-18 16:32:40.000000000 +0900
+@@ -4 +4,5 @@
+-       CREATE, SAVE;
++       CREATE("CREATE", 0),
++    SAVE("SAVE", 1);
++
++    private ModifyType(final String s, final int n) {
++    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/execution/widget/JobExecutionColleague.java        2024-06-18 11:29:27.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/execution/widget/JobExecutionColleague.java 2024-06-19 13:02:09.000000000 +0900
+@@ -4 +4 @@
+-       public void setMediator(JobExecutionMediator mediator);
++       void setMediator(JobExecutionMediator mediator);
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/execution/widget/JobExecutionErrorToolStrip.java   2024-06-18 11:29:27.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/execution/widget/JobExecutionErrorToolStrip.java    2024-06-18 17:07:45.000000000 +0900
+@@ -37 +37 @@
+-                               mediator.getErrors(dataSeq != null?Integer.parseInt(dataSeq):0,currentPage);
++                               mediator.getErrors(dataSeq == null ? 0 : Integer.parseInt(dataSeq), currentPage);
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/main/widget/MainLayout.java        2024-06-18 11:29:28.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/main/widget/MainLayout.java 2024-06-18 17:41:20.000000000 +0900
+@@ -3,0 +4 @@
++import com.smartgwt.client.widgets.Canvas;
+@@ -10 +11 @@
+-        this.setMembers(CenterCutMenuTreeGrid.getInstance(), ContentTabSet.getInstance());
++               this.setMembers(new Canvas[] { (Canvas)CenterCutMenuTreeGrid.getInstance(), (Canvas)ContentTabSet.getInstance() });
+
+
+
+
+
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/system/service/SystemRemoteServiceAsync.java       2024-06-18 11:29:28.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/system/service/SystemRemoteServiceAsync.java        2024-06-19 11:04:31.000000000 +0900
+@@ -12,0 +13,2 @@
++
++       void doEmergencyRecovery(AsyncCallback<InvocationResult<Boolean>> callback);
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/system/widget/SystemGeneralSection.java    2024-06-18 11:29:28.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/system/widget/SystemGeneralSection.java     2024-06-19 11:03:53.000000000 +0900
+@@ -30,5 +30,5 @@
+-               boolean autoRecovery = autoRecoverCheck.getValueAsBoolean();
+-               boolean allowEmptyJob = allowEmptyJobCheck.getValueAsBoolean();
+-               boolean allowUnitTest = allowUnitTestCheck.getValueAsBoolean();
+-               boolean allowDeleteJob = allowDeleteJobCheck.getValueAsBoolean();
+-               boolean allowBlockJob = allowBlockJobCheck.getValueAsBoolean();
++                boolean autoRecovery = autoRecoverCheck.getValueAsBoolean();
++        boolean allowEmptyJob = allowEmptyJobCheck.getValueAsBoolean();
++        boolean allowUnitTest = allowUnitTestCheck.getValueAsBoolean();
++        boolean allowDeleteJob = allowDeleteJobCheck.getValueAsBoolean();
++        boolean allowBlockJob = allowBlockJobCheck.getValueAsBoolean();
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/client/system/widget/SystemToolStrip.java 2024-06-18 11:29:28.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/client/system/widget/SystemToolStrip.java  2024-06-19 09:07:23.000000000 +0900
+@@ -20,0 +21,2 @@
++       private ToolStripButton emergencyButton = new ToolStripButton("긴급중지",CenterCutAdminConstants.STOP_IMANGE_URL);
++       /*긴급중지 */
+@@ -23,0 +26 @@
++               this.addButton(emergencyButton);
+@@ -26 +29 @@
+-               this.addClickHandler(new ClickHandler() {
++               recoveryButton.addClickHandler(new ClickHandler() {
+@@ -32 +35 @@
+-                                               if ( value != null && value) {
++                                               if ( value != null && value.booleanValue()) {
+@@ -33,0 +37,23 @@
++                                                               @Override
++                                                               public void onSuccess(InvocationResult<Boolean> result) {
++                                                                       MessageUtil.printMessage(result);
++                                                               }
++
++                                                               @Override
++                                                               public void onFailure(Throwable throwable) {
++                                                                       MessageUtil.printMessage(throwable);
++                                                               }
++                                                       });
++                                               }
++                                       }
++                               });
++                       }
++               });
++               emergencyButton.addClickHandler(new ClickHandler() {
++                       @Override
++                       public void onClick(ClickEvent event) {
++                               SC.confirm("작업 긴급 중지를 수행하시겠습니까?", new BooleanCallback() {
++                                       @Override
++                                       public void execute(Boolean value) {
++                                               if ( value != null && value.booleanValue()) {
++                                                       serviceAsync.doEmergencyRecovery(new AsyncCallback<InvocationResult<Boolean>>() {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--- /home/kpcnc/output/sample/local/java/com/anyframe/centercut/admin/server/menu/service/MenuService.java      2024-06-18 11:29:25.000000000 +0900
++++ /home/kpcnc/output/sample/real/java/com/anyframe/centercut/admin/server/menu/service/MenuService.java       2024-06-19 09:23:50.000000000 +0900
+@@ -9 +9 @@
+-       public List<Menu> selectMenuList(User user);
++       List<Menu> selectMenuList(User user);
+
+
+
+
+
+
+
+
+=============로컬에만있는소스
+
+=============운영에만 있는 소스
+
+[kpcnc@centos7][/home/kpcnc/output/sample/log]$

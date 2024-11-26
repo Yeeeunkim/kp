@@ -1,0 +1,457 @@
+
+
+<수정파일>
+ItemProcessHandler.java
+ChunkServiceImpl.java
+centerCutAgentImpl
+MainProcessHandler
+JobExecutionServiceImpl
+JobExecutionManagerImpl
+
+
+69
+105
+133
+
+<<변경사항>>
+com.anyframe.centercut.runtime.agent;.centerCutAgentImpl.java 소스의 
+  public boolean executeChunk(Chunk chunk) 해당 메소드 부분 수정
+
+          변경전
+          CenterCutAgentImpl.this.chunkService.execute(this.val$chunk);
+          변경후
+          if (!CenterCutAgentImpl.this.chunkService.execute(this.val$chunk)
+          {
+            CenterCutAgentImpl.logger.error("Chunk execution failed. : ", throwable);
+            this.val$chunk.setExitMessage(ExceptionUtils.getStackTrace(throwable));
+            this.val$chunk.setChunkStatus(ChunkStatus.FAIL);
+            CenterCutAgentImpl.this.chunkRepository.saveExitMessage(this.val$chunk);
+          {
+
+
+com.anyframe.centercut.runtime.service.handler.MainProcessHandler.java 소스의
+  public ChunkAction handle(Chunk chunk, ChunkItems chunkItems) 해당 메소드 부분 수정
+  
+      변경전
+      this.sameErrorInfoChecker.setMaxErrorCount(chunk.getJobConfig().getJobExecutionPolicy().getMaxErrorRepeatCount());
+      변경후
+      this.sameErrorInfoChecker.setMaxErrorCount(chunk.getJobConfig().getJobExecutionPolicy().getMaxErrorRate());
+
+
+<<log 추가>>
+
+com\anyframe\centercut\engine\service\JobExecutionServiceImpl.java
+
+
+  public boolean prepareJobInstance(String jobId, String execDate, int execSeq)
+  {
+    this.logger.info("Try to prepare jobInstance. : {}", toKeyString(jobId, execDate, execSeq));
+
+    JobInstance jobInstance = null;
+    try
+    {
+      jobInstance = this.jobInstanceRepository.find(jobId, execDate, execSeq);
+    } catch (EmptyResultDataAccessException e) {
+      jobInstance = new JobInstance(jobId, execDate, execSeq, null);
+    } finally {
+            logger.info("====centercut_20240909 prepare jobInstance. : {}", jobInstance.toString());     
+      this.applicationEventPublisher.publishEvent(new JobPrepareEvent(this, jobInstance));
+    }
+
+    this.logger.info("JobInstance is prepared. : " + jobInstance.toKeyString());
+
+    return true;
+  }
+
+
+
+
+
+com\anyframe\centercut\engine\execution\manager\JobExecutionManagerImpl.java
+
+  public JobInstanceStatus prepareJobInstance(JobInstance jobInstance)
+  {
+    synchronized (this.instanceLocks.get(jobInstance.getKey())) {
+      String jobId = jobInstance.getJobId();
+      String execDate = jobInstance.getExecDate();
+      int execSeq = jobInstance.getExecSeq();
+
+      logger.info("=======centercut_2024090.jobInstance======== : {}", jobInstance.toKeyString());
+
+      if (jobInstance.getInstanceStatus() == JobInstanceStatus.INIT)
+        this.jobInstanceRepository.create(jobId, execDate, execSeq);
+        logger.info("=======centercut_2024090.jobInstance====create=end====");
+      else 
+        this.jobInstanceRepository.initChunkStatus(jobInstance);
+        logger.info("=======centercut_2024090.jobInstance====initChunkStatus=end====");
+      
+
+      jobInstance.setInstanceStatus(JobInstanceStatus.READY);
+
+      return jobInstance.getInstanceStatus();
+    }
+  }
+
+
+
+
+
+
+
+com\anyframe\centercut\runtime\agent\CenterCutAgentImpl.java
+
+  public boolean executeChunk(Chunk chunk)
+  {
+    logger.info("====CenterCutAgentImpl.executeChunk=======start===20240909=====);
+    logger.info("CentercutAgent executeChunk started. Chunk =  {}", chunk);
+
+    chunk.setChunkStatus(ChunkStatus.ASSIGN);
+    this.chunkRepository.saveStatus(chunk);
+
+    this.taskExecutor.execute(new Runnable(chunk)
+    {
+      public void run()
+      {
+        try
+        {
+          CenterCutAgentImpl.logger.info("Chunk is started. : " + this.val$chunk.toKeyString());
+
+          this.val$chunk.setStartTime(System.currentTimeMillis());
+
+          CenterCutAgentImpl.this.runningChunks.add(this.val$chunk);
+
+          // 2024.09.09 소스 변경
+          // CenterCutAgentImpl.this.chunkService.execute(this.val$chunk);
+          if (!CenterCutAgentImpl.this.chunkService.execute(this.val$chunk)) {
+             logger.error("Chunk execution failed. : ", chunk.toKeyString());
+             System.out.println("=======CenterCutAgentImpl.executeChunk===chunkService.execute(chunk)수행결과========");
+             chunk.setChunkStatus(ChunkStatus.FAIL);
+             chunkRepository.saveExitMessage(chunk);         
+		      }
+        } catch (Throwable throwable) {
+          CenterCutAgentImpl.logger.error("Chunk execution failed. : ", throwable);
+          this.val$chunk.setExitMessage(ExceptionUtils.getStackTrace(throwable));
+          this.val$chunk.setChunkStatus(ChunkStatus.FAIL);
+          CenterCutAgentImpl.this.chunkRepository.saveExitMessage(this.val$chunk);
+        } finally {
+          CenterCutAgentImpl.this.runningChunks.remove(this.val$chunk);
+
+          MDC.clear();
+        }
+      }
+    });
+    return true;
+  }
+  
+
+
+
+
+
+
+com\anyframe\centercut\runtime\service\ChunkServiceImpl.java
+
+  public boolean execute(Chunk chunk)
+  {
+    chunk.initStats();
+
+    ParameterHolder.setParameters(chunk.getParameters());
+    try
+    {
+      ChunkItems chunkItems = this.chunkItemsBuilder.buildItems(chunk);
+
+      this.preProcessHandler.handle(chunk, chunkItems);
+
+      ChunkAction action = this.mainProcessHandler.handle(chunk, chunkItems);
+      LOGGER.info("====centercut_20240909 ChunkServiceImpl action. : {}", action.toString());
+
+      this.postProcessHandler.handle(chunk, chunkItems);
+
+      buildStats(chunk);
+
+      if (action != null) {
+        chunk.setChunkStatus(action.getChunkStatus());
+        this.chunkRepository.saveStatus(chunk);
+      } else {
+        ChunkStatus status = this.chunkStatusChecker.getChunkStatus(chunk);
+        chunk.setChunkStatus(status);
+        this.chunkRepository.saveStatus(chunk);
+      }
+    } catch (Throwable throwable) {
+      buildStats(chunk);
+
+      LOGGER.error("Chunk execution failed.", throwable);
+      chunk.setExitMessage(ExceptionUtils.getStackTrace(throwable));
+      this.chunkRepository.saveExitMessage(chunk);
+      chunk.setChunkStatus(ChunkStatus.FAIL);
+    }
+
+    return chunk.getChunkStatus().isSucceed();
+  }
+
+centercut_v5.0.0 : 화재 수정본 
+
+samfire_centercut_agent.5.0.2 : 깃 원본 
+
+samfire_centercut_agent.5.0.2 : 깃 원본 + 화재 수정본
+
+
+
+
+< 0923 >
+-변경 전-
+public ChunkAction handle(final Chunk chunk, final Item item) throws Throwable {
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			logger.error("Thread interrupted.",e);			
+			return null;
+		}		
+		
+		try {			
+			// chunk 조회시 item 상태가 조회 가능 상태가 아니면 break
+			if (!item.isProcessable()) {
+				return null;
+			}
+			
+			TransactionTemplate transactionTemplate = new TransactionTemplate(businessTxManager);		
+			transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+			
+			triggerPreHandle(item);
+			
+			if ( chunk.getChunkStatus() == ChunkStatus.FORCE_STOPPED) {
+				throw new ForceStopOccuredException("Chunk stopped by forcelly.");
+			}
+		
+			final String serviceId = item.getExecutionInfo().getServiceId();
+			final String onlineServiceInterceptorId = item.getExecutionInfo().getOnlineServiceInterceptor();
+			
+			int timeout = chunk.getJobConfig().getJobExecutionPolicy().getTimeout();
+			
+			logger.info("Online transaction timeout : " + timeout + ", serviceId : " + serviceId);
+			logger.info("Item processing started : " + item.toKeyString());								
+			
+			DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW);								
+			transactionDefinition.setTimeout(timeout);
+			
+			TransactionStatus status = businessTxManager.getTransaction(transactionDefinition);
+
+			TransactionStausAquireSynchronization synchronization = new TransactionStausAquireSynchronization();
+			
+			final OnlineResultHolder holder = new OnlineResultHolder();
+							
+			try {
+				if (!checkProcessible(item)) {
+					businessTxManager.commit(status);
+					return null;
+				}
+			} catch (Throwable t) {
+				logger.error("Status confirm error occured. : ", t);
+				businessTxManager.rollback(status);			
+				return null;
+			} 
+			
+			try {				
+				TransactionSynchronizationManager.registerSynchronization(synchronization);				
+				
+				item.increaseRetryCount();
+				
+				final OnlineServiceInterceptor onlineServiceInterceptor = (OnlineServiceInterceptor)processorFactory.createInstance(onlineServiceInterceptorId);
+
+				ChunkAction action = triggerPreProcess(item, onlineServiceInterceptor, transactionTemplate);									 									
+									
+				if(action == null) {						
+					try {					
+						// 온라인 본처리 수행
+						holder.setResult(executeOnlineService(item, serviceId, transactionTemplate));
+					} finally {
+						setLogInfo(chunk);				
+					}
+					
+					// 온라인 오류 발생시 후처리 수행
+					if (status.isRollbackOnly() || item.getExecutionInfo().isSimulation()) {					
+						businessTxManager.rollback(status);									
+						
+						Throwable throwable = OnlineExceptionHolder.getThrowable();
+						
+						if (throwable != null) {
+							logger.info("Online service exception occured. : {}", throwable);
+							errorHandler.handle(item, OnlineExceptionHolder.getThrowable());
+							sameErrorInfoChecker.putError(throwable);
+						}						
+						
+						return transactionTemplate.execute(new TransactionCallback<ChunkAction>() {
+							@Override
+							public ChunkAction doInTransaction(TransactionStatus status) {																
+								try {
+									if (!checkProcessible(item)) {
+										return null;
+									}
+								} catch (Throwable t) {
+									logger.error("Status confirm error occured. : ", t);			
+									return null;
+								} 
+								
+								itemRepository.saveStatus(item);
+																					
+								return triggerPostProcess(item, onlineServiceInterceptor, holder.getResult());
+							}
+						});											
+					} 
+					
+					// 온라인 후처리 수행 
+					itemRepository.saveStatus(item);
+										
+					action = triggerPostProcess(item, onlineServiceInterceptor, holder.getResult());																					
+				}
+				
+				businessTxManager.commit(status);
+				
+				return action;
+			} catch (final Throwable throwable) {									
+				logger.error("Item process could not be completed :", throwable);
+				
+				if ( !status.isCompleted() ) { 				
+					businessTxManager.rollback(status);
+				}				
+				
+				final int transactionStatus = synchronization.getStatus();
+								
+				sameErrorInfoChecker.putError(throwable);				
+				errorHandler.handle(item, throwable);
+
+				final OnlineServiceInterceptor onlineServiceInterceptor = (OnlineServiceInterceptor)processorFactory.createInstance(onlineServiceInterceptorId);
+												
+				return triggerAfterThrowing(item, onlineServiceInterceptor, throwable, transactionStatus, transactionTemplate);													
+			} finally {				
+				calculateChunkStats(chunk, item); 
+			}								
+		} finally {
+			triggerAfterCompletion(item);
+		}
+	}
+
+
+-변경 후-
+
+try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {	
+			// chunk 조회시 item 상태가 조회 가능 상태가 아니면 break
+			if (!item.isProcessable()) {
+				return null;
+			}
+	
+			TransactionTemplate transactionTemplate = new TransactionTemplate(businessTxManager);
+			transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+	
+			triggerPreHandle(item);
+	
+			if (chunk.getChunkStatus() == ChunkStatus.FORCE_STOPPED) {
+				throw new ForceStopOccuredException("Chunk stopped by forcelly.");
+			}
+	
+			final String serviceId = item.getExecutionInfo().getServiceId();
+			final String onlineServiceInterceptorId = item.getExecutionInfo().getOnlineServiceInterceptor();
+	
+			int timeout = chunk.getJobConfig().getJobExecutionPolicy().getTimeout();
+	
+			logger.info("Online transaction timeout : " + timeout + ", serviceId : " + serviceId);
+			logger.error("Item processing started : " + item.toKeyString());
+	
+			DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition(
+					TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+			transactionDefinition.setTimeout(timeout);
+			logger.info("====centercut_20240919 itemProcessHandler transactionDefinition.setTimeout() action - 1,{}"
+					+ item.toKeyString());
+	
+			TransactionStatus status = businessTxManager.getTransaction(transactionDefinition);
+			logger.info("====centercut_20240919 itemProcessHandler businessTxManager.getTransaction() action - 2,{}"
+					+ item.toKeyString());
+			
+			TransactionStausAquireSynchronization synchronization = new TransactionStausAquireSynchronization();
+	
+			final OnlineResultHolder holder = new OnlineResultHolder();
+			logger.info("====centercut_20240919 itemProcessHandler  new OnlineResultHolder() action - 3,{}"
+					+ item.toKeyString());
+	
+			try {
+				if (!checkProcessible(item)) {
+					businessTxManager.commit(status);
+					return null;
+				}
+			} catch (Throwable t) {
+				logger.error("Status confirm error occured. : ", t);
+				businessTxManager.rollback(status);			
+				return null;
+			} 
+			
+			TransactionSynchronizationManager.registerSynchronization(synchronization);
+	
+			item.increaseRetryCount();
+	
+			final OnlineServiceInterceptor onlineServiceInterceptor = (OnlineServiceInterceptor) processorFactory
+					.createInstance(onlineServiceInterceptorId);
+	
+			ChunkAction action = triggerPreProcess(item, onlineServiceInterceptor, transactionTemplate);
+	
+			if (action == null) {
+				// 온라인 본처리 수행
+				holder.setResult(executeOnlineService(item, serviceId, transactionTemplate));
+	
+				Throwable throwable = OnlineExceptionHolder.getThrowable();
+	
+				// 2016 09-22 온라인에서 exception이 발생하면 framework에서는 에러로 판단
+				if (throwable != null) {
+					logger.info("Online service exception occured. TransactionStatus rollbackOnly = [{}], Exception = {}",
+							status.isRollbackOnly(), throwable);
+					errorHandler.handle(item, throwable);
+					sameErrorInfoChecker.putError(throwable);
+	
+					// 2017 07 06 삼성생명 온라인 트랜잭션 롤백로직 제거로 인해서 센터컷에서 롤백여부를 판단
+					status.setRollbackOnly();
+					logger.info("Centercut Agent marked RollbackOnly due to OnlineService Exception , Exception = {}",
+							throwable);
+				}
+				//
+	
+				// 온라인 오류 발생시 후처리 수행
+				if (throwable != null || status.isRollbackOnly() || item.getExecutionInfo().isSimulation()) {
+					logger.info(
+							"############################# Centercut Business Transaction ROLL BACK ######################");
+					businessTxManager.rollback(status);
+	
+					return (ChunkAction) transactionTemplate.execute(new TransactionCallback() {
+						@Override
+						public ChunkAction doInTransaction(TransactionStatus status) {
+							if (!checkProcessible(item)) {
+								return null;
+							}
+	
+							itemRepository.saveStatus(item);
+	
+							return triggerPostProcess(item, onlineServiceInterceptor, holder.getResult());
+						}
+					});
+				}
+	
+				// 온라인 후처리 수행
+				itemRepository.saveStatus(item);
+	
+				action = triggerPostProcess(item, onlineServiceInterceptor, holder.getResult());
+			}
+				businessTxManager.commit(status);
+				logger.info("====centercut_20240919 itemProcessHandler businessTxManager.commit() action,{}");
+				calculateChunkStats(chunk, item); 
+				logger.info("====centercut_20240919 itemProcessHandler calculateChunkStats() action,{}");
+				
+				return action;
+
+			
+		} finally {
+			triggerAfterCompletion(item);
+		}

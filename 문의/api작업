@@ -1,0 +1,29 @@
+
+<api 작업 시 : 인코딩되어있어서 풀어야함 ! >
+\anyfame-enterprise-admin-web\anyframe-enterprise-admin\anyframe-enterprise-admin-web\src\main.js			
+axios.interceptors.response.use 함수에서 Encoding된 데이터를 다시 Decoding 후 화면에서 사용			
+
+톰켓을 띄울때 VM arguments에서 -Dencode.response-body=false 옵션을 주면 Base64로 Encoding하지 않음
+1. server 에 Decode.response-body=false
+
+2. \anyfame-enterprise-admin-web\anyframe-enterprise-admin\anyframe-enterprise-admin-web\src\main.js 에서 
+    const decodedContent = util.decodeBase64(response.data.content);
+    const contentObj = JSON.parse(decodedContent);
+    Decoding 하는 해당부분 주석 처리 후 
+
+    const contentObj = JSON.parse(response.data.content);
+    JSON 파서만을 사용하게끔 수정
+
+<api 작업 안할 시 : localhost 8080 붙기 위한 작업 > 
+
+1. server 에 Decode.response-body=false 지우기
+
+2. \anyfame-enterprise-admin-web\anyframe-enterprise-admin\anyframe-enterprise-admin-web\src\main.js 에서 
+    const decodedContent = util.decodeBase64(response.data.content);
+    const contentObj = JSON.parse(decodedContent);
+    추가
+
+3. 화면이 안나온다면 ? 400err
+
+K:\Shared files\Anyframe Study\김예은\anyframe\set\common_resources파일\
+anyframe-enterprise-admin-commonf프로젝트에 

@@ -1,0 +1,382 @@
+1. 설치파일
+    apache-maven-3.8.4
+    jdk1.8.0_202
+    apache-tomcat-8.5.98
+    eclipse Oxygen Release (4.7.0)
+
+2. git clone  
+        :: git clone anyframe-centercut  (develop)
+
+3. import project 
+    ::  anyframe-centercut-interfaces       
+                anyframe-centercut-engine           
+                anyframe-centercut-engine-ext
+                    anyframe-centercut-runtime          
+                    anyframe-centercut-runtime-ext
+                         anyframe-centercut-inputdata-sample 
+                         anyframe-online-aui-mybatis-pi   
+
+4. 설정
+	::  anyframe-centercut-interfaces        
+			->    test/resources context.properties db수정
+		anyframe-centercut-engine            
+			->    test/resources context.properties db수정, HttpInvokerFactoryTest(어드민-센터컷 서버관련) 포트 변경
+		anyframe-centercut-engine-ext
+            -> x
+		anyframe-centercut-runtime           
+			-> test/resources context.properties db수정
+			-> pom.xml  javadoc 관련 plugin 오류로 주석 (주석관련 플러그인이므로 주석함)
+			
+		anyframe-centercut-runtime-ext
+			-> pom.xml  <!-- <sourceDirectory>src</sourceDirectory> --> 주석
+
+		anyframe-centercut-inputdata-sample  
+			->  jdbc.properties 수정 
+			->  context-batch-runtime.xml 31변경
+					<bean id="propertyConfigurer" class="org.jasypt.spring31.properties.EncryptablePropertyPlaceholderConfigurer">
+			-> pom.xml
+					  <dependency>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-jdbc</artifactId>
+						<version>${spring.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-dbcp2</artifactId>
+						<version>2.0</version>
+					</dependency>
+					<dependency>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-databind</artifactId>
+						<version>2.11.4</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-lang3</artifactId>
+						<version>3.10</version>
+					</dependency>
+            *centercut sample 실행하기 위해서는 online service 맞는 data 설정이 필요함
+			-> /anyframe-centercut-inputdata-sample/src/main/java/sample/batch/centercut/CentercutInputData.java 소스 수정
+				[1] http://localhost:8091/anyframe-online-aui-mybatis-pi/integration/centerCutAgent
+					
+                        // 전문
+			// 			Object dto = makeDto(dataSeq);
+			// 			vo.setTelegram(VoUtil.toJson(dto));
+						vo.setTelegram(getMovieEmptyJsonData());
+			// 			vo.setTelegram(getSampleInputData());
+				[2]
+						 private String getMovieEmptyJsonData() throws Exception {
+                    
+							Movie movie = new Movie();
+							//movie.setTitle("");
+							movie.setMovieId("MV-00001");
+							movie.setTitle("Test01");
+							movie.setDirector("Director01");
+							movie.setActors("actors01");
+							return VoUtil.toJson(movie);
+							
+						}
+	
+		anyframe-online-aui-mybatis-pi       
+			->  context.properties , management.properties (agent.id , instance.id 새로생성,  tenant.id=tenantIdA 추가, jmx , db정보수정)
+                    centercut.admin.url=127.0.0.1:8080
+            ->  context-transaction 변경
+                    <bean id="onlineDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+            ->  context-management.xml 변경
+                     <bean id="manageDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+			->  pom.xml 변경 
+				<!-- 프로젝트 의존성 주입 -->
+                    <dependency>
+                        <groupId>com.anyframe.centercut</groupId>
+                        <artifactId>anyframe-centercut-runtime</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.anyframe.centercut</groupId>
+                        <artifactId>anyframe-centercut-runtime-ext</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.anyframe</groupId>
+                        <artifactId>anyframe-online-runtime-ext</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                <!--.jar 파일 의존성 주입  -->
+                    <dependency>
+						<groupId>ojdbc</groupId>
+						<artifactId>ojdbc8</artifactId>
+						<version>21.1.0.0</version>
+					</dependency>
+                    <dependency>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-core</artifactId>
+                        <version>2.11.4</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-databind</artifactId>
+                        <version>2.11.4</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-annotations</artifactId>
+                        <version>2.11.4</version>
+                    </dependency>
+					<dependency>
+							<groupId>cglib</groupId>
+							<artifactId>cglib</artifactId>
+							<version>2.2.2</version>
+					</dependency> 
+					<dependency>
+						<groupId>com.oracle.database.jdbc</groupId>
+						<artifactId>ojdbc8</artifactId>
+						<version>21.1.0.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-dbcp2</artifactId>
+						<version>2.0</version>
+					</dependency>
+            
+            -> org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'urlMapping' defined in file
+               java.lang.NoClassDefFoundError: com/fasterxml/jackson/anntation/JsonMerge
+                조치 :: pom.xml jackson 설정확인 
+
+            -> java.lang.NoClassDefFoundError: Could not initialize class net.sf.cglib.proxy.Enhancer 
+                조치 :: pom.xml  cglib 설정확인 
+
+            -> ora.springframework.beans.factory.xml.XmlBeanDefinitionStoreException: context-biz.xml  invalid 
+                조치 ::  context-biz.xml <bean id="onlineDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+
+			-> ORA-28040: 일치하는 인증 프로토콜 없음       
+               ORA-01017: 사용자명/비밀번호가 부적합, 로그온할 수 없습니다. 
+        		조치 :: 현재 oracle21c 로 10c로 추가해야함 박수석님 쿼리로 도와주심 
+                SELECT USERNAME,ACCOUNT_STATUS,PASSWORD_VERSIONS FROM DBA_USERS WHERE USERNAME='frmc';
+                alter user frmc identified by frmc8100 account unlock;
+
+> centercut build 
+        ::  anyframe-centercut-interfaces       
+                anyframe-centercut-engine           
+                anyframe-centercut-engine-ext
+                    anyframe-centercut-runtime          
+                    anyframe-centercut-runtime-ext
+                         anyframe-centercut-inputdata-sample 
+                         anyframe-online-aui-mybatis-pi      
+
+
+> online 프로젝트 환경설정 
+	::  anyframe-enterprise-parent
+	    anyframe-online-core 
+            -> pom.xml
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.11.4</version>
+            </dependency>
+        anyframe-online-runtime
+            -> pom.xml   dbcp2 2.1.1 -> 2.0 / ojdbc 6 -> 8
+                <dependency>     
+                    <groupId>com.oracle.database.jdbc</groupId>     
+                    <artifactId>ojdbc8</artifactId>     
+                    <version>21.1.0.0</version> 
+                </dependency> 
+
+                <dependency> 
+                    <groupId>org.apache.commons</groupId> 
+                    <artifactId>commons-dbcp2</artifactId> 
+                    <version>2.0</version> 
+                </dependency> 
+
+                 <dependency>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                    <version>2.11.4</version>
+                </dependency>
+                
+                 <dependency>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-validator</artifactId>
+                    <version>5.4.2.Final</version>
+                    <scope>provided</scope>
+                </dependency>
+        anyframe-online-runtime-tx
+            -> pom.xml   dbcp2 2.1.1 -> 2.0
+                <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-dbcp2</artifactId>
+                <version>2.0</version>
+            </dependency>
+        anyframe-online-runtime-jdbc 
+            -> pom.xml 
+                    <dependency>
+                    <groupId>com.oracle.database.jdbc</groupId>
+                    <artifactId>ojdbc8</artifactId>
+                    <version>21.1.0.0</version>
+                </dependency>
+        anyframe-online-runtime-orm 
+        anyframe-online-runtime-management
+            -> pom.xml 
+                    <dependency>
+                    <groupId>com.oracle.database.jdbc</groupId>
+                    <artifactId>ojdbc8</artifactId>
+                    <version>21.1.0.0</version>
+                </dependency>
+        anyframe-online-runtime-ext
+
+
+> online build 
+        :: anyframe-enterprise-parent
+            anyframe-online-core 
+             anyframe-online-runtime
+              anyframe-online-runtime-tx
+               anyframe-online-runtime-jdbc 
+                anyframe-online-runtime-orm 
+            anyframe-online-runtime-management
+            anyframe-online-runtime-ext
+    
+        
+
+> anyframe-online-aui-mybatis-pi 톰켓 기동 
+        
+        err 
+        -MANIFEST.MF (지정된 경로를 찾을 수 없습니다)
+            빌드 다시 
+
+        -java.lang.ClassNotFoundException: org.springframework.web.context.ContextLoaderListener
+            build 다시 target com확인 
+
+        -pmd err 
+            maven build 
+            Goals : clean install Dpmd.skip=true
+
+        -CannotCreateTransactionException: Could not open JDBC Connection for transaction
+            ojdbc, commons jdbc 관련.jar, 버전 확인 
+        
+        -Cause: java.sql.SQLSyntaxErrorException: ORA-00933: SQL 명령어가 올바르게 종료되지 않았습니다
+            com.anyframe.centercut.engine.pagination postgres 꺼 가져와서 오류 
+            oracle 꺼로 jar 덮어쓰기
+            [postgres 형식]
+            countSql.append("SELECT COUNT(1) FROM ( \n");
+            countSql.append(sql);
+            countSql.append(") as A");
+            [oracle 형식]
+            countSql.append("SELECT COUNT(1) FROM ( \n");
+            countSql.append(sql);
+            countSql.append(")");
+
+		return countSql.toString();
+	}
+
+        -6월 12, 2024 4:46:01 오후 org.apache.catalina.core.StandardWrapperValve invoke
+        심각: 경로가 [/anyframe-online-aui-mybatis-pi]인 컨텍스트의 서블릿 [action]을(를) 위한 Servlet.service() 호출이 예외를 발생시켰습니다.
+        java.io.EOFException at java.io.ObjectInputStream$PeekInputStream.readFully(ObjectInputStream.java:2681)
+
+        -internal server err
+        -Uncaught (in promise) Error: Request failed with status code 500
+        at t.exports (createError.js:16:15)
+        at t.exports (settle.js:17:12)
+        at f.onreadystatechange (xhr.js:61:7)
+        - message":"헤더에 토큰이 존재하지 않습니다.
+
+        - org.springframework.transaction.CannotCreateTransactionException: Could not open JDBC Connection for transaction; nested exception is java.sql.SQLException: Cannot create PoolableC
+            onnectionFactory (IO 오류: The Network Adapter could not establish the connection)
+                at org.springframework.jdbc.datasource.DataSourceTransactionManager.doBegin(DataSourceTransactionManager.java:305) ~[spring-jdbc-5.2.24.RELEASE.jar:5.2.24.RELEASE]
+
+> job 실행 
+	anyframe-centercut-inputdata-sample에서  sample_input_table 데이터 생성  
+    작업id	    job_id
+    실행일자	exec_date
+    실행회차	exec_seq
+    입력테이블  sample_input_table
+    온라인 서비스	movieSvc_getList
+    아이템입력기    centercutItemReader
+
+    -> java.util.HashMap cannot be cast to com.fasterxml.jackson.databind.JsonNode
+    조치 :: 온라인서비스변경 movieSvc_getList
+
+>  ref 
+        https://devops.sdsdev.co.kr/confluence/pages/viewpage.action?pageId=749145281
+        https://devops.sdsdev.co.kr/confluence/display/ANYKPCNC/Centercut+local+build
+        https://devops.sdsdev.co.kr/confluence/pages/viewpage.action?pageId=395987988
+
+에이전트 url 
+	http://localhost:XXXX/anyframe-online-aui-mybatis-pi/integration/centerCutAgent
+
+센터컷 온라인 
+	http://localhost:XXXX/anyframe-online-aui-mybatis-pi/
+
+
+센터컷 테이블
+    AFCC_EXEC_EVENT             센터컷 작업 실행시 발생하는 이벤트 이력
+    AFCC_APPLICATION            어플리케이션 정보
+    AFCC_APPLICATION_JOBS       어플리케이션-JOB 정보
+    AFCC_JOB_GROUP              작업 그룹 정보
+    AFCC_JOB_INSTANCE           작업 수행시 생성되는 작업인스턴스에 대한 정보를 관리하는 테이블
+    AFCC_JOB_INSTANCE_PARAMS    작업 인스턴스 수행 시 필요한 파라미터 정보
+    AFCC_JOB_CONFIG             작업 설정 정보
+    AFCC_CHUNK                  작업 수행 시 에이전트로 분배할 CHUNK에 대한 정리하는 테이블
+    AFCC_DOMAN_CONFIG           에이전트의 묶음 단위인 도메인 설정을 관리
+    AFCC_AGENT_CONFIG           센터컷 에이전트 설정을 관리
+    AFCC_ERROR_INFO             작업 수행 시 발생한 에러 정보를 관리하는 테이블
+    AFCC_SYS_CONTROL            자동 리커버리, 작업 삭제 허용 등 시스템 제어 정보를 관리하는 테이블
+    AFCC_SUSPEND_TIME           센터컷 어드민을 통한 작업 SUSPEND 시간 관리
+    AFCC_LEADER_INFO            센터컷 어드민이 클러스터링 되어 있을 경우, Leader 역할을 담당하는 어드민의 정보를 관리하는 테이블
+
+====================================================================================================================================================================================================    
+#라이브러리 공통
+* anyframe-centercut-interfaces : 관리환경과 실행환경 사이에 공통적으로 이용되는 라이브러리. 공통 인터페이스 및 도메인 클래스들이 포함
+#관리환경
+* anyframe-centercut-engine : 실제적인 센터컷 작업 수행 요청 및 작업 상태 관리를 담당하는 클래스들이 포함
+#실행환경
+* anyframe-centercut-runtime : Chunk의 실제적인 처리를 하는 클래스들이 포함,  업무팀에서 구현하는 선후처리기,  에이전트 및 ChunkService 등이 포함
+
+    SELECT * FROM AFCC_EXEC_EVENT          ;
+    SELECT * FROM AFCC_APPLICATION         ;
+    SELECT * FROM AFCC_APPLICATION_JOBS    ;
+    SELECT * FROM AFCC_JOB_GROUP           ;
+    SELECT * FROM AFCC_JOB_INSTANCE        ;
+    SELECT * FROM AFCC_JOB_INSTANCE_PARAMS ;
+    SELECT * FROM AFCC_JOB_CONFIG          ;
+    SELECT * FROM AFCC_CHUNK               ;
+    SELECT * FROM AFCC_DOMAN_CONFIG        ;
+    SELECT * FROM AFCC_AGENT_CONFIG        ;
+    SELECT * FROM AFCC_ERROR_INFO          ;
+    SELECT * FROM AFCC_SYS_CONTROL         ;
+    SELECT * FROM AFCC_SUSPEND_TIME        ;
+    SELECT * FROM AFCC_LEADER_INFO         ;
+
+
+
+이론 
+    engine 은 센터컷어드민을 실행하기 위해 존재 
+    pi  engine부터 online 까지 라이브러리가 필요해서 maven build 해야함 
+
+    inputdata-sample 가데이터 생성 후 pi의 online movie 같은 데이터 호출함 
+    센터컷 어드민에서 준비한 수 데이터를 확인 할 수 있어보임 
+
+    수취인계좌처리를 위해 모계좌, 자계좌 header 에서 체크할 수도 
+
+
+    센터컷 준비 -> 시작 
+    온라인 list호출되는 경우처럼 
+    센터컷이 시작되면  list 호출되게 하는 역할을 함 
+
+
+    INCOMPLETE - 준비 
+
+
+    어드민 
+anyframe-centercut-admin-5.0.2
+anyframe-centercut-engine-5.0.2
+anyframe-enterprise-admin-common
+anyframe-enterprise-admin-manager
+
+에이전트
+anyframe-centercut-engine
+anyframe-centercut-engine-ext
+anyframe-centercut-inputdata-sample
+anyframe-centercut-interfaces
+anyframe-centercut-runtime
+anyframe-centercut-runtime-ext
+anyframe-online-aui-mybatis-pi
+

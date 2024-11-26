@@ -1,0 +1,40 @@
+ref 
+    https://velog.io/@dingdoooo/Java-VScode-Java-%EC%97%B0%EA%B2%B0%ED%95%98%EA%B8%B0
+✅jdk  
+    1. settings.json ( ctrl +  , -> java home 설정 ) 
+        "workbench.colorTheme": "Default Dark+",
+        "java.jdt.ls.java.home": "C:\\Program Files\\Java\\jdk1.8.0_202",
+
+        "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-1.8",
+            "path": "C:\\Program Files\\Java\\jdk1.8.0_202",
+            "default": true
+        }
+        ],
+        "maven.terminal.useJavaHome": true
+
+        }
+
+
+    2. sample test 실행 
+        import java.util.*;
+
+        public class main{
+            public static void main(String[] args) {
+
+                System.out.println("Hello");
+
+            }
+
+        }
+    3. 출력확인 
+        PS C:\kye\vscode>  & 'C:\Program Files\Java\jdk1.8.0_202\bin\java.exe' '-cp' 'C:\Users\kpcnc\AppData\Roaming\Code\User\workspaceStorage\6fbb54fa56a504cdb1f52c01b6a32ff0\redhat.java\jdt_ws\vscode_318c673a\bin' 'main'
+        Hello
+
+✅maven
+    1. settings.json 
+        "maven.terminal.useJavaHome": true,
+        "maven.executable.path": "C:\\kye\\eclipse\\apache-maven-3.8.4\\bin\\mvn.cmd"
+    2. 프로젝트 우클릭 new module
+    3. maven.lifecycle.compile 

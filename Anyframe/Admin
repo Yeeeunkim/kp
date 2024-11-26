@@ -1,0 +1,330 @@
+1. 설치파일
+    apache-maven-3.8.4
+    jdk1.8.0_202
+    apache-tomcat-8.5.98
+    eclipse Oxygen Release (4.7.0)
+    
+
+
+admin123!
+
+2. git clone
+    develop
+    https://code.sdsdev.co.kr/anyframe/anyframe-enterprise-admin.git
+    
+
+3. import project 
+    anyframe-enterprise-admin-core
+    anyframe-enterprise-admin-common
+    anyframe-enterprise-admin-batch
+    anyframe-enterprise-admin-online 	
+
+4. 설정		
+    anyframe-enterprise-admin-common	
+        -> application.local.properties 	
+        jdbc.driverClassName=oracle.jdbc.driver.OracleDriver
+        jdbc.url=jdbc:oracle:thin:@70.30.17.111:1521:db21
+        jdbc.username=kye
+        jdbc.password=kye8100  
+
+        -> application.properties 
+        vue.commonApiUrl = http://localhost:8088/admin
+        vue.onlineApiUrl = http://localhost:8088/anyframe-online-admin
+        vue.batchApiUrl = http://localhost:8088/anyframe-batch-admin
+        vue.centercutApiUrl = http://localhost:8088/anyframe-centercut-admin
+        logview.directories=C:/anyframe_log/admin/batchlogs
+
+    anyframe-enterprise-admin-batch
+        -> application.local.properties 	
+        frameworkDriver=oracle.jdbc.driver.OracleDriver
+        frameworkUrl=jdbc:oracle:thin:@70.30.17.111:1521:db21
+        frameworkUsername=kye
+        frameworkPassword=kye8100
+        adminAddress=localhost:8088/anyframe-batch-admin ## 8088 admin 에 맞추기 
+
+    anyframe-enterprise-admin-centercut	
+        -> application.local.properties 	
+        framework.driver=oracle.jdbc.driver.OracleDriver
+        framework.url=jdbc:oracle:thin:@70.30.17.111:1521:db21
+        framework.username=kye
+        framework.password=kye8100
+
+        business.driver=oracle.jdbc.driver.OracleDriver
+        business.url=jdbc:oracle:thin:@70.30.17.111:1521:db21
+        business.username=kye
+        business.password=kye8100			
+        -> src\main\webapp\bin\setEnv.cmd
+
+    anyframe-enterprise-admin-online
+        -> application.local.properties 	
+        db.driver=oracle.jdbc.driver.OracleDriver
+        db.url=jdbc:oracle:thin:@70.30.17.111:1521:db21
+        db.username=kye
+        db.password=kye8100	
+
+어드민-온라인 8082
+    instance_configutaion 
+    anyframe-online-sample\src\main\resources\properties\management.properties
+    anyframe-online-sample\src\main\resources\properties\context.properties
+
+어드민-배치 8090
+    포트설정
+    anyframe-batch-agent\src\main\resources\application.properties
+    batch.admin.urls=localhost:8080/anyframe-batch-admin
+    batch.online.runtime.urls=localhost:8080/anyframe-batch-sample
+
+    배치샘플테스트위해 db 설정
+    anyframe-batch-agent\src\main\resources\application.properties
+    anyframe-batch-sample\src\main\resources\jdbc.properties
+
+어드민-센터컷 8081
+    anyframe-enterprise-admin-centercut\src\main\resources\application.local.properties									
+            -> tablelist.query OWNER = 'ADMINFW' -> OWNER = '본인USER로'							(둘중하나만 해도됨)	
+     anyframe-enterprise-admin-centercut\src\main\resources\application.properties									
+        -> tablelist.query OWNER = 'ADMINFW' -> OWNER = '본인USER로'							(둘중하나만 해도됨)		
+    anyframe-online-aui-mybatis-pi\src\main\resources\properties\management.properties
+    anyframe-online-aui-mybatis-pi\src\main\resources\properties\context.properties
+
+    \anyframe-online-aui-mybatis-pi\src\main\resources\properties\context.properties            							
+        centercut.admin.url=127.0.0.1:8080
+
+    http://localhost:8080/anyframe-centercut-admin/centercut/widget 404 at main.js:193:73
+    instance_configutaion
+
+
+    unknown err 
+    select * From instance_configuration;
+    select * from domain_configuration;
+    SELECT * FROM INSTANCE_CONFIGURATION A LEFT OUTER JOIN SERVER_CONFIGURATION B ON A.SERVER_CONFIG_ID = B.ID 
+    WHERE 1=1 ;
+    select * From SERVER_CONFIGURATION;
+
+> maven build 	
+     : anyframe-enterprise-admin-core
+     > anyframe-enterprise-admin-common
+         > anyframe-enterprise-admin-batch
+            > anyframe-enterprise-admin-online 	
+
+   goals : clean install -Dpmd.skip=true  or clean install dependency:copy-dependencies ( admin-core, admin-common 포함시킴).
+   target 경로 아래에 dependency라는 폴더에 사용된던 라이브러리를 추출하여 저장
+
+   
+> node.js
+    1. node-v10.16.0-x64.msi 설치 :: https://nodejs.org/download/release/v10.16.0/ 
+
+    2.  파일 강제 insert	(  nexus에서 제공하는 오픈소스 경로문제로 강제로 파일 받아서 설치할 예정 ! )							
+        1. K:\Shared files\Anyframe Study\김예은\settings\node_modules 복사  C:\Users\kpcnc\git\anyframe-enterprise-admin\anyframe-enterprise-admin-web\ 알아서 풀기 													
+        2. C:\Users\kpcnc\git\anyframe-enterprise-admin-test\anyframe-enterprise-admin-web 에서 npm run dev	
+        3. npm run build 
+            anyframe-enterprise-admin-common project 하위 src\main\resources	@ 확인 (@ 추가되는 이유  : pom.xml 의 L326 <value>th:$2=@{$3}</value> )	
+        4. admin-web 프로젝트에 node.js 설치 후  localhost:3000 붙으면 정상 
+        5. .env.development 경로 수정
+        * vue build 후 static, templates 추가하는 역할만하는 듯 
+        * node.js 설치하지 않아도 admin-common프로젝트에 staic, templates 적용 후 빌드하면 템플릿으로 화면 호출 가능함  ( K:\Shared files\Anyframe Study\김예은\anyframe\common_resources파일\local용\templates)
+        *  - 에러 
+                    500 Server Error - GET http://70.121.224.52:8081/nexus/content/repositories/npmjs/lodash
+                - 원인
+                    넥서스 경로 막혀서 오류 나는거임 , 현재는 강제 파일 install 했으니 npm install 할 필요 없음 ! 
+                - 조치 
+                    *필요시 클리어 하셈 npm clear clean --force 
+                    npm run dev
+
+> 어드민화면 로그설정 
+    anyframe-enterprise-admin-online :  logview.directories=C:/anyframe_log/admin/batchlogs
+    anyframe-batch-agent : resource.log.directories=C:/anyframe_log/admin/batchlogs
+    anyframe-batch-sample :  batch.log.directory=C:/anyframe_log/admin/batchlogs
+
+    anyframe-enterprise-admin-common
+        logview.directories=C:/anyframe_log/admin/batchlogs
+      
+> server  
+    프로젝트
+        anyframe-enterprise-admin-common
+        anyframe-enterprise-admin-online
+        anyframe-enterprise-admin-batch 
+
+====================================================================================================================================================================================================
+
+> err
+    -에러 
+        # org.apache.maven.InternalErrorException: Internal error: java.lang.UnsupportedOperationException: clientBuilder.sslSocketFactory(SSLSocketFactory) not supported on JDK 9+
+          java.lang.UnsupportedOperationException: clientBuilder.sslSocketFactory(SSLSocketFactory) not supported on JDK 9+
+    -원인 
+        anyframe-enterprise-admin-batch 빌드 시 에러로 필자는 jdk 버전문제로 판단되어 jdk 다시 패치함
+    -조치 
+        - 깃 clone 다시 받음 
+        - jdk1.8.0_401 -> jdk1.8.0_202 버전 변경 
+
+    -에러 
+        java.lang.ClassNotFoundException: com.anyframe.admin.core.spring.AnyframeContextLoaderListener
+    -원인 
+        target.classes안에 파일이 없어서 발생된 오류 
+    -조치 
+        admin-core maven build 다시 
+    
+    *참고
+        https://devops.sdsdev.co.kr/confluence/display/ANYKPCNC/Anyframe_Admin
+            application.local.properties에 vue url과 실제 url 다른 경우 widget 읽어오지 못함
+            > 화면 잘 뜨는데 widget 404 에러 발생 → 확인해보니 tomcat web modules에 배치 어드민 path는 /anyframe-batct-admin이고
+            common의 application.local.properties에 vue.batchApiUrl은 /batchadmin 이었음. 같은 path로 변경해주니 잘 읽어옴
+
+    -에러
+        Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'jobInstanceDao' defined in class path resource [spring/context-repository.xml]: C
+        annot resolve reference to bean 'paginationSql' while setting bean property 'paginationSql'; nested exception is org.springframework.beans.factory.BeanCreationException: Error crea
+        ting bean with name 'paginationSql' defined in class path resource [spring/context-repository.xml]: Invocation of init method failed; nested exception is org.apache.commons.dbcp.SQ
+        LNestedException: Cannot create PoolableConnectionFactory (IO 오류: Invalid number format for port number (CONNECTION_ID=1ZKVHsO7QziDBwM0rnvNxQ==))
+        실행 후 화면 unknown error - vue 설정문제일 확룔 높음
+
+        -에러 
+            GET http://localhost:8080/common/locale/for/login 404 (Not Found) + vue 관련 에러일 경우 
+        -조치 
+            admin-common 프로젝트 대상인 경우 
+            K:\Shared files\Anyframe Study\김예은\common_resources파일 local용 넣고 메이븐 빌드하기 
+            * local용 - resources
+              server용 - target 
+
+
+
+        -에러     
+            main.js:193 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'message') at main.js:193:73
+        -원인  
+            js에서 객체의 속성, 메서드 접근하지만 객체 자체 정의가 안되서 발생 
+
+
+
+        -에러   
+            org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping': Initialization of bean failed; nested exception is org.springframework.beans.factory.CannotLoadBeanClassException: Cannot find class [com.anyframe.batch.integration.DummyEmailSender] for bean with name 'emailSender' defined in class path resource [spring/context-notice.xml]; nested exception is java.lang.ClassNotFoundException: com.anyframe.batch.integration.DummyEmailSender
+        - 원인 
+            anyframe-batch-interface maven 유실되서 sender 클래스 인식 못함
+        -조치 
+             1. anyframe-batch-interface maven run침 
+             2. anyframe-batch-interface  build project 
+             3.  applicationContext.xml 의 <!-- <import resource="classpath:spring/context-notice.xml"/> --> 주석으로 임시해결함 
+
+
+
+        -에러
+            Access to XMLHttpRequest at 'http://localhost:8080/admin/common/locale/for/login' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+        -조치
+            maven build - build project - refresh 
+
+
+        -에러 
+            java.lang.ClassNotFoundException: com.anyframe.admin.core.spring.AnyframeContextLoaderListener
+        -원인 
+            메이븐빌드문제, 빌드패스 문제, 파일 인식못해서 생긴 오류임
+        -조치 
+            1. anyframe-enterprise-admin-core 
+                0) java build path - project - add - batch,centercut, common, online 추가함 
+                                   - order and export - maven 체크 활성화
+                1) maven update
+                2) maven build 
+                    target.com 파일 생성 확인 
+
+            1. anyframe-enterprise-admin-common 
+                0) java build path  - order and export - maven 체크 활성화
+                1) maven update
+                2) maven build 
+                    target.com 파일 생성 확인 
+
+
+        -에러
+            Invalid number format for port number
+        -조치 
+            framework.url=jdbc:oracle:thin:@70.30.17.111.1521:db21 -> framework.url=jdbc:oracle:thin:@70.30.17.111:1521:db21
+
+        -에러 
+          [2024-07-22 13:37:05] ERROR ErrorControllerAdvice : null
+            java.lang.NullPointerException: null
+            at com.anyframe.admin.common.controller.tenant.response.SimpleTenantGroup.<init>(SimpleTenantGroup.java:18)
+        -조치 
+            aft_tenant, aft_tenant_appl 데이터 정제
+
+        -에러
+            [2024-07-22 16:51:45] DEBUG BeanPropertyRowMapper : Intercepted TypeMismatchException for row 1 and column 'CPU_CURRENT' with null value when setting property 'cpuCurrent' of type 'double' on object: BatchAgent(serverName=test, name=1, status=null, url=1, cpuCurrent=0.0, memoryTotal=0, memoryFree=0, description=1)
+            org.springframework.beans.TypeMismatchException: Failed to convert property value of type 'null' to required type 'double' for property 'cpuCurrent'; nested exception is org.springframework.core.convert.ConversionFailedException: Failed to convert from type [null] to type [double] for value 'null'; nested exception is java.lang.IllegalArgumentException: A null value cannot be assigned to a primitive type
+                at org.springframework.beans.AbstractNestablePropertyAccessor.convertIfNecessary(AbstractNestablePropertyAccessor.java:600)
+                at org.springframework.beans.AbstractNestablePropertyAccessor.convertForProperty(AbstractNestablePropertyAccessor.java:609)
+        -조치 
+            BATCH_AGENT 테이블 CPU_CURRENT 값 NULL 로 들어가서 오류 
+            
+어드민 접속 후 online탭 interal server error 
+        -에러 
+            [2024-02-29 11:09:57] ERROR ErrorControllerAdvice : Handler dispatch failed; nested exception is java.lang.NoClassDefFoundError: com/anyframe/admin/online/service/impl/ServerExecutionServiceImpl$5
+            org.springframework.web.util.NestedServletException: Handler dispatch failed; nested exception is java.lang.NoClassDefFoundError: com/anyframe/admin/online/service/impl/ServerExecutionServiceImpl$5
+        -원인 
+            anyframe-enterprise-admin-online의 class 파일 중 service.impl 폴더 빌드 안되있어서 발생된 오류임 
+        -조치 
+            anyframe-enterprise-admin-online build project 다시 함   
+
+
+
+    
+node.js 추가설명
+    registry 설정 
+        ❗❗nexus에서 제공하는 오픈소스 경로문제로 강제로 파일 받아서 설치할 예정 !
+            C:\Users\kpcnc\git\anyframe-enterprise-admin\anyframe-enterprise-admin-web 에서 cmd
+            npm config set registry http://70.121.224.52:8081/nexus/content/repositories/npmjs/ ( sass 없음 ) 
+            npm install node-sass --sass_binary_site=http://70.121.224.52:8081/repository/github/sass/node-sass/releases/download 
+            npm install
+
+            로그확인 
+            C:\Users\kpcnc\AppData\Roaming\npm-cache\_logs 
+
+        - 에러 
+            npm install node-sass --sass_binary_site=http://70.121.224.52:8081/repository/github/sass/node-sass/releases/download  설치 시  아래 에러
+            # npm ERR! 500 Server Error - GET http://70.121.224.52:8081/nexus/content/repositories/npmjs/node-sass
+            원인 : nexus에서 제공하는 오픈소스 경로문제
+            조치 : 강제로 파일 받아서 설치할 예정 !
+
+
+
+
+vue 흐름 
+    1. package.json 기준으로 npm run build-dev 
+        "build": "vue-cli-service build",
+
+    2. vue.config.js 경로로 파일 컴파일 
+     module.exports = {
+        outputDir: path.join(springResourcePath, 'static'),
+        indexPath: '../templates/index.html',
+        publicPath,
+        filenameHashing: isDeploy,
+        configureWebpack: {
+            mode: isDeploy ? 'production' : 'development'
+        },
+
+
+db pool 오버됨
+    TNS:listener: all appropriate instances are blocking new connections
+
+  
+베이스 
+    -어드민은 관리자페이지로 온라인과 배치의 log, 시스템제어, 모니터링 등 가능함 
+
+    -어느 고객사는 어드민을 사용안하고 online만 관리되는 곳도 있음 !
+     
+
+    -admin common > online-admin > [genre, process] 둘다 포함해서 하나의 독립적인 프로세스임  
+    ex. 네이버뉴스의 장르 페이지 
+        네이버뉴스의 목록 페이지 처럼  네이버뉴스라는 하나의 독립적인 프로세스임 
+
+    -admin 화면에서 온라인 제어할 수 있는 환경을 만들기 위해서는  (참고. 1. anyframe 온라인  어드민 - 온라인어드민 연결 )
+        1. anyframe-online-sample 에서 re-context-management.xml - context-management.xml 변경
+
+        2. context-base.xml에서 <prop key="/management">/management</prop>	 주석풀기 
+
+        3. context-management.xml 의   bean name ==  context-base.xml의 prop key 매핑
+        
+        admin 화면에서 제어안하려면 re-context-management.xml 변경 필요없음 ! 
+        고객사마다 원하는 형태가 달라서 변경을 원하는 고객사한테는 re-context-management.xml 수정하기 ~
+
+
+    ❗❗절대 어드민프로젝트랑 배치프로젝트랑 같이 git clone받지말기 
+    그럼 sender 오류로 인해 batch설정파일을 자꾸 읽어서 실행 시 오류남 
+    필자는 applicationContext.xml 의 <!-- <import resource="classpath:spring/context-notice.xml"/> --> 주석으로 임시해결함 
+
+
+    npm run build-dev  :: build 
+    npm run dev :: 서버실행 
+    

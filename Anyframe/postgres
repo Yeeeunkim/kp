@@ -1,0 +1,35 @@
+Network unavailable
+java.net.SocketTimeoutException:Connect timed out
+Network unavailable
+java.net.SocketTimeoutException:Connect timed out
+
+
+https://jdbc.postgresql.org/download/ jar 추가 
+
+
+jdbc.driverClassName=org.postgresql.Driver
+jdbc.url=jdbc:postgresql://70.30.17.111:5432/postgres?currentSchema=kye
+jdbc.username=postgres
+jdbc.password=qwer1234
+
+
+vue.commonApiUrl = http://localhost:8085/admin
+vue.onlineApiUrl = http://localhost:8085/anyframe-online-admin
+vue.batchApiUrl = http://localhost:8085/anyframe-batch-admin
+vue.centercutApiUrl = http://localhost:8085/anyframe-centercut-admin
+
+
+Failed to load resource: the server responded with a status of 404 ()
+
+
+vue 설명 
+node.js 바로 서버 바라봄 
+tomcat  common의 static, template 바라봄 
+
+admin 8078
+agent 8076
+
+
+ps -ef| grep $JOB_NAME | grep -v grep | grep -v runjob | grep -v vi | grep -v tail
+
+ps -ef | grep $JOB_NAME | grep runjob | grep -v grep | grep -v jvm | grep -v vi | grep -v tail

@@ -1,0 +1,297 @@
+베이스 
+    Could not calculate build plan: Plugin org.apache.maven.plugins:maven-resources-plugin:2.6 
+        nexus repository :: http://nexus.sdsdev.co.kr:8081/nexus/#nexus-search;quick~commons-dbcp
+        maven repository
+    oracle 설치 
+
+
+jdk 1.6 
+    설치 : 
+    https://web-obj.tistory.com/479
+    환경변수 : 
+    https://almond0115.tistory.com/entry/Java-%EB%B2%84%EC%A0%84-%EC%97%AC%EB%9F%AC-%EA%B0%9C-%EC%A0%84%ED%99%98%ED%95%98%EC%97%AC-%EC%82%AC%EC%9A%A9%ED%95%98%EB%8A%94-%EB%B2%95
+
+maven 3.2.5 ->  3.2.3
+    https://maven.apache.org/docs/history.html 
+    히스토리 기준으로 java6은 2.3.5 버전 호환됨 
+    https://archive.apache.org/dist/maven/maven-2/2.2.1/binaries/
+
+
+에러 
+    Exception in thread "main" java.lang.UnsupportedClassVersionError: org/codehaus/plexus/classworlds/launcher/Launcher : Unsupported major.minor version 51.0
+    원인 : jdk 자바 버전 호환안되서 발생 필자는 jdk 여러개 설치해서 발생된 문제로 
+    조치 : java8로 버전업함    
+
+
+interface 빌드
+    오류 
+    	    Exception in thread "main" java.lang.UnsupportedClassVersionError: org/apache/maven/cli/MavenCli : Unsupported major.minor version 51.0
+    원인 
+         jdk1.6 maven 호환 안되서 발생된 문제 
+         해당이클립스 자체에서 maven 세팅해주기 
+    조치 
+         preferences.maven installations. add
+
+피드백 
+    에러메세지 차근차근 - 변수명뺴고 영어 서술어 기준으로 찾기 ex.  was cached 처럼 조회해보기 
+    천천히 침착하게 논리적으로 말하기 
+    
+
+git-anyframe-batch-sample
+
+    pom.xml 의존성주입받는 anyframe-batch-interface, anyframe-batch-runtime 빌드 
+
+
+anyframe-batch-interface
+    1. maven usersettings - 내 maven repository 저장소 
+    2. preferences.maven installations. add - maven 실행하기 위한 설정
+    ( jdk 1.6 이라서 maven 3.2.3 낮은 버전으로 패치함  ) 
+
+
+anyframe-batch-runtime
+    1. anyframe-enterprise-parent, anyframe-enterprise-core  패키지 .jar 패치가 필요함 
+    2. C:\kye\eclipse\apache-maven-3.8.4\repository\com\anyframe\anyframe-online-core\5.0.0
+    3. .jar 파일 넣기 
+
+    ( pom.xml 기준으로 anyframe-interface 빌드 후 online-core 의존성으로 주입을 해야해서 )
+    <dependency>
+			<groupId>com.anyframe.batch</groupId>
+			<artifactId>anyframe-batch-interface</artifactId>
+			<version>5.2.1</version>
+    </dependency>
+    <dependency>
+        <groupId>com.anyframe</groupId>
+        <artifactId>anyframe-online-core</artifactId>
+        <version>5.0.0</version>
+    </dependency>
+
+    에러 
+        snapshot err 발생 
+    조치 
+        http://nexus.sdsdev.co.kr:8081/nexus/#nexus-search;quick~anyframe-platform-monitoring
+        넥서스 기준으로 해당 패키지 찾아서 폴더명 확인 
+        anyframe-platform-monitoring-sun <version>1.0</version> 수정
+
+
+Error: org/apache/commons/dbcp2/BasicDataSource : Unsupported major.minor version 51.0
+ jdk 버전에 따라서 conntection, statement JDBC 인터페이스가 상이함
+ 그래서 version 51.0은 JDK7호환되는데 
+ 현재설정은 JDK6으로 설정되어 있어 dbcp2 호환이 안되는 현상 
+ jdk7부터 사용할 수 있는 dbcp2가아닌 jdk6 호환 가능한 설정으로 dbcp를 변경해야 함 
+ 
+
+
+Caused by: java.lang.ClassNotFoundException: org.apache.commons.dbcp.BasicDataSource
+    근거 : DBCP 1.4 compiles and runs under Java 6 only (JDBC 4)
+    조치 : maven repository 1.4 .jar 넣기 
+
+
+ORA-28040: 일치하는 인증 프로토콜 없음
+    1. oracle 설치 
+       https://backendcode.tistory.com/266
+
+    2. db connection 
+        create user kang identified by kpcnc8100;
+        grant connect,resource to kang;s
+        ALTER USER c##kang ACCOUNT UNLOCK;
+        alter user c##kang identified by kpcnc8100;
+        grant dba to c##kang;
+    
+    3. Data Source Explorer , sqldeveloper 
+        jdbc:oracle:thin:@localhost:1521:orcl
+        localhost
+        1521
+        c##kang
+        kpcnc8100
+
+    4. Failed to look up JNDI DataSource
+        context-batch-transaction.xml
+        <bean class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+            <property name="driverClassName" value="${biz_jdbc.driverClassName}" /> 
+            <property name="url" value="${biz_jdbc.url}" />
+            <property name="username" value="${biz_jdbc.username}" />
+            <property name="password" value="${biz_jdbc.password}" />
+            <property name="defaultAutoCommit" value="false" />
+            <property name="initialSize" value="0" />
+            <!-- <property name="maxTotal" value="-1" /> -->
+            <property name="maxIdle" value="50" />
+            <!-- <property name="maxWaitMillis" value="60000" /> -->
+            <property name="poolPreparedStatements" value="true"/>
+        </bean>
+
+ORA-02289: 시퀀스가 존재하지 않습니다.
+
+            ref :: 
+            https://thatisgood.tistory.com/entry/db%EC%99%80-jdbc-%EA%B4%80%EB%A0%A8%EC%9E%90%EB%A3%8C-%EC%98%A4%EB%9D%BC%ED%81%B4oracle-%EC%84%A4%EC%B9%98
+            https://jmkang1984.tistory.com/78
+
+            java.sql.SQLRecoverableException: IO 오류: The Network Adapter could not establish the connection
+
+
+            CREATE SEQUENCE kseq    INCREMENT BY 숫자    START WITH 숫자    MAXVALUE 숫자 or NOMAXVALUE    MINVALUE 숫자 or NOMINVALUE    CYCLE or NOCYCLE    CACHE or NOCACHE;
+
+
+
+            at com.sun.proxy.$Proxy5.saveOrUpdateJob(Unknown Source)
+            at com.anyframe.batch.launch.DefaultJobOperator.execute(DefaultJobOperator.java:224)
+            at com.anyframe.batch.launch.CommandLineJobLauncher.main(CommandLineJobLauncher.java:99)
+
+
+      1. BATCH_JOB 생성
+            CREATE TABLE BATCH_JOB
+            (	 JOB_NAME  VARCHAR2(500 BYTE), 
+                LOCATION  VARCHAR2(1000 BYTE), 
+                AUTHOR  VARCHAR2(200 BYTE), 
+                GROUP_NAME  VARCHAR2(500 BYTE), 
+                DESCRIPTION  VARCHAR2(4000 BYTE), 
+                PARAMETERS  VARCHAR2(4000 BYTE), 
+                CREATE_TIME  TIMESTAMP (6), 
+                MODIFY_TIME  TIMESTAMP (6), 
+                TARGET  VARCHAR2(100 BYTE), 
+                ENABLE  CHAR(1 BYTE), 
+                CONCURRENT  CHAR(1 BYTE), 
+                CONCURRENT_COUNT  NUMBER(20,0), 
+                WINDOW_ENABLE  CHAR(1 BYTE), 
+                WINDOW_FROM  VARCHAR2(40 BYTE), 
+                WINDOW_TO  VARCHAR2(40 BYTE), 
+                LOG_LEVEL  VARCHAR2(20 BYTE), 
+                COMMAND  VARCHAR2(500 BYTE), 
+                DIRECTORY  VARCHAR2(500 BYTE), 
+                JOB_TYPE  VARCHAR2(30 BYTE), 
+                TARGET_TYPE  VARCHAR2(30 BYTE), 
+                EXECUTION_TYPE  VARCHAR2(30 BYTE), 
+                GROUP_POLICY  CHAR(1 BYTE), 
+                TENANT_ID  VARCHAR2(50 BYTE)
+            ) SEGMENT CREATION IMMEDIATE 
+            PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+            NOCOMPRESS LOGGING
+            STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+            PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+            BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+            TABLESPACE  USERS  ;
+
+
+      2. BATCH_JOB_EXECUTION 생성
+            CREATE TABLE BATCH_JOB_EXECUTION
+            (	 JOB_ID  NUMBER(19,0), 
+                JOB_NAME  VARCHAR2(500 BYTE), 
+                STATUS  VARCHAR2(20 BYTE), 
+                EXIT_MESSAGE  VARCHAR2(2500 BYTE), 
+                LOG_FILE  VARCHAR2(500 BYTE), 
+                SHORT_CONTEXT  VARCHAR2(2500 BYTE), 
+                SERIALIZED_CONTEXT  CLOB, 
+                THREAD_COUNT  NUMBER(4,0), 
+                CPU_CURRENT  NUMBER(10,5), 
+                CPU_AVERAGE  NUMBER(10,5), 
+                MEMORY_TOTAL  NUMBER(20,0), 
+                MEMORY_FREE  NUMBER(20,0), 
+                CREATE_TIME  TIMESTAMP (6), 
+                UPDATE_TIME  TIMESTAMP (6), 
+                VERSION  NUMBER(19,0), 
+                JOB_KEY  VARCHAR2(2500 BYTE), 
+                JOB_TYPE  VARCHAR2(30 BYTE), 
+                JOB_LOCATION  VARCHAR2(500 BYTE), 
+                JOB_ARGUMENT  VARCHAR2(2500 BYTE), 
+                JOB_EXEC_YN  VARCHAR2(1 BYTE), 
+                SERVER  VARCHAR2(100 BYTE), 
+                IP  VARCHAR2(20 BYTE), 
+                PID  VARCHAR2(30 BYTE), 
+                MONITOR_CHECK_YN  CHAR(1 BYTE), 
+                COMMAND  VARCHAR2(1000 BYTE), 
+                OPERATION_DATE  VARCHAR2(10 BYTE), 
+                JOB_EXECUTION_KEY  VARCHAR2(100 BYTE), 
+                RUNTIME_INSTANCE_NAME  VARCHAR2(100 BYTE), 
+                STEP_TOTAL  NUMBER(5,0), 
+                SCHEDULE_TIME  TIMESTAMP (6), 
+                TIMEZONE_ID  VARCHAR2(100 BYTE), 
+                TENANT_ID  VARCHAR2(50 BYTE)
+            );
+
+
+                
+       3. 시퀀스 생성 
+        CREATE SEQUENCE   BATCH_JOB_EXECUTION_SEQ  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 81 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE  GLOBAL ;
+
+        CREATE SEQUENCE  BATCH_STEP_EXECUTION_SEQ  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 81 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE  GLOBAL ;
+
+
+PreparedStatementCallback; bad SQL grammar [SELECT STEP_ID, STEP_NAME, STATUS, LOG_FILE, SHORT_CONTEXT, SERIALIZED_CONTEXT, VERSION FROM BATCH_STEP_EXECUTION WHERE JOB_ID = ? AND STEP_NAME = ?]; nested exception is java.sql.SQLSyntaxErrorException: ORA-00942: 테이블 또는 뷰가 존재하지 않습니다
+    1. BATCH_STEP_EXECUTION 생성            
+        CREATE TABLE BATCH_STEP_EXECUTION
+        (	 JOB_ID  NUMBER(19,0), 
+            STEP_ID  NUMBER(19,0), 
+            STEP_NAME  VARCHAR2(500 BYTE), 
+            STATUS  VARCHAR2(20 BYTE), 
+            EXIT_MESSAGE  VARCHAR2(2500 BYTE), 
+            LOG_FILE  VARCHAR2(500 BYTE), 
+            CREATE_TIME  TIMESTAMP (6), 
+            UPDATE_TIME  TIMESTAMP (6), 
+            SCHEDULE_TIME  TIMESTAMP (6), 
+            SHORT_CONTEXT  VARCHAR2(2500 BYTE), 
+            SERIALIZED_CONTEXT  CLOB, 
+            CPU_CURRENT  NUMBER(5,2), 
+            CPU_AVERAGE  NUMBER(5,2), 
+            MEMORY_TOTAL  NUMBER(20,0), 
+            MEMORY_FREE  NUMBER(20,0), 
+            CURRENT_COUNT  NUMBER(38,0), 
+            TOTAL_COUNT  NUMBER(38,0), 
+            COMMIT_COUNT  NUMBER(38,0), 
+            VERSION  NUMBER(19,0), 
+            MAX_COMMIT_INTERVAL  NUMBER(38,0)
+        ) ;
+
+PreparedStatementCallback; bad SQL grammar [SELECT RESOURCE_NAME FROM BATCH_RESOURCE_EXECUTION WHERE STEP_ID = ?]; nested exception
+ is java.sql.SQLSyntaxErrorException: ORA-00942: 테이블 또는 뷰가 존재하지 않습니다        
+    
+  CREATE TABLE BATCH_RESOURCE_EXECUTION  
+   (	 JOB_ID  NUMBER(19,0), 
+	 STEP_ID  NUMBER(19,0), 
+	 RESOURCE_NAME  VARCHAR2(500 BYTE), 
+	 URL  VARCHAR2(2000 BYTE), 
+	 IO_TYPE  VARCHAR2(10 BYTE), 
+	 RESOURCE_TYPE  VARCHAR2(10 BYTE), 
+	 STATUS  VARCHAR2(10 BYTE), 
+	 CURRENT_COUNT  NUMBER(38,0), 
+	 COMMIT_POS  NUMBER(38,0), 
+	 COMMIT_COUNT  NUMBER(38,0), 
+	 CREATE_TIME  TIMESTAMP (6), 
+	 UPDATE_TIME  TIMESTAMP (6)
+   ) ;
+
+
+
+
+*** 아래 에러는 계속 발생
+[2024-04-03 09:46:47] job-execution-monitor1 ERROR ExecutionMonitor : monitor error
+java.lang.NoSuchMethodError: com.sun.management.OperatingSystemMXBean.getProcessCpuLoad()D
+
+
+
+
+\git-anyframe-batch-runtime\pom.xml 수정
+        <dependency>
+                <groupId>com.anyframe</groupId>
+                <artifactId>anyframe-online-core</artifactId>
+    <!-- 			<version>5.0.0-SNAPSHOT</version> -->
+                <version>5.0.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.anyframe</groupId>
+                <artifactId>anyframe-platform-monitoring-sun</artifactId>
+    <!-- 			<version>1.0-SNAPSHOT</version> -->
+                <version>1.0</version>
+            </dependency>
+
+git-anyframe-batch-sample\pom.xml 추가 
+            <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+
+
+
+java.lang.NoSuchMethodError: com.sun.management.OperatingSystemMXBean.getProcessCpuLoad()D
+	at com.anyframe.online.core.platform.SunOperatingSystemMonitor.getProcessCpuLoad(SunOperatingSystemMonitor.java:14) ~[anyframe-platform-monitoring-sun-1.0.jar:na]

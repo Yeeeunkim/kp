@@ -1,0 +1,42 @@
+- java 
+        9 -> 11 
+  x패키지 -> 자카르타 
+
+- pom.xml 관련
+  1. maven 라이프사이클 (pom.xml 설정안해도 maven에 default 라이프사이클이 내장되어 있음 )
+     [goals] 
+    package -> target 아래 compile 
+    install -> repository 참조된 것 전부 compile 
+    deploy -> nexus와 같은 외부저장소 compile 
+     
+     [lifecycle]
+      compile
+      test
+      package
+      verify
+      install
+      deploy
+
+  2. plugin vs dependency 
+     plugin - build 역할 , class compile 시 필요한 
+     dependency - 프로젝트 전체 주입할 기준으로 어떠한 lib 쓸거다 하는 것 
+
+  3. pmd 이슈 
+      parent 패키지에서 pmd 제외 시켜 repository안에 .pom 최신화 시킨 후 상속 프로젝트 build 
+      pmd 는 은행권에서 스페로우를 사용함 !
+
+  4. spring.context-xxx.xml 객체만드는 역할로 재활용 가능한 객체 정의해주는 것 
+
+  5. 애니프레임과 관련없는 lib
+  - Testopia   : test code 자동 만들어줌 
+  - Sonar Qube : 소스코드분석 
+  - 커버리지
+
+
+  *<maven-test-skip>true</maven-test-skip>
+
+
+
+
+프레임워크팀의 주 목적 : 바이너리소스 딜리버리 
+현실 : 소스 통 딜리버리 

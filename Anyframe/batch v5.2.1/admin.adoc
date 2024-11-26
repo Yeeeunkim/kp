@@ -1,0 +1,1498 @@
+[[admin]]
+
+== 배치 어드민
+---
+::
+
+[[admin-install]]
+
+
+=== 배치 어드민 설치
+
+:: 배치 어드민(admin)는 WAR 형태의 웹 어플리케이션으로 Servlet을 지원하는 컨테이너에서 실행 가능하다.
+
+설치 방법은 배치 어드민 WAR 파일을 컨테이너에 deploy하여 설치한다.
+
+
+[NOTE]
+====
+
+		WAR 파일 deploy 방법은 각 컨테이너(Tomcat, Weblogic 등) 참고
+
+
+	
+====
+
+
+[[admin-install-config]]
+
+
+==== 어드민 설정
+
+:: 어드민 설치(deploy) 후, 각 서버 환경에 적합한 내용으로 설정 파일을 변경한다. 서버 환경에 따라 변경 여부를 확인하여 수정해야 하는 설정파일은 다음과 같다.
+
+.배치 어드민 설정파일
+[options="header"]
+|===============
+^|설정파일 ^|설정내용 
+|WEB-INF/classes/context.properties |사용하는 DB 접속정보 (JDNI 데이터소스가 없는 경우 사용됨) 
+|WEB-INF/classes/logback.xml |로그 파일이 생성되는 위치정보 및 로그레벨 
+|WEB-INF/classes/admin-tcp.xml |어드민 HA 구성에 필요한 JGroup 정보(TCP) 
+|WEB-INF/classes/admin-udp.xml |어드민 HA 구성에 필요한 JGroup 정보(UCP) 
+|WEB-INF/classes/spring/context-notice.xml |통지기능 설정정보
+
+
+* 관리자 이메일 주소 및 전송 연락처
+
+* e-mail 전송정보
+
+* SMS 전송 정보
+
+ |WEB-INF/classes/spring/context-transaction.xml |DataSource jndiName 
+
+|===============
+
+
+[[admin-install-config-context]]
+
+
+===== context.properties
+
+:: 
+[options="header"]
+|===============
+^|항목 ^|내용 
+|frameworkDriver |JDBC Driver Class name 
+|frameworkUrl |Database Instance 접속 정보 
+|frameworkUsername |데이터베이스 계정 아이디 
+|frameworkPassword |데이터베이스 계정 암호 
+|jdbcValidationQuery |해당 DB 접속정보를 확인할 수 있는 테스트 쿼리 
+|jdbcMaxActive |Admin에서 사용할 DB Connection 최대수 
+|jdbcMaxIdle |Connection Pool 상에서 존재하는 Idle Connection 최대수 
+|jdbcInitialSize |Active 상태로 존재하는 초기 Connection 수 
+|jdbcMaxWait |Active Connection 모두 사용 중일 때 Connection 획득을 위한 최대 대기 시간
+						(단위:millisecond) 
+|adminAddress |어드민 url (leader admin 선정 및 fowarding 에 필요 )
+|clusterName |jgroups clustering 위한 cluster 명
+|clusterConfig |jgroups clustering 시 사용할 설정 파일
+|agentMonitoringInterval |Batch Agent가 정상적으로 구동 중인지 여부를 확인하는 간격
+
+
+
+(context-admin.xml에서 참조함. 단위:second)
+
+
+ |jobMonitoringInterval |실행이 지연되고 있는 Batch Job을 모니터링하는 간격
+
+
+
+(context-admin.xml에서 참조함. 단위:second)
+
+
+ |daemonMonitoringInterval |STARTED된 데몬 작업이 지정된 시간(threshold)내에 상태 업데이트가 발생했는지 여부를 모니터링하는 간격
+
+
+
+(context-admin.xml에서 참조함. 단위:second)
+
+ |triggerMonitoringInterval |STARTED된 데몬 트리거 작업이 지정된 시간(threshold)내에 상태 업데이트가 발생했는지 여부를 모니터링하는 간격
+
+
+
+(context-admin.xml에서 참조함. 단위:second)
+
+ |preJobMonitoringInterval |작업의 선후행 관계가 설정되어 있을 시에 선행작업의 완료 여부를 체크하여 후행작업을 실행시키는 간격 (단위:second)
+ |leaderMonitorInterval |HA 구성시 leader admin 모니터링하는 간격 (단위:millis)
+ |leaderCheckInterval |HA 구성시 지정된 시간(threadhold)내에 업데이트가 발생했는지 여부를 모니터링하는 간격 (단위:millis)
+ 
+|===============
+
+
+.context.properties
+====
+
+----
+
+
+
+##### Oracle
+frameworkDriver=oracle.jdbc.driver.OracleDriver
+frameworkUrl=jdbc:oracle:thin:@127.0.0.1:1521:xe
+frameworkUsername=system
+frameworkPassword=dusruf11
+
+jdbcValidationQuery=select 1 from dual
+jdbcMaxActive=100
+jdbcMaxIdle=5
+jdbcInitialSize=10
+jdbcMaxWait=60000
+
+adminAddress=70.121.244.11:8080/batchadmin
+clusterName=cluster.batchAdmin
+clusterConfig=classpath:admin-udp.xml
+
+# interval to check if agent is alive (second)
+agentMonitoringInterval=10
+jobMonitoringInterval=300
+daemonMonitoringInterval=10
+triggerMonitoringInterval=60
+
+preJobMonitoringInterval=10
+
+executionMonitorInterval=1000
+leaderMonitorInterval=1000
+leaderCheckInterval=5000
+
+
+----
+
+
+====
+
+[[admin-install-config-log]]
+
+
+===== logback.xml
+
+:: 어드민 로그를 설정한다.
+
+어드민 로그가 저장될 파일과 Rolling 개수(보관 파일 개수)를 지정한다.
+
+
+[source, xml]
+----
+
+ <appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<file>/log/batch/framework/admin.log</file>
+<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+<fileNamePattern>/log/batch/framework/admin.%d{yyyy-MM-dd}.log
+</fileNamePattern>
+<maxHistory>30</maxHistory>
+</rollingPolicy>
+
+----
+
+.logback.xml
+====
+
+----
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+<encoder>
+<pattern>[%d{yyyy-MM-dd HH:mm:ss}] %-5level %logger{0} : %msg%n</pattern>
+</encoder>
+</appender>
+
+    <appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<file>/log/batch/framework/admin.log</file>
+<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+<fileNamePattern>/log/batch/framework/admin.%d{yyyy-MM-dd}.log
+</fileNamePattern>
+<maxHistory>30</maxHistory>
+</rollingPolicy>
+<encoder>
+<pattern>[%d{yyyy-MM-dd HH:mm:ss}] %-5level %logger{0} : %msg%n</pattern>
+</encoder>
+</appender>
+
+<logger name="org.springframework.jdbc" level="info"/>
+
+<logger name="com.anyframe" level="debug"/>
+
+<logger name="com.anyframe.admin.core.auth" level="error"/>
+
+<root level="info">
+<appender-ref ref="console" />
+<appender-ref ref="rollingFile" />
+</root>
+
+</configuration>
+
+
+----
+
+
+====
+
+[[admin-install-config-admin]]
+
+
+===== spring/context-admin.xml
+
+:: 어드민 관련 주요 설정 내용은 다음과 같다.
+
+[options="header"]
+|===============
+^|Bean ^|설정 내용 
+|agentMonitor |* intervalSecond - 배치 에이전트 상태 모니터링 간격. (
+
+<<admin-install-config-context>>값을 참조)
+
+
+
+ 
+|jobMonitor |* intervalSecond - 실행이 지연되고 있는 Job을 모니터링하는 간격. (
+
+<<admin-install-config.context>>값을 참조)
+
+
+
+* noticeDelayHour - 작업의 지연통지 기준 시간. 이 값이 1인 경우, 한시간 전에 생성된 작업이 현재까지 WAITING 상태이면, 정해진 작업 담당자에게 통지를 발송함.
+
+ 
+|daemonMonitor |* intervalSecond - STARTED된 데몬 작업이 지정된 시간(threshold)내에 상태 업데이트가 발생했는지 여부를 모니터링하는 간격. (
+
+<<admin-install-config.context>>값을 참조)
+
+
+
+* threshold - 상태 업데이트 이상 여부 기준 시간. 이 값이 "300"인 경우. STARTED인 데몬 작업이 300초 내에 상태 업데이트가 발생하지 않으면 이상상태로 간주하여 데몬의 상태를 UNKNOWN으로 변경하고, 담당자에게 이상통지를 발송함 (단위 second)
+
+|triggerMonitor |* intervalSecond - STARTED된 데몬 트리거 작업이 지정된 시간(threshold)내에 상태 실패가 발생했는지 여부를 모니터링하는 간격. (
+
+<<admin-install-config.context>>값을 참조) 실패한 내역이 있는 경우 담당자에게 이상통지를 발송함
+
+|preJobExecutionMonitor |* intervalSecond - 모니터링 중인 작업이 지정된 시간 내에 상태 업데이트가 발생했는지 여부를 판단하여 후속작업을 실행시키도록 함.
+
+|leaderMonitor |* leaderMonitorInterval - HA 구성 사용시 현재 리더가 정상적으로 설정되어 있는지 지정된 시간마다 체크함. ( 단위 millis )
+
+* leaderCheckInterval - HA 구성 사용시 현재 리더의 상태 업데이트 시간이 지정된 시간보다 크면 이상상태로 간주하여 리더를 다시 선정함. ( 단위 millis )
+
+
+
+
+
+ 
+
+|===============
+
+
+.context-admin.xml
+====
+
+----
+
+
+
+<util:properties id="contextProperties" location="classpath:context.properties"/>
+
+<bean id="agentMonitor" class="com.anyframe.batch.admin.server.monitor.AgentMonitorServiceImpl">
+	<property name="intervalSecond" value="#{contextProperties.agentMonitoringInterval}"/>
+	<property name="noticeService" ref="noticeService"/>
+	<property name="batchAgentDao" ref="batchAgentDao"/>
+</bean>
+
+<bean id="jobMonitor" class="com.anyframe.batch.admin.server.monitor.JobExecutionMonitorServiceImpl">
+	<property name="intervalSecond" value="#{contextProperties.jobMonitoringInterval}"/>
+	<property name="noticeService" ref="noticeService"/>
+	<property name="jobExecutionDao" ref="jobExecutionDao"/>
+	<property name="noticeDelayHour" value="1"/>
+</bean>
+
+<bean id="daemonMonitor" class="com.anyframe.batch.admin.server.monitor.DaemonMonitorServiceImpl">
+	<property name="intervalSecond" value="#{contextProperties.daemonMonitoringInterval}"/>
+	<property name="noticeService" ref="noticeService"/>
+	<property name="daemonDao" ref="daemonDao"/>
+	<property name="daemonService" ref="daemonService"/>
+	<property name="threshold" value="10"/>
+</bean>
+ 
+<bean id="triggerMonitor" class="com.anyframe.batch.admin.server.monitor.TriggerMonitorServiceImpl">
+	<property name="intervalSecond" value="#{contextProperties.triggerMonitoringInterval}"/>
+	<property name="daemonDao" ref="daemonDao"/>
+	<property name="jobExecutionDao" ref="jobExecutionDao"/>
+	<property name="noticeService" ref="noticeService"/>
+</bean> 
+
+<bean id="cluserAdapter" class="com.anyframe.batch.admin.server.system.manager.ClusterAdapter">
+	<property name="configLocation" value="#{contextProperties.clusterConfig}"/>
+	<property name="clusterName" value="#{contextProperties.clusterName}"/>
+	<property name="monitorExecutor" ref="monitorExecutor"/>
+	<property name="leaderMonitor" ref="leaderMonitor"/>
+	<property name="clusterManager" ref="clusterManager"/>			
+</bean>
+
+<bean id="clusterManager" class="com.anyframe.batch.admin.server.system.manager.ClusterManagerImpl">	
+</bean>
+
+<bean id="monitorExecutor" class="com.anyframe.batch.admin.server.system.manager.MonitorExecutorImpl">
+	<property name="leaderMonitor" ref="leaderMonitor"/>
+	<property name="monitorTaskScheduler" ref="monitorTaskScheduler"/>
+	<property name="scheduleManager" ref="scheduleManager"/>
+	<property name="configurationHandler" ref="configurationHandler"/>
+	<property name="monitorServices">
+		<list>
+			<ref bean="agentMonitor"/>
+			<ref bean="jobMonitor"/>
+			<ref bean="daemonMonitor"/>
+			<ref bean="triggerMonitor"/>
+			<ref bean="preJobExecutionMonitor"/>
+		</list>
+	</property>
+</bean>
+
+<bean id="leaderMonitor" class="com.anyframe.batch.admin.server.system.monitor.LeaderMonitorImpl">
+	<property name="clusterId" value="#{contextProperties.adminAddress}"/>
+	<property name="interval" value="#{contextProperties.leaderMonitorInterval}"/>
+	<property name="batchConfigService" ref="batchConfigService"/>
+	<property name="leaderCheckInterval" value="#{contextProperties.leaderCheckInterval}"/>		
+</bean>
+
+<task:scheduler id="monitorTaskScheduler" pool-size="10" />
+
+<bean id="preJobExecutionMonitor" class="com.anyframe.batch.admin.server.monitor.PreJobExecutionMonitorImpl">
+	<property name="jobExecutionContext" ref="jobExecutionContext"/>
+	<property name="intervalSecond" value="#{contextProperties.preJobMonitoringInterval}"/>
+</bean>
+
+
+----
+
+
+====
+
+[[admin-install-config-notice]]
+
+
+===== spring/context-notice.xml
+
+:: SMS, e-Mail 발송을 위한 통지기능을 설정한다.
+
+배치 어드민은 배치 작업의 실행지연, 배치 에이전트의 상태 및 데몬/트리거의 상태에 대해 통지 기능을 제공한다
+
+상태 감지를 위한 체크 주기는
+
+<<admin-install-config-context>>에서 설정할 수 있다.
+
+
+
+통지는 e-Mail 및 SMS를 통하여 발송할 수 있으며 일반적으로 e-Mail, SMS 발송은 타 시스템에 의해 처리되므로 타 시스템 연계를 위한 구현체를 noticeService에 Injection 해주어야 한다.
+
+.e-Mail 연계를 위한 인터페이스
+====
+
+----
+
+
+
+package com.anyframe.batch.integration;
+public interface EmailSender {
+public void send(String sendAddress, String sendAlias, String recvAddress, String recvAlias, String title, String content);
+}
+
+
+----
+
+
+====
+
+.SMS 연계를 위한 인터페이스
+====
+
+----
+
+
+
+package com.anyframe.batch.integration;
+
+public interface SmsSender {
+public void send(String recvNo, String sendNo, String message);
+}
+
+
+----
+
+
+====
+
+
+[NOTE]
+====
+
+		SMS를 사용하지 않을 경우 com.anyframe.batch.integration.DummySmsSender를 설정한다.
+
+
+		e-Mail을 사용하지 않을 경우 com.anyframe.batch.integration.DummyEmailSender를 설정한다.
+
+
+	
+====
+
+
+[[admin-install-config-transaction]]
+
+
+===== spring/context-transaction.xml
+
+:: 어드민에서 사용할 데이터소스를 설정한다.
+
+
+[NOTE]
+====
+
+		데이터소스 설정은JndiObjectFactoryBean을 사용하여 우선 지정된 JNDI 데이터소스를 Lookup하여 사용하고, 해당 JNDI 데이터소스가 없는 경우 내부 BasicDataSource를 사용한다.
+
+
+	
+====
+
+
+[options="header"]
+|===============
+^|Bean ^|설정 내용 
+|dataSource.framework |* jndiName - J2EE 컨테이너에서 사용할 Datasource의 JDNI명을 설정한다
+
+ 
+
+|===============
+
+
+.context-admin.xml
+====
+
+----
+
+
+
+<bean id="dataSource.framework" class="org.springframework.jndi.JndiObjectFactoryBean">
+<property name="jndiName" value="DS_CBKFRW"/>
+<property name="defaultObject">
+<bean class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="#{contextProperties.frameworkDriver}"/>
+        <property name="url" value="#{contextProperties.frameworkUrl}"/>
+        <property name="username" value="#{contextProperties.frameworkUsername}"/>
+        <property name="password" value="#{contextProperties.frameworkPassword}"/>
+<property name="initialSize" value="#{contextProperties.jdbcInitialSize}" />
+<property name="maxActive" value="#{contextProperties.jdbcMaxActive}" />
+<property name="maxIdle" value="#{contextProperties.jdbcMaxIdle}" />
+<property name="maxWait" value="#{contextProperties.jdbcMaxWait}" />
+<property name="validationQuery" value="#{contextProperties.jdbcValidationQuery}"/>
+<property name="testOnBorrow" value="true"/>
+    </bean>
+</property>
+</bean>
+
+
+----
+
+
+====
+
+[[admin-run]]
+
+
+=== 기동 및 중지
+
+:: 배치 어드민 실행 및 중지는 Deploy된 J2EE 컨테이너의 기동/중지 방법을 참조한다. (Weblogic, Tomcat, WebSphere 등)
+
+[[admin-architecture]]
+
+
+=== Admin Reference
+
+:: [[admin-architecture-job]]
+
+
+==== 작업(Job) 실행제어
+
+:: [[admin-architecture-job-run]]
+
+
+===== 작업 실행
+
+:: 일반 배치 작업은 Batch Manager, Batch Admin, 타 시스템(온라인, 센터컷) 등에서 Batch Agent를 통해 구동되거나, 스케줄러를 통해 구동된다. 일반 배치 작업의 실행 흐름은 다음 그림과 같다.
+
+
+
+image::images/admin-architecture-job-run.png[]
+
+* Batch Admin이나 Batch Manager에서의 Batch Job 실행요청은 Remote(Hessian)로 Batch Agent에 전달된다.
+** Batch Admin이나 Batch Manager에서 Job을 실행시키는 경우, 요청을 전달하는 타겟 서버를 화면에서 지정한다.
+
+** BatchAgentServiceImpl에서, 해당 서버에서 사용이 가능한 Agent의 URL을 BATCH_AGENT 테이블에서 select하고, 조회된 Agent URL 중 접근이 가능한 하나의 Agent를 랜덤하게 지정하고(HessianAccessor), 해당 Agent에 Job 구동 요청을 전달한다.
+
+* Batch Agent는 Job 정보를 생성하고, BATCH_JOB_EXECUTION 테이블에 Job 정보를 insert한다. 이때, Job의 상태는 "WAITING" 이다.
+
+* Batch Agent는 다음과 같은 시스템의 상태에 따라 Job의 실행을 제한한다. (10초 간격, JobExecutionManagerImpl)
+** Batch Agent는 구동된 이후부터 JOB의 실행현황을 polling한다.
+
+** BATCH_JOB_EXECUTION 테이블로부터 현재 구동중인 Job의 수를 select한다.
+
+** 현재 수행 중인 Job의 수가 허용 최대수(maxJob)를 초과하는 경우, 해당 Job을 실행하지 않는다.
+** maxJob의 값은 policy 객체에 정의딤 (Policy 설정은
+
+<<agent-architecture-policy>>참조)
+
+
+
+** Agent의 policy가 Blocking 상태이면 작업을 실행시키지 않는다.
+
+** Batch Job의 구동현황을 polling하여 Job을 구동시키는 Agent는 클러스터링 된 Agent group에서 하나의 Agent만 가능하다.
+
+** 즉, Batch Admin이나 Batch Manager로부터 Job 구동 요청을 받아 테이블에 Job 정보를 insert하는 Agent는 모든 Agent가 가능하나, 테이블에서 Job 정보를 select하여 policy에 맞게, job을 구동시키는 역할을 하는 Agent는 클러스터링 된 Agent 중 하나이다. (
+
+<<agent-architecture-cluster>>참조)
+
+
+
+* Job 실행에 대한 조건을 만족하는 경우, Batch Agent는 해당 Job의 상태를 "STARTING"으로 업데이트하고 Job을 실행시킨다.
+
+* Batch Agent는 신규 프로세스를 생성하여 runjob.sh을 구동시켜, Job 실행 Command(CommandLineJobLauncher)를 실행시킨다.
+
+* 위 모든 과정에서 에러가 발생 할 경우, Batch Agent는 Job의 상태를 "FAILED"로 변경한다.
+
+
+
+image::images/admin-architecture-job-run2.png[]
+
+* Batch Agent나 Control-M Agent는 배치 작업 구동 쉘 (runjob.sh)을 실행시켜, Batch Runtime의 CommandLineJobLauncher를 실행시킨다.
+
+* 구동 쉘 실행 시 인자로 실행 대상 Batch Job의 config 파일 위치와 입력 파라미터를 다음과 같이 전달한다.
+
++
+[source, bourne]
+----
+#runjob.sh sample/sample_cfg.xml today=20131231 base=/batch/sample/
+----
+* CommandLineLauncher는 DefaultJobOperator를 통해 Job 실행에 대한 정보를 생성하고, DefaultJobLauncher를 통해 Job을 구동시킨다.
+
+* DefaultJobOperator는 ReloadableCacheLocator를 통해 구동 쉘 실행 시 전달된 입력 인자의 내용을 기반으로 XXX_cfg.xml 파일과 관련 클래스들을 로드하여, Job 객체를 생성한다.
+
+* DefaultJobLauncher는 DefaultJobOperator로부터 전달받은 Job 정보를 기반으로 Job을 구동시킨다. 이때, BATCH_JOB_EXECUTION에 Job의 STATUS를 "STARETED"로 업데이트한다.
+
+* Job은 SimpleStepHandler를 통해 Job 내부에 정의되어 있는 Step들을 수행시킨다. 각 Step 수행 시 BATCH_STEP_EXECUTION 테이블에 각 Step 정보를 insert한다. (STATUS="STARTED")
+
+* 모든 Step의 수행이 완료되면, Job의 상태는 "COMPLETED"로 BATCH_JOB_EXECUTION 에 update된다.
+
+* 수행 중 오류가 발생하면 "FAILED", 외부로부터 Job의 종료되면 "STOPPED"로 Job의 상태가 변경된다.
+
+[[admin-architecture-job-stop]]
+
+
+===== 작업 중지
+
+:: 어드민에서 배치 작업을 중지할 경우, 배치 어드민은 배치 에이전트로 해당 작업 Kill을 요청한다. 배치 에이전트는 작업의 정보를 BATCH_JOB_EXECUTION 테이블에서 조회하여, 작업의 프로세스 ID로 프로세스를 kill 커맨드로 종료시키고, 작업의 상태를 업데이트 한다.
+
+
+
+image::images/admin-architecture-job-stop.png[]
+
+**어드민**
+
+* 배치 어드민에서 중지시킬 작업 선택 후 ‘정지 '버튼 클릭 시, JobExecutionServiceImpl.stopJob() 메소드가 호출된다.
+
+* JobExecutionServiceImpl.stopJob() 메소드에서는 리모트(Hessian)로 배치 에이전트의 JobOperationServiceImpl.kill() 메소드를 호출한다. 에이전트가 제공하는 서비스의 리모트 접근을 위한 에이전트 설정은 아래와 같다.
+.agent/agent-servlet.xml
+====
+
+----
+
+
+
+<bean name="jobOperationServiceExporter" class="org.springframework.remoting.caucho.HessianServiceExporter">
+<property name="service" ref="jobOperationService" />
+<property name="serviceInterface" value="com.anyframe.batch.agent.service.JobOperationService" />
+</bean>
+
+
+----
+
+====
+
+.agent/application-context.xml
+====
+
+----
+
+
+
+<bean id="jobOperationService" class="com.anyframe.batch.agent.service.JobOperationServiceImpl">
+<property name="jobOperator" ref="jobOperator"/>
+</bean>
+
+<bean id="jobOperator" class="com.anyframe.batch.agent.service.JobOperatorImpl">
+<property name="jobExecutionManager" ref="jobExecutionManager"/>
+<property name="policyService" ref="agent"/>
+<property name="jobDao" ref="jobDao"/>
+</bean>
+
+
+----
+
+====
+
+**에이전트**
+
+* 배치 에이전트의 JobOperationServiceImpl.kill() 메소드에서는 JobOperatorImpl.stop() 메소드를 호출한다.
+
+* JobOperatorImpl.stop()에서는 현재 작업을 수행하는 에이전트 policy 설정에서 작업의 stop을 허용하고 있는지를 확인한다. 에이전트에서 작업의 stop 허용여부는 아래와 같이 policy.properties 파일에서 관리한다.
+.agent/policy.properties
+====
+
+----
+
+
+
+# allow to stop job. if false, request to stop job causes exception. 
+allowStop=true
+
+
+----
+
+====
+
+* 작업의 stop이 가능한 경우, BATCH_JOB_EXECUTION 테이블로부터 작업의 정보를 조회한다.
+
+* 작업의 현재 상태가 STARTED인 경우, JobExecutionManager.stop()을 호출한다. 이때, Job 객체가 인자로 전달된다. (작업의 현재 상태가 STARTED가 아닌 경우, IllegalStateException이 발생한다.)
+
+* JobExecutionManager는 인자로 전달된 작업 정보에서 프로세스 ID를 확인하여, 해당 프로세스를 kill 시킨다.
+** PID로 프로세스를 kill 시키기 위한 커맨드는 agent.properties에서 관리한다.
+
+** 해당 프로세스를 kill 시키고, 작업의 상태를 ‘STOPPED '로 업데이트 한다
+
+.agent/agent.properties
+====
+
+----
+
+
+
+runtime.batch.killCommand=/app/batch/runtime/bin/killjob.cmd
+
+
+----
+
+====
+
+.agent/application-context.xml
+====
+
+----
+
+
+
+<bean id="jobExecutionManager" class="com.anyframe.batch.agent.launch.JobExecutionManagerImpl">
+<property name="jobDao" ref="jobDao"/>
+<property name="clusterLock" ref="clusterLock"/>
+<property name="workingDirectory" value="${runtime.workingDirectory}"/>
+<property name="runCommand" value="${runtime.batch.runCommand}"/>
+<property name="killCommand" value="${runtime.batch.killCommand}"/>
+</bean>
+
+
+----
+
+====
+
+[[admin-architecture-job-kill]]
+
+
+===== 작업 강제중지
+
+:: 어드민에서 배치 작업을 강제중지할 경우, 배치 어드민은 BATCH_JOB_EXECUTION 테이블에 작업의 상태를 ‘STOPPED '로 업데이트한다.
+
+
+
+image::images/admin-architecture-job-force.png[]
+
+[[admin-architecture-job-restart]]
+
+
+===== 작업 재시작
+
+:: 어드민에서 배치 작업을 재시작할 경우, 배치 어드민은 배치 에이전트로 해당 작업 restart를 요청한다. 배치 에이전트는 작업의 정보를 BATCH_JOB_EXECUTION 테이블에서 조회하여, 작업의 상태 확인한다. 재시작이 가능한 상태인 경우, 작업을 구동시킨다.
+
+
+
+image::images/admin-architecture-job-restart.png[]
+
+**어드민**
+
+* 배치 어드민에서 재시작시킬 작업 선택 후 ‘재시작 '버튼 클릭 시, JobExecutionServiceImpl.restartJob() 메소드가 호출된다.
+
+* JobExecutionServiceImpl.restartJob() 메소드에서는 리모트(Hessian)로 배치 에이전트의 JobOperationServiceImpl.restart() 메소드를 호출한다. 에이전트가 제공하는 서비스의 리모트 접근을 위한 에이전트 설정은 아래와 같다.
+.agent/agent-servlet.xml
+====
+
+----
+
+
+
+<bean name="jobOperationServiceExporter" class="org.springframework.remoting.caucho.HessianServiceExporter">
+<property name="service" ref="jobOperationService" />
+<property name="serviceInterface" value="com.anyframe.batch.agent.service.JobOperationService" />
+</bean>
+
+
+----
+
+====
+
+.agent/application-context.xml
+====
+
+----
+
+
+
+<bean id="jobOperationService" class="com.anyframe.batch.agent.service.JobOperationServiceImpl">
+<property name="jobOperator" ref="jobOperator"/>
+</bean>
+
+<bean id="jobOperator" class="com.anyframe.batch.agent.service.JobOperatorImpl">
+<property name="jobExecutionManager" ref="jobExecutionManager"/>
+<property name="policyService" ref="agent"/>
+<property name="jobDao" ref="jobDao"/>
+</bean>
+
+
+----
+
+====
+
+**에이전트**
+
+* 배치 에이전트의 JobOperationServiceImpl.restart() 메소드에서는 JobOperatorImpl.restart() 메소드를 호출한다.
+
+* JobOperatorImpl.restart()에서는 현재 작업을 수행하는 에이전트 policy 설정에서 작업의 run을 허용하고 있는지를 확인한다. 에이전트에서 작업의 run 허용여부는 아래와 같이 policy.properties 파일에서 관리한다.
+.agent/policy.properties
+====
+
+----
+
+
+
+# allow to stop job. if false, request to stop job causes exception. 
+allowRun=true
+
+
+----
+
+====
+
+* 작업의 run이 가능한 경우, BATCH_JOB_EXECUTION 테이블로부터 작업의 정보를 조회한다.
+
+* 작업의 현재 상태가 STARTED인 경우, 이미 구동 중이므로 재시작이 불가능하다. IllegalStateException이 발생한다. 또한, 작업의 현재 상태가 COMPLETED인 경우, 이미 작업이 완료되었으므로 재시작이 불가능하다. IllegalStateException이 발생한다.
+
+* 위 두가지 경우를 제외하고, JobExecutionManager의 run메소드를 실행시켜, 해당 작업을 재시작한다.
+
+[[admin-architecture-daemon]]
+
+
+==== 데몬(Daemon) 실행제어
+
+:: [[admin-architecture-daemon-run]]
+
+
+===== 데몬 실행
+
+:: 데몬 배치 작업은 Batch Admin이나 스케줄러를 통해 구동된다. 데몬 배치 작업의 실행 흐름은 다음 그림과 같다.
+
+
+
+image::images/admin-architecture-daemon-run.png[]
+
+* Batch Admin으로부터 데몬 배치의 실행 요청은 Remote(Hessian)로 Batch Agent에 전달되고, 스케줄러의 경우 데몬 구동 쉘 스크립트(rundaemon.sh)을 직접 실행시킨다.
+
+* Batch Admin의 경우, DaemonServiceImpl의 startDaemon() 메소드 내부에서 Hessian으로 Batch AgentDaemonOperationService를 호출한다. 이때 Batch Admin의 DaemonServiceImpl에서는 BATCH_DAEMON 과 BATCH_DAEMON_TRIGGER 테이블에 각각 해당 데몬과, 데몬에 포함된 트리거의 상태를 "STARTING"으로 업데이트한다.
+
+* Batch Agent는 DaemonExecutionManagerImpl의 start() 메소드에서 해당 데몬의 상태를 "STARTING"으로 업데이트하고, agent.properties 파일에 정의되어 있는 데몬 배치 구동 쉘 스크립트를 실행시킨다.
+
+* "rundaemon.sh" 은 Batch Runtime의 CommandLineDaemonLauncher 클래스의 main()를 실행시킨다.
+
+* CommandLineDaemonLauncher로부터 실행된 DefaultDaemonOperator는 해당 데몬과 내부 트리거들의 상태를 "STARTED"로 업데이트한다.
+
+* DefaultDaemonOperator는 Trigger의 수만큼 loop를 돌며, 각 트리거의 유형에 적합한 TriggerValidator로, 관련 트리거 설정파일(XML)을 로드하고, TriggerManager를 통해 Trigger를 구동시킨다.
+** FileTriggerValidator - daemon-file.xml
+
+** TimeTriggerValidator - daemon-timer.xml
+
+** ScheduleTriggerValidator - daemon-schedule.xml
+
+* DefaultDaemonMonitor는 Trigger와 TriggerManager를 등록하고 Trigger의 상태를 주기적으로 모니터링하여, 데몬 테이블의 UPDATE_TIME을 주기적으로 업데이트하고, Trigger의 상태를 업데이트한다.
+** DefaultDaemonMonitor가 Trigger의 상태를 모니터링하는 간격은 daemonMonitor Bean 설정 시 "interval" 값으로 설정이 가능하다. (default 10초)
+
+.context-daemon-runtime.xml
+====
+
+----
+
+
+
+<bean id="daemonRepository" class="com.anyframe.daemon.repository.support.DaemonRepositoryFactory">
+<property name="dataSource" ref="DS_FRAMEWORK"/>
+<property name="transactionManager" ref="frameworkTxManager"/>
+<property name="maxVarCharLength" value="3000"/>
+<property name="persist" value="${batch.database.persist}"/>
+</bean>
+
+<bean id="daemonOperator" class="com.anyframe.daemon.launch.DefaultDaemonOperator">
+<property name="daemonRepository" ref="daemonRepository"/>
+<property name="batchService" ref="batchService"/>
+<property name="validators">
+<map>
+<entry key="file">
+<bean class="com.anyframe.daemon.trigger.file.FileTriggerValidator">
+<property name="configLocation" value="classpath:spring/daemon-file.xml" />
+</bean>
+</entry>
+<entry key="timer">
+<bean class="com.anyframe.daemon.trigger.timer.TimerTriggerValidator">
+<property name="configLocation" value="classpath:spring/daemon-timer.xml" />
+</bean>
+</entry>
+<entry key="schedule">
+<bean class="com.anyframe.daemon.trigger.schedule.ScheduleTriggerValidator">
+<property name="configLocation" value="classpath:spring/daemon-schedule.xml" />
+</bean>
+</entry>
+
+</map>
+</property>
+
+<property name="daemonMonitor" ref="daemonMonitor"/>
+</bean>
+
+<bean id="daemonMonitor" class="com.anyframe.daemon.monitor.DefaultDaemonMonitor">
+<property name="interval" value="10000"/>
+<property name="daemonOperator" ref="daemonOperator"/>
+<property name="daemonRepository" ref="daemonRepository"/>
+</bean>
+
+<bean id="batchService" class="com.anyframe.daemon.service.BatchService">
+<property name="jobOperator" ref="jobOperator"/>
+<property name="daemonRepository" ref="daemonRepository"/>
+</bean>
+
+
+----
+
+
+====
+
+[[admin-architecture-daemon-run-file]]
+
+
+====== 파일 데몬
+
+:: 파일 데몬은 지정된 입력 폴더에 처리될 파일이 생성되면 데몬이 이를 감지하여 배치 작업을 구동시키는 형태이다. 입력 폴더의 파일은 처리 시 이중 구동을 방지하기 위하여 파일 명 뒤에 생성일자를 붙여 처리 폴더로 이동되어 처리된다.
+
+
+
+image::images/admin-architecture-daemon-file.png[]
+
+FileTrigger 내부에서 파일 감지 및 Batch Job 수행을 위해서는 Spring의 SourcePollingChannelAdapter 및 FileOutboundGateway 등이 아래와 같은 흐름으로 처리한다.
+
+
+
+image::images/admin-architecture-daemon-file2.png[]
+
+* FileTriggerManager에서는 FileTriggerConfigurer를 통해 감지 대상 파일에 대한 정보를 설정한다. 설정정보는 Batch Admin에서 트리거를 생성할 때 정의된 값이다.
+** 입력 파일 디렉토리 (예: /dat/centercut/occs/req/dmt)
+
+** 출력 파일 디렉토리 (예: /dat/centercut/occs/wrk/dmt)
+
+** 입력 파일명 : regular expression (예: [^a-z]*\_[^a-z]*\_CC[0-9]*\_[0-9]*\_[0-9]*\_RLTM)
+
+* FileTriggerManager에서 start 시키는 SourcePollingChannelAdapter는 Spring이 제공하는 클래스로 다음과 같은 설정값을 기반하여 Polling 을 수행한다.
+** source : polling해야 하는 MessageSource
+
+** outputChannel : message가 전달될 message channel
+
+** trigger : 관련된 Task의 다음 실행 시점을 정의하는 Trigger
+** period : Polling 간격을 정의 (millisecond).
+
+** fixedRate : 이 값이 true인 경우, 최근 실행 예정 시간을 기준으로 period에 정의된 간격 이후가 다음 작업의 수행시간이 되어, 처리 간격 내에 완료되지 않는 경우, 중복실행이 허용되며, 이 값이 false 인 경우, 최근에 수행 완료된 작업 시간을 기준으로 period에 정의된 간격 이후에 다음 작업이 수행된다.
+
+** 파일 데몬 배치 작업의 경우, 설정 파일에 period 및 fixedRate 값을 설정한다.
+
+** maxMessagePerPoll : Polling 시 처리하는 메시지의 최대 수
+
+** autoStartup : 자동 시작여부를 설정
+
+* FileTriggerManager에서 start시키는 FileOutboundGateway는 다음과 같은 설정 값에 기반하여 파일 처리를 수행한다.
+** inputChannel : SourcePollingChannelAdapter의 output-channel이 FileOutboundGateway의 input-channel이 된다.
+
+** deleteSourceFiles : 이 값이 true인 경우, 출력 파일 디렉토리로 파일이 이동된 후, 입력 파일 디렉토리에서 삭제된다.
+
+** fileNameGenerator : 출력 파일 디렉토리로 파일이 이동될 때, 파일명 생성 규칙을 정의한다. 현재 설정에는 TimestampFileNameGenerator로 지정되어 있으므로, 원 파일명 뒤에 ".yyyy-MM-dd'T'HHmmss.SSS" 형태의 생성일자를 append하여 파일명이 생성된다.
+
+** outputChannel : 메시지를 전송할 output channel을 정의함
+
+** autoStartup : 자동 시작여부를 설정
+
+* outbound-channel인 target 채널의 adapter로 정의된 BatchService에서 DefaultJobOperator의 execute() 메소드를 호출하여 트리거에 연관된 Batch Job을 구동시킨다.
+
+.daemon-file.xml
+====
+
+----
+
+
+
+<bean id="triggerManager" class="com.anyframe.daemon.trigger.file.FileTriggerManager">
+<property name="triggerConfigurer" ref="triggerConfigurer"/>
+<property name="pollingAdapter" ref="sourcePollingChannelAdapter"/>
+<property name="fileOutboundGateway" ref="fileGateway"/>
+</bean>
+
+<bean id="triggerConfigurer" class="com.anyframe.daemon.trigger.file.FileTriggerConfigurer">
+<property name="fileReadingMessageSource" ref="fileSource"/>
+<property name="regexPatternFileListFilter" ref="regexFilter"/>
+<property name="fileOutboundGateway" ref="fileGateway"/>
+<property name="periodicTrigger" ref="trigger"/>
+</bean>
+
+<bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
+<property name="poolSize" value="10"/>
+<property name="threadNamePrefix" value="task-scheduler-"/>
+<property name="waitForTasksToCompleteOnShutdown" value="true"/>
+<property name="rejectedExecutionHandler">
+<bean class=" java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy"/>
+</property>
+<property name="errorHandler">
+<bean class="org.springframework.integration.channel.MessagePublishingErrorHandler">
+<property name="defaultErrorChannel" ref="errorChannel"/>
+</bean>
+</property>
+</bean>
+
+<bean id="trigger" class="com.anyframe.daemon.support.PeriodicTrigger">
+<property name="period" value="10000"/>
+<property name="fixedRate" value="false"/>
+</bean>
+
+<bean id="fileSource" class="org.springframework.integration.file.FileReadingMessageSource">
+<property name="directory" value="."/><!-- current directory -->
+<property name="filter" ref="regexFilter"/>
+</bean> 
+
+<bean id="regexFilter" class="org.springframework.integration.file.filters.RegexPatternFileListFilter">
+<constructor-arg value="a^"/> <!-- match nothing -->
+</bean>
+
+<bean id="sourcePollingChannelAdapter" class="org.springframework.integration.endpoint.SourcePollingChannelAdapter">
+<property name="source" ref="fileSource"/>
+<property name="outputChannel" ref="source"/>
+<property name="trigger" ref="trigger"/>
+<property name="maxMessagesPerPoll" value="1"/>
+<property name="autoStartup" value="false"/>
+</bean>
+
+<bean id="source" class="org.springframework.integration.channel.DirectChannel"/>
+
+<bean id="fileGateway" class="com.anyframe.daemon.trigger.file.FileOutboundGateway">
+<property name="inputChannel" ref="source"/>
+<property name="deleteSourceFiles" value="true"/>
+<property name="fileNameGenerator">
+<bean class="com.anyframe.daemon.support.TimestampFileNameGenerator"/>
+</property>
+<property name="outputChannel" ref="move"/>
+<property name="autoStartup" value="false"/>
+</bean>
+
+<bean id="move" class="org.springframework.integration.channel.DirectChannel"/>
+
+<integration:transformer id="transformer" ref="triggerConfigurer" method="transform" input-channel="move" output-channel="target"/>
+
+<bean id="target" class="org.springframework.integration.channel.DirectChannel"/>
+
+<integration:outbound-channel-adapter channel="target" ref="batchService" method="run"/>
+
+
+----
+
+
+====
+
+[[admin-architecture-daemon-run-timer]]
+
+
+====== 타이머 데몬
+
+:: 타이머 데몬 배치는 지정된 시간 간격에 따라 배치 작업을 구동시키는 형태이다. 기본적으로는 중복 실행을 방지하기 위하여 이전 작업이 종료된 후 지정된 시간 간격 이후에 작업이 다시 실행된다.
+
+
+
+image::images/admin-architecture-daemon-timer.png[]
+
+TimerTrigger 내부에서 정해진 시간 간격으로 특정 Batch Job 수행을 위해서는 아래와 같은 흐름으로 처리한다.
+
+
+
+image::images/admin-architecture-daemon-timer2.png[]
+
+* DefaultTriggerManager에서는 Batch Admin에서 타이머 트리거를 생성할 때 정의된 값을 기반으로 TimerTriggerConfigurer를 통해 PeriodicTrigger의 값을 설정한다.
+** Period : Batch Admin에서 트리거 정의 시 ‘실행주기 '로 지정된 값이 Polling 간격으로 설정된다. (millisecond)
+
+** fixedRate : Batch Admin에서 주기유형이 ‘상대간격 '이면 fixedRate가 false이고, ‘고정간격 '이면 true이다.
+
+* DefaultTriggerManager에서 start 시키는 pollingAdapter는 설정파일에 정의되어 있는 &lt;integration:inbound-channel-adapter&gt; 로 Polling 을 수행한다.
+** trigger : 관련된 Task의 다음 실행 시점을 정의하는 Trigger(PeriodicTrigger)
+** period : TimerTriggerConfigurer에 의해 설정된 PeriodicTrigger의 period가 Polling 간격으로 설정된다. (millisecond)
+
+** fixedRate : 이 값이 true인 경우, 최근 실행 예정 시간을 기준으로 period에 정의된 간격 이후가 다음 작업의 수행시간이 되어, 처리 간격 내에 완료되지 않는 경우, 중복실행이 허용되며, 이 값이 false 인 경우, 최근에 수행 완료된 작업 시간을 기준으로 period에 정의된 간격 이후에 다음 작업이 수행된다.
+
+** maxMessagePerPoll : Polling 시 처리하는 메시지의 최대 수
+
+** autoStartup : 자동 시작여부를 설정
+
+** expression : polling 결과 메시지로 현재 시간을 전달한다.
+
+* outbound-channel인 target 채널의 adapter로 정의된 BatchService에서 DefaultJobOperator의 execute() 메소드를 호출하여 트리거에 연관된 Batch Job을 구동시킨다.
+
+.daemon-timer.xml
+====
+
+----
+
+
+
+<bean id="triggerManager" class="com.anyframe.daemon.trigger.DefaultTriggerManager">
+<property name="triggerConfigurer" ref="triggerConfigurer"/>
+<property name="pollingAdapter" ref="source.adapter"/>
+</bean>
+
+<bean id="triggerConfigurer" class="com.anyframe.daemon.trigger.timer.TimerTriggerConfigurer">
+<property name="periodicTrigger" ref="trigger"/>
+</bean>
+
+<bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
+<property name="poolSize" value="10"/>
+<property name="threadNamePrefix" value="task-scheduler-"/>
+<property name="waitForTasksToCompleteOnShutdown" value="true"/>
+<property name="rejectedExecutionHandler">
+<bean class=" java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy"/>
+</property>
+<property name="errorHandler">
+<bean class="org.springframework.integration.channel.MessagePublishingErrorHandler">
+<property name="defaultErrorChannel" ref="errorChannel"/>
+</bean>
+</property>
+</bean>
+
+<integration:inbound-channel-adapter id="source" expression="new java.util.Date()" auto-startup="false">
+<integration:poller max-messages-per-poll="1" trigger="trigger"/>
+</integration:inbound-channel-adapter>
+
+<bean id="trigger" class="com.anyframe.daemon.support.PeriodicTrigger"/>
+
+<integration:transformer id="transformer" ref="triggerConfigurer" method="transform" input-channel="source" output-channel="target"/>
+
+<bean id="target" class="org.springframework.integration.channel.DirectChannel"/>
+
+<integration:outbound-channel-adapter channel="target" ref="batchService" method="run"/>
+
+
+----
+
+
+====
+
+[[admin-architecture-daemon-run-schedule]]
+
+
+====== 스케줄 데몬
+
+:: 스케쥴 데몬 배치는 특정 시간, 특정 요일 등의 스케쥴에 따라 배치 작업을 구동시키는 형태이다.
+
+
+
+image::images/admin-architecture-daemon-schedule.png[]
+
+Schedule Trigger 내부에서 정해진 스케쥴로 특정 Batch Job 수행을 위해서는 아래와 같은 흐름으로 처리한다.
+
+
+
+image::images/admin-architecture-daemon-schedule2.png[]
+
+* DefaultTriggerManager에서는 Batch Admin에서 스케쥴 트리거를 생성할 때 정의된 값을 기반으로 ScheduleTriggerConfigurer를 통해 CronTrigger의 값을 설정한다.
+** cronExpression : Batch Admin에서 트리거 정의 시 ‘스케쥴(CRON) '로 지정된 값이 스케쥴로 정의된다. 다음은 cron tab expression의 사용예이다.
+** 매일 매시 정각 : 0 0 * * * *
+
+** 매일 8-10시 정각: 0 0 8-10 * * *
+
+** 매일 8:00, 8:30, 9:00, 9:30, 10시 : 0 0/30 8-10 * * *
+
+** 월~금, 9시~17시 정각 : 0 0 9-17 * * MON-FRI
+
+* DefaultTriggerManager에서 start 시키는 pollingAdapter는 설정파일에 정의되어 있는 &lt;integration:inbound-channel-adapter&gt; 로 정해진 스케쥴에 따라 Polling 을 수행한다.
+** trigger : 관련된 Task의 다음 실행 시점을 정의하는 Trigger(CronTrigger)
+** cronExpression에 정의된 스케쥴에 따라 실행 시점이 정해진다.
+
+** maxMessagePerPoll : Polling 시 처리하는 메시지의 최대 수
+
+** autoStartup : 자동 시작여부를 설정
+
+** expression : polling 결과 메시지로 현재 시간을 전달한다.
+
+* outbound-channel인 target 채널의 adapter로 정의된 BatchService에서 DefaultJobOperator의 execute() 메소드를 호출하여 트리거에 연관된 Batch Job을 구동시킨다.
+
+.daemon-schedule.xml
+====
+
+----
+
+
+
+<bean id="triggerManager" class="com.anyframe.daemon.trigger.DefaultTriggerManager">
+<property name="triggerConfigurer" ref="triggerConfigurer"/>
+<property name="pollingAdapter" ref="source.adapter"/>
+</bean>
+
+<bean id="triggerConfigurer" class="com.anyframe.daemon.trigger.schedule.ScheduleTriggerConfigurer">
+<property name="cronTrigger" ref="trigger"/>
+</bean>
+
+<bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
+<property name="poolSize" value="10"/>
+<property name="threadNamePrefix" value="task-scheduler-"/>
+<property name="waitForTasksToCompleteOnShutdown" value="true"/>
+<property name="rejectedExecutionHandler">
+<bean class=" java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy"/>
+</property>
+<property name="errorHandler">
+<bean class="org.springframework.integration.channel.MessagePublishingErrorHandler">
+<property name="defaultErrorChannel" ref="errorChannel"/>
+</bean>
+</property>
+</bean>
+
+<integration:inbound-channel-adapter id="source" expression="new java.util.Date()" auto-startup="false">
+<integration:poller max-messages-per-poll="1" trigger="trigger"/>
+</integration:inbound-channel-adapter>
+
+<bean id="trigger" class="com.anyframe.daemon.support.CronTrigger"/>
+
+<integration:transformer id="transformer" ref="triggerConfigurer" method="transform" input-channel="source" output-channel="target"/>
+
+<bean id="target" class="org.springframework.integration.channel.DirectChannel"/>
+
+<integration:outbound-channel-adapter channel="target" ref="batchService" method="run"/>
+
+
+----
+
+
+====
+
+[[admin-architecture-daemon-stop]]
+
+
+===== 데몬 중지
+
+:: 어드민에서 데몬을 중지할 경우, BATCH_DAEMON 테이블과 BATCH_DAEMON_TRIGGER 테이블에서 데몬과 트리거의 상태를 ‘STOPPING '으로 업데이트한다. 배치 런타임에서는 주기적으로 해당 테이블에서 데몬의 상태를 모니터링하여 상태가 ‘STOPPING '인 경우, ‘STOPPED '로 업데이트하고, 해당 스레드 및 프로세스를 종료시킨다.
+
+
+
+image::images/admin-architecture-daemon-stop.png[]
+
+**어드민**
+
+* 데몬을 어드민에서 중지하고자 할 경우, 배치 어드민에서 [배치]-[데몬 작업 관리]-[데몬 정의]를 클릭한다.
+
+* 조회된 데몬 목록에서 중지하고자 하는 데몬을 선택하고 [중지] 버튼을 클릭한다.
+
+* 배치 어드민에서 [중지] 버튼 클릭시 다음과 같은 절차로 데몬이 중지된다.
+
+* 어드민에서 [중지]버튼이 클릭되면, DaemonController의 stopDaemon(String daemonName) 메소드가 실행된다.
+** 현재 Daemon의 상태가 ‘STARTED '인 경우에만 stop이 가능하므로, 그 외의 경우에는 "STARTED 상태에서만 STOP 가능합니다." 메시지를 어드민에 전달한다.
+
+** DaemonServiceImpl의 stopDaemon(String daemonName) 메소드를 호출한다.
+
+* DaemonServiceImpl.stopDaemon() 메소드에서는 BATCH_DAEMON 테이블과 BATCH_DAEMON_TRIGGER 테이블에 데몬과 트리거의 상태를 ‘STOPPING '으로 업데이트한다.
+
+**에이전트**
+
+* context-daemon-runtime.xml에 설정된 간격(10초)을 주기로 DefaultDaemonMonitor의 doMonitor() 메소드가 실행된다.
+
+* DefaultDaemonMonitor.doMonitor()에서는 BATCH_DAEMON 테이블에서 데몬들의 정보를 select 하여, 상태가 ‘STOPPING '인 데몬에 대하여, 데몬에 포함된 트리거들을 종료시키고, 데몬을 종료시킨다.
+** TriggerManager를 통해 데몬에 포함된 Trigger를 수행시키기 위해 사용했던 ThreadPoolTaskScheduler를 shutdown 시키고, ThreadExecutor들을 terminate시킨다.
+
+** BATCH_DAEMON_TRIGGER 테이블에 트리거의 상태를 ‘STOPPED '로 업데이트한다.
+
+** 데몬에 포함된 모든 트리거의 종료처리가 완료되면, 데몬의 상태를 ‘STOPPED '로 업데이트하고,daemon-monitor ThreadExecutor를 shutdown 시키고, 어플리케이션 컨텍스트를 close한다.
+
+.agent/application-context.xml
+====
+
+----
+
+
+
+<bean id="daemonMonitor" class="com.anyframe.daemon.monitor.DefaultDaemonMonitor">
+<property name="interval" value="10000"/>
+<property name="daemonOperator" ref="daemonOperator"/>
+<property name="daemonRepository" ref="daemonRepository"/>
+<property name="order" value="1004"/>
+</bean>
+
+
+----
+
+====
+
+[[admin-architecture-daemon-kill]]
+
+
+===== 데몬 강제중지
+
+:: 어드민에서 데몬을 강제중지할 경우, BATCH_DAEMON 테이블과 BATCH_DAEMON_TRIGGER 테이블에서 데몬과 트리거의 상태를 ‘STOPPED '으로 업데이트하고, 배치 에이전트로 데몬 kill 요청을 전송한다. 배치 에이전트는 데몬의 프로세스 ID를 조회하여, 해당 프로세스를 kill 커맨드로 종료시킨다.
+
+
+
+image::images/admin-architecture-daemon-kill.png[]
+
+**어드민**
+
+* 데몬을 어드민에서 중지하고자 할 경우, 배치 어드민에서 [배치]-[데몬 작업 관리]-[데몬 정의]를 클릭한다.
+
+* 조회된 데몬 목록에서 중지하고자 하는 데몬을 선택하고 [강제중지] 버튼을 클릭한다.
+
+* 배치 어드민에서 [강제중지] 버튼 클릭시 다음과 같은 절차로 데몬이 중지된다.
+
+* 어드민에서 [강제중지]버튼이 클릭되면, DaemonController의 killDaemon (String daemonName, String server, boolean isServer) 메소드가 실행된다.
+** DaemonServiceImpl.getDaemon() 메소드를 호출하여 BATCH_DAEMON 테이블로부터 데몬이 할당된 서버의 정보를 얻는다.
+
+** DaemonServiceImpl의 killDaemon(String daemonName, String target, boolean isServer) 메소드를 호출한다.
+
+* DaemonServiceImpl.killDaemon() 메소드에서는 배치 에이전트로 데몬 Kill을 요청하고, 데몬과 트리거의 상태를 ‘STOPPED '로 업데이트한다.
+** 데몬이 할당된 서버에 사용가능한 Agent가 없는 경우, 데몬과 트리거의 상태를 ‘STOPPED '로 업데이트하고, NoAgentAvailableException(target + " : 서버 연결 불가 : 데몬 상태 STOPPED처리 ");를 throw한다.
+
+** 사용가능한 Agent가 있는 경우, Agent의 DaemonOperationService의 kill()을 요청한다.
+
+** 데몬과 트리거의 상태를 ‘STOPPED '로 업데이트한다.
+
+**에이전트**
+
+* 배치 에이전트의 DaemonOperationServiceImpl.kill() 에서는 DaemonExecutionManager.stop() 메소드를 호출한다.
+
+* DaemonExecutionManager.stop()에서는 BATCH_DAEMON 테이블에서 데몬의 정보를 select하고, 그 중 PID를 가지고 해당 프로세스를 kill 시킨다.
+** PID로 프로세스를 kill 시키기 위한 커맨드는 agent.properties에서 관리한다.
+
+** 해당 프로세스를 kill 시키고, 데몬의 상태를 ‘STOPPED '로 업데이트 한다.
+
+* 아래는 강제종료와 관련된 에이전트의 설정파일이다.
+.agent/agent.properties
+====
+
+----
+
+
+
+runtime.daemon.killCommand=/app/batch/runtime/bin/killdaemon.cmd
+
+
+----
+
+====
+
+.agent/application-context.xml
+====
+
+----
+
+
+
+<bean id="daemonExecutionManager" class="com.anyframe.batch.agent.launch.DaemonExecutionManagerImpl">
+<property name="daemonDao" ref="daemonDao"/>
+<property name="workingDirectory" value="${runtime.workingDirectory}"/>
+<property name="runCommand" value="${runtime.daemon.runCommand}"/>
+<property name="killCommand" value="${runtime.daemon.killCommand}"/>
+</bean>
+
+
+----
+
+====
+
+[[admin-architecture-daemon-monitor]]
+
+
+===== 데몬 모니터링
+
+:: 어드민에서는 데몬의 실행상황을 모니터링하여 상태를 업데이트하거나 관리자 및 데몬 담당자에게 SMS, Email 등으로 통지한다.
+
+
+
+image::images/admin-architecture-daemon-monitor.png[]
+
+**어드민**
+
+* daemonMonitor Bean이 초기화되면서 DaemonMonitorServiceImpl의 afterPropertiesSet() 내에서 ScheduledThreadPoolExecutor에 의해 데몬 모니터링을 위한 Thread가 run() 된다. 해당 Thread는 context.properties 파일에 정의된 ‘daemonMonitoringInterval ' 값인 10초 간격으로 DaemonMonitorServiceImpl의 doMonitor()를 수행한다.
+
+* DaemonMonitorServiceImpl.doMonitor()에서는 다음 상황에 따라, 데몬 상태 변경 및 재실행, 통지등을 수행한다.
+
+* 1분동안 DAEMON이 동작하지 않은 경우 (1분이라는 주기는 배치 어드민에서 데몬 기본설정에 ‘자동 실행주기 '의 값으로 정해진다.)
+** BATCH_DAEMON 테이블에서 데몬들의 정보를 조회하고, DAEMON의 최종 업데이트 시간으로부터 1분이 넘었을 경우, 즉, 1분동안 DAEMON의 업데이트 시간에 변동이 없는 경우, 데몬과 트리거의 상태를 UNKNOWN으로 변경하여 테이블에 업데이트한다.
+
+** 해당 데몬의 담당자에게 SMS와 Email로 데몬의 상태가 변경되었음을 통지한다.
+
+** 만약, 어드민에서 해당 데몬 설정에 ‘자동 재실행 '이 체크되어 있는 경우, DaemonServiceImpl.startDaemon() 을 호출하여, 해당 데몬을 재시작 시킨다.
+
+** 해당 데몬의 담당자에게 SMS와 Email로 해당 데몬이 재시작되었음을 통지한다.
+
+* Daemon의 상태가 변경된 경우
+** BATCH_DAEMON 테이블에서 조회한 데몬의 상태가 이전 상태와 다른 경우, 즉, 데몬의 상태가 모니터링 중에 변경된 경우, 배치 관리자 및 데몬 담당자에게 해당 내용을 통지한다.
+
+** 전송매체(SMS, Email) 및 시작시 통지 여부는 배치 어드민에서 데몬의 통지설정에 설정된 내용을 기반으로 수행한다.
+
+.context.properties
+====
+
+----
+
+
+
+# interval to check if agent is alive (second)
+daemonMonitoringInterval=10
+
+
+----
+
+
+====
+
+.context-admin.xml
+====
+
+----
+
+
+
+<bean id="daemonMonitor" class="com.anyframe.batch.admin.server.monitor.DaemonMonitorServiceImpl">
+<property name="intervalSecond" value="#{contextProperties.daemonMonitoringInterval}"/>
+<property name="noticeService" ref="noticeService"/>
+<property name="daemonDao" ref="daemonDao"/>
+<property name="daemonService" ref="daemonService"/>
+<property name="threshold" value="1"/>
+</bean>
+
+
+----
+
+
+====
+
+===== 작업 스케줄링
+
+* 어드민화면에서 Anyframe Batch 및 shell 의 스케줄 정보를 설정하여, 설정한 시간에 실행할 수 있다. 
+
+* 스케줄 정보는 작업 등록시 스케줄 탭에서 설정할 수 있으며, 각 작업의 설정된 스케줄 정보를 읽어서 하루에 한 번 다음날 수행될 작업들을 미리 인스턴스화 하여 작업인스턴스를 생성한다. 
+
+* 이런 일련의 동작을 "일일 스케줄링"이라고 부르며, Configuration 메뉴에서 해당 "일일스케줄링" 시간을 설정할 수 있다. 
+  ( 예 : 23:30:00 -> 23:30 에 다음날 수행될 작업인스턴스 목록을 미리 생성함 )
+
+[NOTE]
+====
+
+		"일일 스케줄링" 수행 자체도 시간이 소요되므로 23:59:59 와 같이 자정에 임박한 값으로 설정할 경우 자정에 돌아야 할 작업들이 경우에 따라 수행이 되지 않을 수도 있으니 주의하도록 한다. 
+
+	
+====
+
+
+.context-schedule.xml
+
+====
+
+----
+
+
+<bean id="scheduleManager" class="com.anyframe.batch.admin.server.schedule.manager.ScheduleManagerImpl" destroy-method="close">
+	<property name="jobScheduler" ref="jobScheduler"/>
+	<property name="mngScheduler" ref="mngScheduler"/>
+	<property name="jobExecutionContext" ref="jobExecutionContext"/>
+</bean>
+
+<bean id="triggeringJobExecution" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+	<property name="jobClass" value="com.anyframe.batch.admin.server.schedule.manager.TriggeringJobExecution"/>
+	<property name="jobDataAsMap">
+		<map>
+			<entry key="jobExecutionContext" value-ref="jobExecutionContext"/>
+		</map>
+	</property>
+	<property name="durability" value="true"/>
+</bean>
+
+<bean id="jobScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+	<property name="quartzProperties">
+		<props>
+			<prop key="org.quartz.threadPool.class">org.quartz.simpl.SimpleThreadPool</prop>
+			<prop key="org.quartz.threadPool.threadCount">10</prop>
+			<prop key="org.quartz.threadPool.threadPriority">4</prop>
+			<prop key="org.quartz.jobStore.class">org.quartz.simpl.RAMJobStore</prop>
+			<prop key="org.quartz.jobStore.misfireThreshold">60000</prop>
+		</props>
+	</property>
+	<property name="jobDetails">
+		<list>
+			<ref bean="triggeringJobExecution"/>
+		</list>
+	</property>
+</bean>
+
+<bean id="instanciateJobDaily" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+	<property name="jobClass" value="com.anyframe.batch.admin.server.schedule.manager.InstanciateJobDaily"/>
+	<property name="jobDataAsMap">
+		<map>
+			<entry key="jobExecutionContext" value-ref="jobExecutionContext"/>
+			<entry key="jobScheduler" value-ref="jobScheduler"/>
+		</map>
+	</property>
+	<property name="durability" value="true"/>
+</bean>
+
+<bean id="mngScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+	<property name="quartzProperties">
+		<props>
+			<prop key="org.quartz.threadPool.class">org.quartz.simpl.SimpleThreadPool</prop>
+			<prop key="org.quartz.threadPool.threadCount">5</prop>
+			<prop key="org.quartz.threadPool.threadPriority">4</prop>
+			<prop key="org.quartz.jobStore.class">org.quartz.simpl.RAMJobStore</prop>
+			<prop key="org.quartz.jobStore.misfireThreshold">60000</prop>
+		</props>
+	</property>
+
+	<property name="jobDetails">
+		<list>
+			<!--  ref bean="triggeringTimeout"/-->
+			<ref bean="instanciateJobDaily"/>
+		</list>
+	</property>
+
+</bean>
+
+<bean id="configurationHandler" class="com.anyframe.batch.admin.server.schedule.manager.ConfigurationHandlerImpl" destroy-method="close">
+	<property name="mngScheduler" ref="mngScheduler"/>
+	<property name="jobExecutionContext" ref="jobExecutionContext"/>
+	<property name="scheduleTime" value="233000"/>
+</bean>
+
+<bean id="jobExecutionContext" class="com.anyframe.batch.admin.server.execution.context.JobExecutionContextImpl">
+	<property name="jobExecutionService" ref="jobExecutionService"/>
+	<property name="batchAgentService" ref="batchAgentService"/>
+	<property name="clusterManager" ref="clusterManager"/>
+	<property name="batchConfigService" ref="batchConfigService"/>
+</bean>
+
+<bean id="scheduleService" class="com.anyframe.batch.admin.server.schedule.service.ScheduleServiceImpl">
+	<property name="jobExecutionContext" ref="jobExecutionContext"/>
+	<property name="jobScheduler" ref="jobScheduler"/>
+	<property name="jobDao" ref="jobDao"/>
+</bean>
+
+<task:scheduler id="taskScheduler" pool-size="10" />
+
+<bean id="adminOperator" class="com.anyframe.batch.admin.server.remote.AdminOperatorImpl">
+	<property name="jobExecutionContext" ref="jobExecutionContext"/>
+</bean>
+
+----
+
+
+====

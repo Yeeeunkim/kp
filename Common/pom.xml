@@ -1,0 +1,699 @@
+ 
+- pom.xml 관련
+  1. maven 라이프사이클 (pom.xml 설정안해도 maven에 default 라이프사이클이 내장되어 있음 )
+     [goals] 
+    package -> target 아래 compile 
+    install -> repository 참조된 것 전부 compile 
+    deploy -> nexus와 같은 외부저장소 compile 
+     
+     [lifecycle]
+      compile
+      test
+      package
+      verify
+      install
+      deploy
+
+  2. plugin vs dependency 
+     plugin - build 역할 , class compile 시 필요한 
+     dependency - 프로젝트 전체 주입할 기준으로 어떠한 lib 쓸거다 하는 것 
+
+  3. pmd 이슈 
+      parent 패키지에서 pmd 제외 시켜 repository안에 .pom 최신화 시킨 후 상속 프로젝트 build 
+      pmd 는 은행권에서 스페로우를 사용함 !
+	  pmd는 정적소스코드 분석기로 사용하지 않는 변수나, 아무 일도 하지 않은 catch 구문 등 문제가 될만한 부분을 찾아줌 ! 
+	  
+	 적용하기 위해서는 
+	 <parent>
+		<groupId>org.anyframe</groupId>
+		<artifactId>anyframe-plugin-parent</artifactId>
+		<version>5.2.2</version>
+	</parent>
+	1. 안에 정의되어있는 pmd  build 주석 처리 
+	방법 2. anyframe-pulgin-parent maven install 처리를 해야함 !  그래야지 내부소스에서 인식 후 에러안남
+	방법 2. maven 경로에서 pom 파일 수정함 
+	C:\kye\eclipse\maven\삼성화재\samfire.5.0.2-241002\apache-maven-3.8.4\repository\org\anyframe\anyframe-plugin-parent\5.2.2
+	
+  4. spring.context-xxx.xml 객체만드는 역할로 재활용 가능한 객체 정의해주는 것 
+
+  5. 애니프레임과 관련없는 lib
+  - Testopia   : test code 자동 만들어줌 
+  - Sonar Qube : 소스코드분석 
+  - 커버리지
+
+
+<dependency>
+	<groupId>com.anyframe.centercut</groupId>
+	<artifactId>anyframe-centercut-engine-ext</artifactId>
+	<version>5.0.1-SNAPSHOT</version>
+	<exclusions>
+	<!-- .jar 제외 -->
+		<exclusion>
+			<groupId>com.anyframe.centercut</groupId>
+			<artifactId>anyframe-centercut-engine</artifactId>
+		</exclusion>
+	</exclusions>
+	<scope>compile</scope>			
+</dependency>
+<!-- .jar 의존성추가  -->
+<dependency>
+	<groupId>com.anyframe.centercut</groupId>
+	<artifactId>anyframe-centercut-engine</artifactId>
+	<version>5.0.2-SNAPSHOT</version>
+	<scope>system</scope>
+	<systemPath>${project.basedir}/lib/anyframe-centercut-engine-5.0.2-SNAPSHOT-20240710.jar</systemPath>
+</dependency>
+
+
+지정할 경우
+1. 
+    <parent>
+        <groupId>org.anyframe</groupId>
+        <artifactId>anyframe-plugin-parent</artifactId>
+        <version>5.2.2</version>
+    </parent>    
+2.
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-webmvc</artifactId>
+	</dependency>
+
+	springframework version 지정 따로 안하고 parent 가져오는 역할, 
+
+지정안할 경우, 
+1. 주석
+	<!-- 	<parent> -->
+<!-- 		<groupId>org.anyframe</groupId> -->
+<!-- 		<artifactId>anyframe-plugin-parent</artifactId> -->
+<!-- 		<version>5.2.2-SNAPSHOT</version> -->
+<!-- 	</parent> -->
+2.<version>${spring.version}</version> 추가
+   <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
+
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.anyframe.admin</groupId>
+	<artifactId>anyframe-enterprise-admin-common</artifactId>
+	<version>6.5.0-SNAPSHOT</version>
+	<name>anyframe-enterprise-admin-common</name>
+	<packaging>war</packaging>
+
+	<properties>
+		<maven.test.skip>true</maven.test.skip>
+		
+		<encodingtype>UTF-8</encodingtype>
+		<jdk.version>11</jdk.version>
+		<spring.version>5.3.39</spring.version>
+		<spring.security.version>5.8.14</spring.security.version>
+		<spring.data.version>3.3.3</spring.data.version>
+
+		<jackson.library>2.17.2</jackson.library>
+		<swagger.version>3.0.0</swagger.version>
+		<anyframe.version>1.7.0</anyframe.version>
+		<admin.release.version>6.5.0-SNAPSHOT</admin.release.version>
+
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
+					<encoding>${encodingtype}</encoding>
+					<compilerVersion>${jdk.version}</compilerVersion>
+				</configuration>
+			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+            </plugin>
+			
+			<!-- replacer -->
+			<!-- vue의 index.html의 내용을 변경하는데 사용 -->
+<!--			<plugin>-->
+<!--				<groupId>com.google.code.maven-replacer-plugin</groupId>-->
+<!--				<artifactId>maven-replacer-plugin</artifactId>-->
+<!--				<version>1.3.7</version>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<phase>prepare-package</phase>-->
+<!--						<goals>-->
+<!--							<goal>replace</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--				<configuration>-->
+<!--					<skip>${replace.skip}</skip>-->
+<!--					<filesToInclude>target/classes/templates/index.html</filesToInclude>-->
+<!--					<replacements>-->
+<!--						<replacement>-->
+<!--							 <script src=/vue/js/app.d4f036cf.js></script> 형태를 -->
+<!--							 <script th:src=@{/vue/js/app.d4f036cf.js}></script> 형태로 변경 -->
+<!--							 or -->
+<!--							 <link href=/admin/vue/css/app.622e2a31.css rel=preload as=style> 형태를 -->
+<!--							 <link th:href=@{/admin/vue/css/app.622e2a31.css} rel=preload as=style> 형태로 변경 -->
+<!--							<token>((src|href)\s*=\s*)(\"([^"]*\")|'[^']*'|([^'">\s]+))</token>-->
+<!--							<value>th:$2=@{$3}</value>-->
+<!--						</replacement>-->
+<!--						<replacement>-->
+<!--							 source는 id="vueProperties" 로 되어있지만, build 시 "가 사라짐 -->
+<!--							<token>id=vueProperties</token>-->
+<!--							 IDE(intellij)에서는 컴파일에러가 있지만 실제빌드 시 문제없음 -->
+<!--							<value>id=vueProperties th:text="\${vueProperties}"</value>-->
+<!--						</replacement>-->
+<!--					</replacements>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
+			
+		</plugins>
+
+	</build>
+
+	<dependencies>
+		<!-- Compile Scope Libraries -->
+		<dependency>
+			<groupId>org.anyframe</groupId>
+			<artifactId>anyframe-core</artifactId>
+			<version>${anyframe.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-beanutils</groupId>
+					<artifactId>commons-beanutils</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.anyframe</groupId>
+			<artifactId>anyframe-query</artifactId>
+			<version>${anyframe.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-access</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+<!--				 <exclusion>-->
+<!--            <groupId>org.slf4j</groupId>-->
+<!--            <artifactId>slf4j-log4j12</artifactId>-->
+<!--        </exclusion>-->
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.anyframe.admin</groupId>
+			<artifactId>anyframe-enterprise-admin-core</artifactId>
+			<version>${admin.release.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>javax.validation</artifactId>
+					<groupId>validation-api</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.6.12</version>
+		</dependency>
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib-nodep</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>1.4</version>
+
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-pool</artifactId>
+					<groupId>commons-pool</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>commons-pool</groupId>
+			<artifactId>commons-pool</artifactId>
+			<version>1.5.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derbyclient</artifactId>
+			<version>10.8.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.13</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.jasypt</groupId>
+			<artifactId>jasypt-spring31</artifactId>
+			<version>1.9.3</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency>
+<!-- <dependency>
+    <groupId>jakarta.servlet.jsp.jstl</groupId>
+    <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+    <version>3.0.0</version>
+</dependency> -->
+
+		<dependency>
+			<groupId>junitperf</groupId>
+			<artifactId>junitperf</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.oracle.database.jdbc</groupId>
+		    <artifactId>ojdbc8</artifactId>
+<!--		    <version>21.1.0.0</version>-->
+		    <version>19.20.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- <dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.0.0</version>
+		</dependency> -->
+
+		<dependency>
+			<groupId>aopalliance</groupId>
+			<artifactId>aopalliance</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>${spring.security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>${spring.security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
+			<version>${spring.data.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<version>1.3.1</version>
+		</dependency>
+<!-- <dependency>
+    <groupId>jakarta.inject</groupId>
+    <artifactId>jakarta.inject-api</artifactId>
+    <version>2.0.1</version>
+</dependency> -->
+
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.thymeleaf</groupId> -->
+<!-- 			<artifactId>thymeleaf</artifactId> -->
+<!-- 			<version>3.0.9.RELEASE</version> -->
+<!-- 		</dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.thymeleaf</groupId> -->
+<!-- 			<artifactId>thymeleaf-spring4</artifactId> -->
+<!-- 			<version>3.0.9.RELEASE</version> -->
+<!-- 		</dependency> -->
+		<!-- 2023.08.31 보안취약점 ver 변경 (thymeleaf 3.0.15.RELEASE > 3.1.2.RELEASE) -->
+<!--		<dependency>-->
+<!--			<groupId>org.thymeleaf</groupId>-->
+<!--			<artifactId>thymeleaf</artifactId>-->
+<!-- 			<version>3.0.15.RELEASE</version> -->
+<!--			<version>3.1.2.RELEASE</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.thymeleaf</groupId>-->
+<!--			<artifactId>thymeleaf-spring5</artifactId>-->
+<!-- 			<version>3.0.15.RELEASE</version> -->
+<!--			<version>3.1.2.RELEASE</version>-->
+<!--		</dependency>-->
+<dependency>
+    <groupId>org.thymeleaf</groupId>
+    <artifactId>thymeleaf-spring6</artifactId>
+    <version>3.1.2.RELEASE</version>
+</dependency>
+
+		<!--<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.6.4</version>
+			<scope>runtime</scope>
+		</dependency>-->
+
+<!--		<dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+        </dependency>-->
+
+			<!-- 2023.08.31 보안취약점 ver 변경 (guava 30.1.1-jre > 32.1.2-jre) -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+<!-- 			<version>30.1.1-jre</version> -->
+			<version>32.1.2-jre</version>
+		</dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-access</artifactId>
+            <version>1.4.11</version>
+<!--            <version>1.2.11</version>-->
+            <exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.11</version>
+<!--            <version>1.2.11</version>-->
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.4.11</version>
+<!--            <version>1.2.11</version>-->
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>2.0.7</version>
+<!--            <version>1.7.25</version>-->
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.slf4j</groupId>-->
+<!--	<artifactId>slf4j-log4j12</artifactId>-->
+<!--            <version>1.7.25</version>-->
+<!--            <version>2.0.7</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--          <groupId>org.slf4j</groupId>-->
+<!--  <artifactId>slf4j-api</artifactId>-->
+<!--            <version>2.0.7</version>-->
+<!--            <version>1.7.25</version>-->
+<!--        </dependency>-->
+
+		<dependency>
+			<groupId>org.codehaus.janino</groupId>
+			<artifactId>janino</artifactId>
+			<version>2.6.1</version>
+		</dependency>
+
+		<!-- Test Scope Libraries -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.5</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+<!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
+		<!-- <dependency>
+		    <groupId>org.apache.velocity</groupId>
+		    <artifactId>velocity-engine-core</artifactId>
+		    <version>2.3</version>
+		</dependency> -->
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity</artifactId>
+			<version>1.6.4</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-collections</groupId>
+					<artifactId>commons-collections</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.2</version>
+		</dependency>
+        <dependency>
+        <groupId>postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>9.1-901-1.jdbc4</version>
+        </dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.library}</version>
+		</dependency>
+
+<!-- 		<dependency> -->
+<!-- 			<groupId>javax.validation</groupId> -->
+<!-- 			<artifactId>validation-api</artifactId> -->
+<!-- 			<version>1.0.0.GA</version> -->
+<!-- 		</dependency> -->
+
+<!--		<dependency>-->
+<!--			<groupId>org.hibernate</groupId>-->
+<!--			<artifactId>hibernate-validator</artifactId>-->
+<!--			<version>5.3.6.Final</version>-->
+<!--			<exclusions>-->
+<!--				<exclusion>-->
+<!--					<artifactId>javax.validation</artifactId>-->
+<!--					<groupId>validation-api</groupId>-->
+<!--				</exclusion>-->
+<!--			</exclusions>-->
+<!--		</dependency>-->
+<dependency>
+    <groupId>org.hibernate.validator</groupId>
+    <artifactId>hibernate-validator</artifactId>
+    <version>8.0.1.Final</version>
+</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.projectlombok</groupId>-->
+<!--			<artifactId>lombok</artifactId>-->
+<!--			<version>1.18.4</version>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+	<dependency>
+		<groupId>org.projectlombok</groupId>
+		<artifactId>lombok</artifactId>
+		<version>1.18.30</version>
+		<scope>provided</scope>
+	</dependency>
+		<!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt -->
+<!--		<dependency>-->
+<!--			<groupId>io.jsonwebtoken</groupId>-->
+<!--			<artifactId>jjwt</artifactId>-->
+<!--			<version>0.9.0</version>-->
+<!--			<version>0.9.1</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>com.fasterxml.jackson.core</groupId>-->
+<!--                    <artifactId>jackson-databind</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--		</dependency>-->
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>0.12.3</version>
+    <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+            </exclusions>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>0.12.3</version>
+<!--    <scope>runtime</scope>-->
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
+    <version>0.12.3</version>
+<!--    <scope>runtime</scope>-->
+</dependency>
+
+
+<!--		<dependency>-->
+<!--			<groupId>io.springfox</groupId>-->
+<!--			<artifactId>springfox-swagger2</artifactId>-->
+<!--			<version>${swagger.version}</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>io.springfox</groupId>-->
+<!--			<artifactId>springfox-swagger-ui</artifactId>-->
+<!--			<version>${swagger.version}</version>-->
+<!--		</dependency>-->
+ 
+<!--  대안책인데 오픈api-->
+<!--<dependency>-->
+<!--    <groupId>org.springdoc</groupId>-->
+<!--    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>-->
+<!--    <version>2.2.0</version>-->
+<!--</dependency>-->
+<!--    <dependency>-->
+<!--        <groupId>org.springdoc</groupId>-->
+<!--        <artifactId>springdoc-openapi-ui</artifactId>-->
+<!--        <version>1.7.0</version>-->
+<!--    </dependency>-->
+<!--   <dependency>-->
+<!--    <groupId>org.springdoc</groupId>-->
+<!--    <artifactId>springdoc-openapi-core</artifactId>-->
+<!--    <version>1.1.49</version>-->
+<!--</dependency>-->
+		<dependency>
+		    <groupId>org.mybatis</groupId>
+		    <artifactId>mybatis</artifactId>
+<!--		    <version>3.4.6</version>-->
+		    <version>3.5.13</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.mybatis</groupId>
+		    <artifactId>mybatis-spring</artifactId>
+<!--		    <version>1.3.2</version>-->
+		    <version>3.0.2</version>
+		</dependency>
+		<dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper</artifactId>
+<!--             <version>5.1.10</version> -->
+            <version>5.3.2</version>
+        </dependency>
+		
+		<dependency>
+		  <groupId>org.modelmapper</groupId>
+		  <artifactId>modelmapper</artifactId>
+		  <version>2.3.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.1.0.Final</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+			<version>3.0.2</version>
+		</dependency> -->
+<!--		<dependency>-->
+<!--    <groupId>org.glassfish</groupId>-->
+<!--    <artifactId>jakarta.annotation</artifactId>-->
+<!--    <version>2.0.5</version>-->
+<!--</dependency>-->
+<!-- <dependency>
+    <groupId>jakarta.annotation</groupId>
+    <artifactId>jakarta.annotation-api</artifactId>
+    <version>2.1.1</version>
+</dependency> -->
+
+		
+	</dependencies>
+
+</project>

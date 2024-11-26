@@ -1,0 +1,68 @@
+ anyframe-centercut-admin-5.0.2
+        JobConfigController
+        if(CurrentPage == 1) {
+                startRow =  CurrentPage; //현재페이지 
+                endRow =  CurrentPage * pageNum; //현재페이지 * 20 or 40 구분자
+            }else {
+                startRow = 1 + (CurrentPage-1) * pageNum; //21부터 보여주기 위한 
+                endRow =  CurrentPage * pageNum;
+            }
+        화면단
+        JobConfigTab
+        -- JobConfigToolStrip
+
+        CenterCutAdminConstants
+        DATE_SEARCH_CONDITION.put("execDate", "실행일자");
+		DATE_SEARCH_CONDITION.put("execTime", "수행일시");
+        
+    anyframe-centercut-engine-5.0.2
+        JobConfigService
+        JobConfigServiceImpl
+        JobConfigRepositoryImpl
+        
+        JobConfigDao
+        JobConfigParameterSource
+
+
+> 작업준비 
+    init 
+        anyframe-centercut\anyframe-centercut-engine-5.0.2\src\main\java\com\anyframe\centercut\engine\execution\dao\JobInstanceDao.java
+        updateChunkStatsByInit
+    READY    
+        anyframe-centercut\anyframe-centercut-engine-5.0.2\src\main\java\com\anyframe\centercut\engine\execution\manager\JobExecutionManagerImpl.java
+        jobInstance.setInstanceStatus(JobInstanceStatus.READY);	
+    PRE_PROCESS_START
+        anyframe-centercut\anyframe-centercut-engine-5.0.2\src\main\java\com\anyframe\centercut\engine\execution\repository\JobInstanceRepositoryImpl.java
+            decideStatus
+        anyframe-centercut-interfaces\src\main\java\com\anyframe\centercut\interfaces\agent\CenterCutAgent.java
+
+
+
+
+    context-management.xml
+
+
+
+> 작업정의 작업실행 관련 쿼리 
+    [작업정의] 
+    
+    jobConfigDao.java selectJobConfigs() 
+    select * from 
+    afcc_job_config a left outer join afcc_job_group b
+    on a.group_id = b.group_id
+    order by job_id asc
+    ;
+
+    [작업실행 다시 실행 할 경우]
+
+    delete fROM AFCC_JOB_INSTANCE WHERE JOB_ID IN ('sample2');
+    delete  fROM AFCC_CHUNK WHERE JOB_ID IN ('sample2');
+    commit;
+
+    작업정의해서 다시 준비하기 
+
+    afcc_job_config 작업정의관련
+    afcc_job_instance, afcc_application 작업실행관련
+
+
+

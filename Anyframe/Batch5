@@ -1,0 +1,64 @@
+history 
+    ibk프로젝트에서 anyframe버전6 rpc , 버전5 gwt 통신방식이 달라서 
+    online, common, batch 등 화면비교, 매핑작업이 필요했음
+
+1. 환경
+    apache-maven-3.8.4
+    jdk1.7.0_80
+    apache-tomcat-7.0.10
+    encoding, code style, 
+    context type default encoding utf-8
+
+2. db 
+    db online5 버전에 맞는 계정생성
+    
+    1. c## 제거되는 session
+    ALTER SESSION SET "_ORACLE_SCRIPT" = TRUE;
+
+    2. 계정추가    
+    CREATE USER c##kyeibk IDENTIFIED BY kyeibk;
+
+    
+    3. 권한부여 
+    GRANT connect, resource, dba TO c##kyeibk;
+
+    4. ddl dml 추가
+    common
+      anyframe-batch-admin\dist\sql\admin-init.sql
+
+    배치
+        anyframe-batch-admin\dist\ddl\schema-agent(oracle).sql
+        anyframe-batch-admin\dist\ddl\schema-batch(oracle).sql
+        anyframe-batch-admin\dist\ddl\schema-meta(oracle).sql
+        anyframe-batch-admin\dist\ddl\schema-sample.sql
+
+
+1.svn check out 
+    공통
+        ibk frame 할 경우 
+            http://182.195.89.102/subv/anyframe-enterprise/anyframe-enterprise-admin-site/ibk/release
+            anyframe-enterprise-admin-common-5.0.2 
+
+        anyframe 할 경우 
+            https://code.sdsdev.co.kr/kimyeun/anyframe-online-admin.git
+            anyframe-enterprise-admin-common-5.0.2 
+
+    배치 
+        http://182.195.89.102/subv/anyframe-enterprise/anyframe-enterprise-batch-5.0/trunk/anyframe-batch-admin
+        anyframe-batch-admin
+        anyframe-batch-agent
+        anyframe-batch-interfaces
+        
+
+
+    
+
+maven build 
+    anyframe-batch-admin
+        clean install -Dmaven.clean.failOnError=false
+
+
+
+err
+    java.lang.NoClassDefFoundError: org/springframework/beans/factory/InitializingBean
+    java.lang.ClassNotFoundException: org.springframework.web.context.ContextLoaderListener

@@ -1,0 +1,287 @@
+1. 설치파일
+    apache-maven-3.8.4
+    jdk1.8.0_202
+    apache-tomcat-8.5.98
+    encoding, code style, 
+    context type default encoding utf-8
+
+2. git clone
+    develop
+    https://code.sdsdev.co.kr/anyframe/anyframe-batch.git
+
+3. import project 	
+    anyframe-batch-agent
+    anyframe-batch-interface
+    anyframe-batch-runtime
+    anyframe-batch-sample 
+
+
+4. 설정		
+    anyframe-batch-agent
+        -> application.properties
+            server.servlet.context-path=/anyframe-batch-agent
+            server.port=8090
+            spring.datasource.platform=oracle
+            spring.datasource.driver-class-name=oracle.jdbc.driver.OracleDriver
+            spring.datasource.url=jdbc:oracle:thin:@70.30.17.111:1521:db21
+            spring.datasource.username=kye
+            spring.datasource.password=kye8100
+            runtime.working.directory=C:/Users/kpcnc/git/anyframe-batch-0311/anyframe-batch-sample/dist/bin
+            runtime.run.batch=C:/Users/kpcnc/git/anyframe-batch-0311/anyframe-batch-sample/dist/bin/runjob.cmd
+            runtime.kill.batch=C:/Users/kpcnc/git/anyframe-batch-0311/anyframe-batch-sample/dist/bin/killjob.cmd
+            runtime.run.daemon=C:/Users/kpcnc/git/anyframe-batch-0311/anyframe-batch-sample/dist/bin/rundaemon.cmd
+            runtime.kill.daemon=C:/Users/kpcnc/git/anyframe-batch-0311/anyframe-batch-sample/dist/bin/killdaemon.cmd
+            resource.job.directories=C:/Users/kpcnc/git/anyframe-batch-0311/anyframe-batch-sample/target/classes
+            resource.log.directories=C:/anyframe_log/admin/batchlogs
+            agent.cluster.nio.directory=C:/kye/eclipse/apache-tomcat-8.5.98/agent
+            batch.admin.use=true 
+            batch.admin.urls=localhost:8088/anyframe-batch-admin <-- 어드민 url 로 변경해주기 (어드민에서 배치 실행 후 어드민으로 urls 다시 통신 )
+            batch.online.runtime.urls=localhost:8090/C:/Users\kpcnc\git\anyframe-batch-0311\anyframe-batch-sample
+
+        -> policy.properties
+            allowAddress="127.0.0.1;70.30.14.194"
+        
+    anyframe-batch-sample 
+        -> jdbc.properties 
+            frw_jdbc.driverClassName=oracle.jdbc.OracleDriver
+            frw_jdbc.url=jdbc:oracle:thin:@70.30.17.111:1521:db21
+            frw_jdbc.username=kye
+            frw_jdbc.password=kye8100
+            biz_jdbc.driverClassName=oracle.jdbc.OracleDriver
+            biz_jdbc.url=jdbc:oracle:thin:@70.30.17.111:1521:db21
+            biz_jdbc.username=kye
+            biz_jdbc.password=kye8100
+
+        -> batch.properties utf
+            batch.database.persist=true
+            batch.log.directory=C:/anyframe_log/admin/batchlogs
+            
+        -> setenv.cmd
+            set RUNTIME_HOME=C:\Users\kpcnc\git\anyframe-batch-0305\anyframe-batch-sample
+            rem set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_202
+
+        -> 로그설정
+            anyframe-batch-agent\src\main\resources\application.properties
+            resource.log.directories=C:/anyframe_log/admin-iops-postgres/batchlogs
+            resource.file.directories=C:/anyframe_log/admin-new-iops-postgres/file
+    
+    anyframe-batch-sample\src\main\resources\batch.properties
+        batch.log.directory=C:/anyframe_log/admin-iops-postgres/batchlogs
+        
+        -> batch.database.persist=true
+
+5. maven build 	
+    anyframe-batch-agent
+    anyframe-batch-interface
+    anyframe-batch-runtime
+    anyframe-batch-sample 
+ 
+
+톰캣 사용하지 않고 Batch Agent Spring Boot 내장 WAS 사용
+        ⭐Anyframe-Batch-Agent 는 Spring Boot 기반이어서 내장 WAS로 기동이 가능하다.
+        ref : https://devops.sdsdev.co.kr/confluence/pages/viewpage.action?pageId=754473967
+
+
+
+     
+배치 agent 연결 
+    오류 
+        HessianProxy cannot connect to
+    조치 
+        batch-agent  
+        server.port=8090
+        batch.online.runtime.urls=localhost:8090/anyframe-batch-sample  
+        RemoteJobLauncher args = new RemoteJobLauncher("localhost:8090/batch-agent");
+		String[] jobNames = new String[] {"localhost:8090/batch-agent"};
+
+batch manager 
+    1. com.anyframe.ide.batchmanager                server_list.xml 변경 <server ip="127.0.0.1:8085/anyframe-batch-agent" name="로컬1" domain="로컬" locale="Asia/Seoul" TENANTID="tenantIdA" tenantId="tenantIdA"/>
+    2. com.anyframe.ide.batchmanager.update         .project 제외하고 .zip 
+    3. install new software  .zip 추가 
+    4. 이클립스 batch manager  server_list.xml 경로 설정 
+    5. anyframe-batch-agent 실행 후 Server Explorer run 
+
+    
+batch manager ide 로 설치 
+    git-anyframe.enterprise.batch.manager.update 
+        1. site.xml에서 add feature 
+            com.anyframe.ide.batchmanager.feature //버전정보
+            원리 :  git-anyframe.enterprise.batch.manager //실제소스
+                    anyframe.enterprise.batch.manager.nl1 //메세지 프로퍼티 
+                    소스를 faeture 에 담고 있음 
+        2. build 
+        3.  build  update.zip 패치하기  또는 .project 제외하고 .zip 
+
+%PREFIX%
+    AbstractBatchDao
+
+> err 
+    오류 
+        No repository found at jar:file:/C:/Users/kpcnc/git/anyframe-batch/com.anyframe.ide.batchmanager.update/com.anyframe.ide.batchmanager.update.zip.
+    원인 
+        전에 git clone 브런치에서 batch manager 설치파일 충돌로 재설치
+    조치 
+        기존 batch manger uninstalled 처리
+
+    오류 
+        java.sql.SQLException: Unable to load class: oracle.jdbc.driver.OracleDriver ParallelWebappClassLoader
+    조치 
+         spring.datasource 정보, port 변경 
+        maven build 
+        refresh
+        build project 
+
+
+    오류    
+        java.lang.NumberFormatException: For input string
+    조치 
+       \anyframe-batch-sample\src\main\java\sample\batch\hello\cfg\hello_cfg.xml
+       <parameter key="threadsleeptime" value="1000"/>
+
+
+    오류 :: batch-sample 커맨드로 직접 [runjob.cmd] 실행 오류 
+        main INFO  CommandLineJobLauncher : batch process error.
+        java.lang.NullPointerException: null
+            at com.anyframe.batch.launch.CommandLineJobLauncher.main(CommandLineJobLauncher.java:66) ~[anyframe-batch-runtime-6.5.0-SNAPSHOT.jar:na]
+    조치 
+        runjob.cmd sample/batch/hello/cfg/hello_cfg.xml -LEVEL=INFO TENANTID=tenantId threadsleeptime=1000 이렇게 실행해야지 독립적으로 실행가능함 !!
+
+    오류 :: admin화면 에서 batch [실행] 오류 
+        ERROR JobExecutionManagerImpl : Fail to build batch process java.io.IOException: Cannot run program 
+        "C:Userskpcncgitanyframe-batch-0305anyframe-batch-sampledistbin unjob.cmd											" (in directory "C:Userskpcncgitanyframe-batch-0305anyframe-batch-sampledistbin											"): CreateProcess error=2, 지정된 파일을 찾을 수 없습니다
+        at java.lang.ProcessBuilder.start(ProcessBuilder.java:1048)
+        Caused by: java.io.IOException: CreateProcess error=2, 지정된 파일을 찾을 수 없습니다
+
+    조치 
+        C:\Users\kpcnc\git\anyframe-batch-0305\anyframe-batch-agent\src\main\resources\application.properties 에서 
+        runtime.관련 경로 체크
+
+    오류 
+        org.springframework.batch.core.UnexpectedJobExecutionException: job is disabled
+    조치 
+        스케줄러 켜주기 
+
+
+    오류 
+        org.springframework.boot.loader.WarLauncher을(를) 찾거나 로드할 수 없습니다.
+    원인 
+
+    오류
+        DEBUG processLogger : ����: �⺻ Ŭ���� com.anyframe.batch.launch.CommandLineJobLauncher��(��) ã�ų� �ε��� �� �����ϴ�.
+    조치 
+        debug processLoger : batch-launch.CommandLineJobLauncher~ 깨진 문자열 뜨면서 job 실패 하는 경우 발생 시 setenv 라이브러리 경로 확인
+        C:\Users\kpcnc\git\anyframe-batch\anyframe-batch-sample\dist\bin
+
+
+    오류 
+        ORA-01400: NULL을 ("KYE"."BATCH_JOB_EXECUTION"."TENANT_ID") 안에 삽입할 수 없습니다
+    조치 
+        server_list key 값,  run configurations parameters  key : TENANTID value : tenantIdA 추가 
+
+    오류
+        등록된 에이전트 상태를 
+  
+C:/Users/kpcnc/git/iops_postgres/anyframe-batch/anyframe-batch-sample/dist/bin/runjob.cmd JOB:job -JOBID=6 TE
+NANTID=tenantIdA TENANTID=tenantIdA -PROFILE=processBatch
+./runjob.cmd test\batch\hello\cfg\hello_cfg.xml JOB:job -JOBID=6 TENANTID=tenantIdA TENANTID=tenantIdA -PROFILE=processBatch
+ref
+    재홍수석님 엑셀
+    유영인선임 정리
+    https://devops.sdsdev.co.kr/confluence/display/ANYKPCNC/Anyframe_Batch
+
+====================================================================================================================================================================================================
+베이스 
+    - admin page - batch-agent <-> batch-admin 통신 한 뒤 batch-sample 호출 
+
+    -어드민안에 배치를 띄우기 위해서는 anyframe-batch-agent를 실행시켜야함 
+    그래서 batch admin은 ⭐batch-agent⭐로 통신 후 batch-sample를 실행가능
+    예로 agent가 여러개라면 입출금관리 agent1은 batch1-sample를 바라보고 
+                           대출관리 agent2는 batch2-sample를 바라봄 !
+         => agent는 각각의 배치를 관리하기 위해 존재함 
+    
+    -에이전트는 어드민에서 배치 통신하게 하려고 있는 존재임 
+
+    -어드민안에서 안띄울려면 batch-sample의 배치단독실행 가능
+
+      배치단독실행 
+        1. C:\Users\kpcnc\git\anyframe-batch-0305\anyframe-batch-sample\dist\bin  cmd 실행 
+        2. runjob.cmd sample/batch/hello/cfg/hello_cfg.xml -LEVEL=INFO TENANTID=tenantId threadsleeptime=1000
+        3. hello_cfg.xml 라는 배치 실행시켜줌
+
+
+    - 에이전트 배치 1:다 관계가 가능한건가? 
+
+    - AbstractVo에사 실 데이터 담는 공간이 있기때문에 vo lombok 사용 안됨 
+
+    - 로그 
+        BatchDefine baseLogDir =  prop.getProperty("batch.log.directory", baseLogDir);
+        
+=====================================================================================================================================================================================
+[/was/boot-agent-kye/]
+bin변경
+--.startup.sh, 
+	AGENT_BASE=$PWD <- 현재경로
+	jar_file 
+	* jar를 코드소스는 변경사항없으면 그대로 사용 
+	classpath 
+		 $AGENT_BASE/$JAR_FILE <- 자르세팅
+		 : $AGENT_BASE/config <- 설정파일 세팅
+		 :  $AGENT_BASE/lib <- 라이브러리 세팅
+
+--.shudown.sh
+	cd 경로 변경 
+
+--bootkye.sh, downkye.sh port변경
+
+
+config변경 
+--application.properties 
+	spring.datasource.username=kye
+	spring.datasource.password=kye8100
+
+	runtime.working.directory=/anyframe/app/batch-sample-kye/dist/bin
+	runtime.run.batch=/anyframe/app/batch-sample-kye/dist/bin/runjob.sh
+	runtime.kill.batch=/anyframe/app/batch-sample-kye/dist/bin/killjob.sh
+	runtime.run.daemon=/anyframe/app/batch-sample-kye/dist/bin/rundaemon.sh
+	runtime.kill.daemon=/anyframe/app/batch-sample-kye/dist/bin/killdaemon.sh
+	
+	resource.file.directories=/was/boot-agent-kye/log
+
+	resource.job.directories=/anyframe/app/batch-sample-kye/target/classes
+
+	batch.admin.urls=70.30.17.111:18099/anyframe-batch-admin
+
+	batch.online.runtime.urls=70.30.17.111:8085/anyframe-runtime-web
+
+	batch.shell.log.dir=/was/boot-agent-kye/log
+
+--logback.xml 
+	<fileNamePattern>${resource.log.directories}/agent-kye/${log.filename}.%d{yyyyMMdd}.log</fileNamePattern>
+
+	
+[/anyframe/app/batch-sample-kye]]
+
+sample runjob.cmd
+
+boot-agent-kye/
+
+batch-runtime_kye
+
+target
+
+cp 복사 
+mv 기존파일명 변경파일명
+mv  파일명/디렉터리명  파일명/디렉터리명
+
+alias 
+cd 
+. .bash_profile
+
+
+vi 
+편집모드x
+2yy -> p 
+커서 -> shirt + insert 
+dd 삭제 
+
+편집모드상태 작성 -> esc -> . 
