@@ -1,3 +1,11 @@
 https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rtemigration3.0
 defultanntationhandlermapping 5버전 안쓰는 오류 8번 참고
 
+web/ap scp 환경 그외 서버 on-premise 재구성으로 eos sw 전환 및 업그레이드
+etms 외주tm시스템
+easy 경비처리시스템
+
+web iPlanet -> Webtob
+ap  JEUS6 EOS로 JEUS8 
+dr서버 1대로 축소
+
