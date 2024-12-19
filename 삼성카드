@@ -1,3 +1,7 @@
+-프로젝트정보
+web/ap scp환경에서 그외서버 on-premise재구성으로 eos sw 전화 및 업그레이드
+pjt 명 : 2024년 it인프라 교체 및 구조개선 프로젝트
+
 https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rtemigration3.0
 defultanntationhandlermapping 5버전 안쓰는 오류 8번 참고
 
@@ -72,10 +76,18 @@ sap 	40.2.2.91
 .pointcut	execution 정의된걸 호출시켜 실행 시 제어권 뺏어감
 
 
+- spring 2->5 변경함수
+AbstractExcelView -> AbstractXlsView ( spring-webmvc-5.2.2.1)
+multivalueMap(key, object) => multivalueMap(key, object) list방식 (spring-core-5.2.2.1)
+DefaultAnnotationHandlerMapping => ReqeustMappingHandlerMapping	(common-servlet.xml)
+AnnotationMethodHAndlerAdapter =>. RequestMappingHandlerAdapter (common-servlet.xml)
+
+
+
 
       
 
-nosleep.vbs
+- nosleep.vbs
 Set ws = CreateObject("WScript.shell")
 Do
 				 Wscript.Sleep 120000
