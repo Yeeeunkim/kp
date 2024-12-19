@@ -9,3 +9,75 @@ web iPlanet -> Webtob
 ap  JEUS6 EOS로 JEUS8 
 dr서버 1대로 축소
 
+
+
+- 리눅스 
+ctrl + \ 
+ctrl + H 
+Terminal too wide 나면서 stty columns 160 이라는 명령어를 미리 날리면 문제 안생김 - HP-UX OS 특성
+find 경로 -name *.xml -type f | xargs grep 40.2.2.91
+find 경로 -type f | xargs grep ZFFIFT_870
+less test.log
+tail -f test.log -n 1000
+cmd창에 curl -v 40.2.2.91:3610
+
+- 구축 범위
+easy 
+	os		SunOs 5.10 -> RHEL 8.10
+			HP-UX 11 -> RHEL 8.10
+	web	iplanet -> webtob5
+	was	jeus6 -> jeus8
+
+etms
+	os		SunOs 5.10 -> RHEL 8.10
+	web	Iplanet	-> webtob5
+	was 	Weblogic 11 -> JEUS 8
+	db		oracle 11g -> oracle 19c 
+
+- asis server 
+jeus		/was/jeus6/
+source		/gfinance/wasApps
+jeus6	/was/jeus6/gfinance/config/midv02/JEUSMain.xml (container로 application확인)
+
+- tobe server
+java		/usr/lib/jvm/java-1.8.0
+jeus8	/was/jeus8/domains/T-EY11-0	(startEY11-F11.sh / stopEY11-F11.sh)
+log		/log/jeus8/T-EY11-0
+source		/gfinance/wasApps (java, jsp)
+				/gfinance/webApps (js, image)
+webtob5	/web/webtob5/domains/T-EY11-W/config
+sap 	40.2.2.91 
+
+-easy 시스템 특징
+	.do
+	.dwr : direct web remoting 	자바로 만든 객체를 스크립트로 컨버팅해서 클라이언트에서 비동기식으로 사용할 수 있도록 해주는 자바 라이브러리
+				 web.xml /service/*파일을 호출함
+				 context-dwr.xml
+					<dwr:configuration 스크립트에서 json방식으로 사용할 데이터 모델객체를 설정
+					<dwr:remote javascript="commonServiceAjax"> commonServiceAjax 호출해서 지정 메서드만 사용 
+
+	anyframe	
+			tld message 	사용함 /utils.java message.message-utils / anyframe-tags.tld
+	damo	
+			actionlog	 쿼리찍어줄때 사용함 
+			web.xml filter방식으로 actionLogger잡혀있음 패턴은 url 방식
+	actionlog
+			actionlogconst.java 에서 ACTION_INFO_FILE 정의된 actioninfo.xml 참조하는데 
+			screenID	값이 호출되면 sap통신을 통해 log쌓임
+
+-몰랐던 것
+.dll 구현체로 함수를 미리 만들어모아 놓은 라이브러리, window운영체제에서 사용하는 실행파이리 형식
+			sapjco2는 window/system32 안에 sapjco.dll을 참조하는 방식 (다른 dll 종속성있으니 조심하자)
+.jar 인터페이스 
+.pointcut	execution 정의된걸 호출시켜 실행 시 제어권 뺏어감
+
+
+
+      
+
+nosleep.vbs
+Set ws = CreateObject("WScript.shell")
+Do
+				 Wscript.Sleep 120000
+				 ws.SendKeys "{SCROLLOCK}{SCROLLLOCK}"
+Loop
