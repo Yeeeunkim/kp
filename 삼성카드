@@ -79,8 +79,10 @@ sap 	40.2.2.91
 - spring 2->5 변경함수
 AbstractExcelView -> AbstractXlsView ( spring-webmvc-5.2.2.1)
 multivalueMap(key, object) => multivalueMap(key, object) list방식 (spring-core-5.2.2.1)
-DefaultAnnotationHandlerMapping => ReqeustMappingHandlerMapping	(common-servlet.xml)
-AnnotationMethodHAndlerAdapter =>. RequestMappingHandlerAdapter (common-servlet.xml)
+org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping 
+=> org.springframework.web.servlet.mvc.method.annotation.ReqeustMappingHandlerMapping	(common-servlet.xml)
+org.springframework.web.servlet.mvc.annotation.AnnotationMethodHAndlerAdapter 
+=>. org.springframework.web.servlet.mvc.method.RequestMappingHandlerAdapter (common-servlet.xml)
 
 
 
