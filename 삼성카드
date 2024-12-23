@@ -120,7 +120,39 @@ sap 	40.2.2.91
 	.dll .jar -> window 파일들
 
 
+	Invocation of init method failed; nested exception is java.lang.Error: java.lang.IllegalStateException: DestinationDataProvider already registered 
+		원인 : DestinationDataProvider이 bean 생성시 최초 만들어지는데 해당 메뉴 조회 시에도 만들어지려고 해서 이미 등록된 메서드라고 나오는 오류임 
+		해결 : spring에서 기존 context 가져오기 위해서는 아래 소스처럼 수정
+			전 :ApplicationContext context = new ClassPathXmlApplicationContext("spring/context-datasource.xml");
+			후 :WebApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+ 	
+	
+-interface  추가하는 방법
+common-servlet.xml 
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<bean id="actionLogInterceptor" class="com.sc.gf.actLog.common.ActionLogInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
 
+
+추가하고싶은 interface 생성하면 됨 ! 
+필자는 spring-webmvc 에서 HandlerInterceptorAdapter 커스텀함 
+
+public class ActionLogInterceptor extends HandlerInterceptorAdapter {
+	protected Log log = Log.Factory.getLog(ActionLogInterceptor.class);
+
+@Override
+public void postHandler(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
+		log.debug("========: " + handler.toString();
+//		MultiReadHttpServletRequest req = new MultiReadHttpServletRequest((HttpServletRequest)request);
+//		new ActionLogSerivce().makeLog(req);
+	}
+
+	@Override
+	public void afterCompletion( ...
+}
 
 
 -properties 속성가져오는 코드
