@@ -129,6 +129,15 @@ sap 	40.2.2.91
 	
 -interface  추가하는 방법
 common-servlet.xml 
+<bans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+xmlns:mvc="http://www.springframwork.org/schema/mvc"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/mvc
+http://www.springframework.org/schema/mvc/spring-mvc.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd"? // 순서 중요 
 	<mvc:interceptors>
 		<mvc:interceptor>
 			<mvc:mapping path="/**" />
@@ -162,7 +171,16 @@ connectProperties.setProperty(DestinationDataProvider.JCO_LANG, "ko");
 memoryProvider.changeProperties(jcoCOnnectionInfo.getGroup(), connectProperties);
 
 
-      
+-리눅스 svn 
+ 버전확인법
+	./svn --version
+			기본경로 svn://10.20.40.50:3690
+			https: 안먹힘 
+	./svn --h
+
+
+
+
 
 - nosleep.vbs
 Set ws = CreateObject("WScript.shell")
