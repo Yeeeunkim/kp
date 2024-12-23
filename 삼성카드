@@ -123,6 +123,11 @@ sap 	40.2.2.91
 
 
 
+-properties 속성가져오는 코드
+Properties connectProperties = new Properties();
+connectProperties.setProperty(DestinationDataProvider.JCO_AHOST, jcoConnectionInfo.getHostName());
+connectProperties.setProperty(DestinationDataProvider.JCO_LANG, "ko");
+memoryProvider.changeProperties(jcoCOnnectionInfo.getGroup(), connectProperties);
 
 
       
