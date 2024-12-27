@@ -155,6 +155,13 @@ sap 	40.2.2.91
 			전 :ApplicationContext context = new ClassPathXmlApplicationContext("spring/context-datasource.xml");
 			후 :WebApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
  	
+	datatype 오류
+	원인 : sapjco-2.1.8 버전은 return bu.toString()
+	sapjco3 	버전은 return new BidDecimal 
+	return 타입이 맞지않아 오류가 발생함
+	해결 : JCOManager.java getRecord 함수에서 
+  if(value instanceof BigDecimal) value = value.toString);
+	해줌으로써 return 타입이 BigDecimal 일 경우 , String으로 변환해줌 ! 
 	
 -interface  추가하는 방법
 common-servlet.xml 
