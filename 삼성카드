@@ -207,6 +207,35 @@ connectProperties.setProperty(DestinationDataProvider.JCO_LANG, "ko");
 memoryProvider.changeProperties(jcoCOnnectionInfo.getGroup(), connectProperties);
 
 
+-debug
+public void setDebug(boolean isDebug){
+	this.isDebug = isDebug;
+}
+소스에서 manager.setDebug(true);
+
+
+-JCOFactory.java
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Properties;
+import com.sap.conn.jco.JCoException;
+import com.sap.conn.jco.ext.DataProviderExcpetion;
+import com.sap.conn.jco.ext.DestinationDataEventListener;
+import com.sap.conn.jco.ext.DestinationDataProvider;
+import com.sap.conn.jco.ext.Environment;
+import com.sc.gf.common.BaseCommon;
+
+public class JCOFactory extends BaseCommon {
+	private JCOConnectionInfo jcoConnectionInfo;
+	private InMemoryDestinationDataProvier memoryProvider;
+	public JCOConnectionInfo getJconConnectionInfo(){
+		return jcoConnectionInfo;	
+	}
+	
+}
+
+
 -리눅스 svn 
  버전확인법
 	./svn --version
