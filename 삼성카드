@@ -123,10 +123,14 @@ sap 	40.2.2.91
 
 - spring 2->5 변경함수
 	AbstractExcelView -> AbstractXlsView ( spring-webmvc-5.2.2.1)
+  org.springframework.web.servlet.view.document.AbstractXlsView
 
 	multivalueMap(key, object) => multivalueMap(key, object) list방식 (spring-core-5.2.2.1)
 	자세히쓰면
 	Map MultipartFiles = new HashMap(); => MultiValueMap<String, MultipartFile> multipartFiles = new LinkedMultiValueMap<>();	
+
+  Map multipartFiles = new HashMap();
+	=> MultiValueMap<String, MultipartFile> multipartFiles = new LinkedMultiValueMap<>();
 
 	org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping 
 	=> org.springframework.web.servlet.mvc.method.annotation.ReqeustMappingHandlerMapping	(common-servlet.xml)
@@ -212,28 +216,6 @@ public void setDebug(boolean isDebug){
 	this.isDebug = isDebug;
 }
 소스에서 manager.setDebug(true);
-
-
--JCOFactory.java
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Properties;
-import com.sap.conn.jco.JCoException;
-import com.sap.conn.jco.ext.DataProviderExcpetion;
-import com.sap.conn.jco.ext.DestinationDataEventListener;
-import com.sap.conn.jco.ext.DestinationDataProvider;
-import com.sap.conn.jco.ext.Environment;
-import com.sc.gf.common.BaseCommon;
-
-public class JCOFactory extends BaseCommon {
-	private JCOConnectionInfo jcoConnectionInfo;
-	private InMemoryDestinationDataProvier memoryProvider;
-	public JCOConnectionInfo getJconConnectionInfo(){
-		return jcoConnectionInfo;	
-	}
-	
-}
 
 
 -리눅스 svn 
