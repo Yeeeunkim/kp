@@ -66,8 +66,23 @@ public class JCOFactory extends BaseCommon {
 		{
 			try{
 				Properties p = secureDbStorage.get(destinationName);
-
-
+				
+				if(p!=null&&p.isEmpty())
+					throw new DataProviderException(DataProviderException.Reason.INVALID_CONFIGURATION,
+						"destination configuration is incorrect", null);
+				return p;
+			}
+			catch (RuntimeException re)
+			{
+				throw new DataProviderException(DataProviderException.Reason.INTERNAL_ERROR, re);
 			}
 		}
-	}
+
+		@Override
+		public void setDestinationDataEventListener(DestinationDataEventListener eventListener)
+		{
+			this.eL=eventListener;
+		}
+	
+		@Override	
+}	
