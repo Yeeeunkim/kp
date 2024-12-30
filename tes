@@ -1,1 +1,73 @@
-  
+
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Properties;
+import com.sap.conn.jco.JCoException;
+import com.sap.conn.jco.ext.DataProviderExcpetion;
+import com.sap.conn.jco.ext.DestinationDataEventListener;
+import com.sap.conn.jco.ext.DestinationDataProvider;
+import com.sap.conn.jco.ext.Environment;
+import com.sc.gf.common.BaseCommon;
+
+public class JCOFactory extends BaseCommon {
+	private JCOConnectionInfo jcoConnectionInfo;
+	private InMemoryDestinationDataProvier memoryProvider;
+	public JCOConnectionInfo getJconConnectionInfo(){
+		return jcoConnectionInfo;	
+	}
+	public void setJconConnectionInfo(JCOConnectionInfo jcoConnectionInfo) {
+		this.jcoConnectionInfo = jcoConnectionInfo;
+	}
+	//jco 연결 초기화
+	private void initJCOPool() {
+		memoryProvider = new JCOFactory.InMemoryDestinationDataProvider();
+		try
+		{
+			Environment.registerDestinationDataProvider(memoryProvider);
+		}	
+		}
+		catch (IllegalStateException providerAlreadyRegisteredException
+		{
+			throw new Error(providerAlreadyRegisteredException);
+		}	
+	}
+	
+	public void refresh() throws Exception {
+		debug("JCO success ");
+	}
+	public JCOManager getJCOManager() throws IOException {
+		//initJCOPool();
+		Properties connectProperties = new Properties();
+		connectProperties.setProperty(DestinationDataProvider.JCO_ASHOST, jcoConnectionInfo.getHostName());
+		connectProperties.setProperty(DestinationDataProvider.JCO_SYSNR, jcoConnectionInfo.getSystemNumber());
+	  connectProperties.setProperty(DestinationDataProvider.JCO_CLIENT, jcoConnectionInfo.getClient());
+	  connectProperties.setProperty(DestinationDataProvider.JCO_USER, jcoConnectionInfo.getUserName());
+	  connectProperties.setProperty(DestinationDataProvider.JCO_PASSWD, jcoConnectionInfo.getPasswd());
+	  connectProperties.setProperty(DestinationDataProvider.JCO_LANG, "ko");
+		memoryProvider.changeProperties(jcoConnectionInfo.getGroup(), connectProperties);
+		
+		JCOManager manager = null;
+		try {
+			manager = new JCOManager(jcoConnectionInfo.getGroup());
+		}catch(JCoException e) {
+				e.printStackTrace();
+		}
+		return manager;
+	}	
+	
+	public static class InMemoryDestinationDataProvider implements DestinationDataProvider
+	{
+		private DestinationDataEventListener eL;
+		private HashMap<String, Properteis> secureDBStorage = new HashMap<String, Properties>();
+	
+		@Override
+		public properties getDestinationProperties(String destinationName)
+		{
+			try{
+				Properties p = secureDbStorage.get(destinationName);
+
+
+			}
+		}
+	}
