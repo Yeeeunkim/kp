@@ -167,6 +167,17 @@ sap 	40.2.2.91
   if(value instanceof BigDecimal) value = value.toString);
 	해줌으로써 return 타입이 BigDecimal 일 경우 , String으로 변환해줌 ! 
 	
+	pointcut remove
+	변경 전: 
+	@Pointcut("exection(* *..*GenercService+,*(..) || execution(* anyframe.core.ria.mip..*MIPServiceImpl.*(..))")
+	public voide genericServiceMethod(){}
+	
+	변경 후:
+	@Override
+	public void setApplicationContext(ApplicationContext arg0) throws BeanException {}
+
+
+
 -interface  추가하는 방법
 common-servlet.xml 
 <bans xmlns="http://www.springframework.org/schema/beans"
