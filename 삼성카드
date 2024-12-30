@@ -16,6 +16,24 @@ pjt 명 : 2024년 it인프라 교체 및 구조개선 프로젝트
 	1) lib 날리면서 compile, server 기동하면서 확인 
 	2) console에 loading xml bean 찍히면 bean 생성확인된 것 !
 
+-path 잡는법
+  -> jdk/bin .dll 옮기는 법
+  -> 환경변수 path 설정하는 법
+
+-classapath 잡는 법
+	dynamic project는 default 경로가 WEB-INF/lib 인식해줌 
+	안된다면 ? ey1-pjt\.settings\org.eclipse.wst.common 파일 수정 
+	<?xml version="1.0" encoding="UTF-8"?><project-modules id="modeuleCoreId" project-version="1.5.0">
+		<wb-module deploy-name="ey1-pjt">
+			<wb-resource deploy-path="/" source-oath="/webApp" tag="defaultRootSource"/>
+			<wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+			<wb-resource deploy-path="/WEB-INF/classes" source-path="/resources"/>
+			<property name="context-root" value="/"/>
+			<property name="java-output-path" value="/ey1-pjt/build/classes"/>
+	</wb-module?
+</project-modules>
+
+
 
 https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rtemigration3.0
 defultanntationhandlermapping 5버전 안쓰는 오류 8번 참고
@@ -144,9 +162,7 @@ sap 	40.2.2.91
 
 	프로젝트 시작하면서 디비 누락된 것 
 		sapjco.jar
-	Injection of resource dependencies failed; nested exception is org.springframework.beans.factory.BeanCreationException javax.annotation.Resource.lookup()Ljava/lang/String;
-	=> jsr-250-ani-1.0.jar 랑 jdk에 있는 인터페이스가 중복되는 부분이 있어서 jsr250-api-1.0.jar 제거 
-
+	
 	com.sap.mw.jco.JCO.Exception => com.sap.conn.jco.JCoException
 
 	.so .jar -> linux 파일들 
@@ -175,6 +191,40 @@ sap 	40.2.2.91
 	변경 후:
 	@Override
 	public void setApplicationContext(ApplicationContext arg0) throws BeanException {}
+	
+	<server 오류>
+	org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'jcoFactory' defined in class path resource [spring/context-datasource.xml]: Invocation of init method failed;
+	nested exception is java.lang.Error: java.lang.IllegalStateException: DestinationDataProvider already registered [com.sc.gf.utils.jco.JCOFactory$InMemoryDestinationDataProvider]
+	원인:
+	빈이 생성될 때 context-datasource.xml 읽어서 객체 생성하는데 
+	소스에 new ClassPathXmlApplicationContext("spring/context-datasource.xml");
+	또한번 생성하려고해서 이미 등록된 빈이라는 오류가 나옴 
+	해결 :
+	변경 전 :
+	ApplicationContext context = new ClassPathXmlApplicationContext("spring/context-datasource.xml");
+	변경 후 :
+	WebApplicationContext context = ContnextLoader.getCurrentWebApplicationContext();
+
+
+
+	< jeus runtime오류 >
+	Injection of resource dependencies failed; nested exception is org.springframework.beans.factory.BeanCreationException javax.annotation.Resource.lookup()Ljava/lang/String;
+	=> jsr-250-ani-1.0.jar 랑 jdk에 있는 인터페이스가 중복되는 부분이 있어서 jsr250-api-1.0.jar 제거 
+	
+	< sap 관련 오류 >   
+	ELF file data encoding not little-endian
+	해결 : 
+	유튜엘이라 권한 담당자한테 so파일 다시 빌드요청함
+	*so파일은 os별로 내용이 상이함 sapjco-2.1.9 x86 so 파일 지원 안되서 sapjco3 버전으로 확인해야함 
+
+	Exception in thread "main" java.lang.ExceptionInInitializerError: Native library sapjco3 is too old. Found library C:\Program Files\Java\jre1.8.0_202\bin\sapjco3.dll has version "721.800", but required is at least version "753.1425"
+	해결 : 
+	dll 	버전이 721.800 낮아 적어도 753.1425 정도는 되야함 
+	1) java project 에서 32비트 버전 open jdk 적용함
+	2) open jdk bin 안에 sapjco.dll 받아서 적용함
+  3) ABAP_AS1.jcoDestination파일이랑 context-datasource.xml 비굑해서 추가함 
+	
+
 
 
 
