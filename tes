@@ -85,4 +85,26 @@ public class JCOFactory extends BaseCommon {
 		}
 	
 		@Override	
-}	
+		public boolean supprotsEvents()
+		{
+			return true;
+		}
+
+		void changeProperties(String destName, Properties properties)
+		{
+			synchrnized(secureDBStorage)
+			{
+				if (properties==null)
+				}
+					if(secureDBStorage.remove(destName)!=null)
+					eL.deleted(destName);
+			}
+				else
+			{
+					secureDBStorage.put(destName, properties);
+					eL.updated(destName);	
+			}
+		 }
+		}
+	}	
+}
