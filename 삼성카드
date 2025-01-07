@@ -225,8 +225,22 @@ sap 	40.2.2.91
   3) ABAP_AS1.jcoDestination파일이랑 context-datasource.xml 비굑해서 추가함 
 	
 
+	<파일첨부 이슈> 
+	1) MultipartParsingResult는 세가지 인자 넘김 
+	(실제파일, 파일파라미터, 컨텐츠 타입)
+	2) 컨텐츠타입과 파일명 put 해주는 로직이빠졌음 
+	3) MultiCommonsMultipartResolver.java 파일 수정
+	변경 전 
+	fileParmList.add(fileItem.getName());
+	fileParamList.put(fileItem.getFieldName(), fileParamList);
 
-
+	변경 후 
+	MultValueMap<String,MultparFile> multiparFiles = new LinkedMultiValueMap<>();
+	Map<String, String> contentTypes = new HashMap<String, String>();
+	multiparFiles.add(fileItem.getName(), file);
+	fileParamList.add(fileItem.getName());
+	fileParameter.put(fileItem.getFieldName(), fileParamList);
+	contentTypes.put(fileItem.getFieldName(), fileItem.getContentType());
 
 -interface  추가하는 방법
 common-servlet.xml 
