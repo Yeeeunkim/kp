@@ -78,8 +78,8 @@ anyframe.springmvc.ext-4.2.0
 anyframe-tags.tld
 
 - 리눅스 
-ctrl + \ 
-ctrl + H 
+강제종료 ctrl + \ 
+문자지우기 ctrl + H 
 Terminal too wide 나면서 stty columns 160 이라는 명령어를 미리 날리면 문제 안생김 - HP-UX OS 특성
 find 경로 -name *.xml -type f | xargs grep 40.2.2.91
 find 경로 -type f | xargs grep ZFFIFT_870
@@ -87,13 +87,28 @@ less test.log
 tail -f test.log -n 1000
 cmd창에 curl -v 40.2.2.91:3610
 
+여러파일의 단어찾기
+find /gfinanve/wasApps/WEB-INF/classes/spring -name *.xml type f | xargs grep 40.2.2.91
+디렉토리 찾기
+find /etc -name 'profile' -type d -print
+5일전 수정된 파일
+find /gfinanve/wasApps -type f -mtime -5
+하나파일에서 단어찾기
+grep "servlet" JeusServer_20241218.log
+
+OS 확인
+car /etc/*release*
+OS비트 확인
+getconf LONG_BIT
+
+
 - 구축 범위
 easy 
 	os		SunOs 5.10 -> RHEL 8.10
 			HP-UX 11 -> RHEL 8.10
 	web	iplanet -> webtob5
 	was	jeus6 -> jeus8
-
+	
 etms
 	os		SunOs 5.10 -> RHEL 8.10
 	web	Iplanet	-> webtob5
@@ -104,6 +119,8 @@ etms
 jeus		/was/jeus6/
 source		/gfinance/wasApps
 jeus6	/was/jeus6/gfinance/config/midv02/JEUSMain.xml (container로 application확인)
+log.  /log/was/jeus8/misdv02/misdv02_container1
+			tail -f -n 1000 misdv02_container1_20250106.log
 
 - tobe server
 java		/usr/lib/jvm/java-1.8.0
@@ -226,10 +243,17 @@ sap 	40.2.2.91
 	
 
 	<파일첨부 이슈> 
+	문제 : 첨부파일 저장 시 파일사이즈, 파일명, 등 파일의 인자들이 안넘어옴 
+	원인 :	MultipartParsingResult return 될 때 multipartFiles 실제파일, contentTypes 컨텐츠 타입이 빠져서 들어가는 원인임 
+	해결 : 
+	0) common-servlet.xml 
+	<bean id="multipartResolver" class="com.sc.gf.common.resolver.MultiCommonsMultiparResolver"/>
+	정의된 bean 으로 첨부파일 누르면 처음으로 호출되는 곳임 
 	1) MultipartParsingResult는 세가지 인자 넘김 
 	(실제파일, 파일파라미터, 컨텐츠 타입)
 	2) 컨텐츠타입과 파일명 put 해주는 로직이빠졌음 
 	3) MultiCommonsMultipartResolver.java 파일 수정
+
 	변경 전 
 	fileParmList.add(fileItem.getName());
 	fileParamList.put(fileItem.getFieldName(), fileParamList);
