@@ -1,1 +1,33 @@
-test
+PerfLogInterceptor.java
+
+클래스명(패키지포함), 메소드명, GUID, 유입단IP, 서비스 수행시간, 인터페이스ID, 서비스ID, 화면ID
+
+interceptor preHandler -> controller -> postHandler -> mvc 
+
+public class ActionLogInterceptor extends HandlerInterceptorAdapter {
+	private static Logger log = Logger.getLogger("PERF_LOG");
+	
+	private StopWatch sw;
+
+	@Override
+	public boolean preHandler(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
+		sw = new StopWatch();
+		sw.start();
+		return true;
+	}
+	
+
+	@Override
+	public void postHandler(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
+		log.debug("========: " + handler.toString();
+//		MultiReadHttpServletRequest req = new MultiReadHttpServletRequest((HttpServletRequest)request);
+//		new ActionLogSerivce().makeLog(req);
+		
+		String strClassPath = hanlder.toString().split("#")[0];
+		String strMethodName = handler.toString().split("#")[1];
+		strMethodName = strMethodName.subString(0, strMethodName.indexOd("("));
+	}
+
+	@Override
+	public void afterCompletion( ...
+}
