@@ -266,6 +266,30 @@ sap 	40.2.2.91
 	fileParameter.put(fileItem.getFieldName(), fileParamList);
 	contentTypes.put(fileItem.getFieldName(), fileItem.getContentType());
 
+
+	<online anyframe jdk 1.6 - 1.7 >
+	org.springframework.integration.Message -> org.anyframe.spring.message.Message;
+	
+	org.springframework.integration.MessageHeaders => org.springframework.messaging.MessageHeaders;
+	
+	org.springframework.integration.message.ErrorMessage => org.springframework.messaging.support.ErrorMessage;
+
+	org.springframework.cache.Cache => public <T> T get(Object arg0, Class<T> arg1) Cache interface 메소드 추가
+  public <T> T get(Object arg0, Callable<T> arg1) Cache interface 메소드 추가
+
+	org.springframework.integration.MessageHandlingException => org.springframework.messaging.MessageHandlingException
+
+	org.springframework.integration.channel.interceptor.ChannelInterceptorAdpter => org.springframework.messaging.support.ChannelInterceptorAdapter;
+
+	org.springframework.integration.channel.ChannelInterceptor => org.springframwork.messaging.support.ChannelInterceptor;
+
+	org.springframework.integration.annotation.Header => org.springframework.messaging.handler.annitation.Header;
+
+	org.springframework.integration.annotation.Payload => org.springframework.messaging.handler.annotation.Payload
+
+	
+
+	
 -interface  추가하는 방법
 common-servlet.xml 
 <bans xmlns="http://www.springframework.org/schema/beans"
