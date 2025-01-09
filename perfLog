@@ -48,4 +48,22 @@ Common-servlet.xml
 
 
 
+log4j.xml
+<appender name="PERF_LOG_APPENDER" class="org.apache.log4j.rolling.RollingFileAppender">
+	<param name="append" value="true" />
+	<param name="encoding" value="UTF-8" />
+	<param name="file" value="/gfinance/wasApps/log/perf_log/easy_perf.log"/>
+	<rollingPolicy class="org.apache.log4j.rolling.TimeBaseRollingPolicy">
+		<param name="FileNamePattern" value="/gfinance/wasApps/log/perf_log/easy_perf_%d{yyyy-MM-dd}.log" />
+	</rollingPolicy>
+	<layout class="org.apache.log4j.PatternLayout">
+		<param name="CoversionPattern" value=%m%n" />
+	</layout>
+</appender>
+
+<logger name="PERF_LOG">
+		<level value="INFO" />
+		<appender-ref ref="PERF_LOG_APPEDNER"/>
+</logger>
+
 
