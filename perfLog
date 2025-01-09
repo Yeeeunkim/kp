@@ -1,8 +1,12 @@
-PerfLogInterceptor.java
 
+- 히스토리 
 클래스명(패키지포함), 메소드명, GUID, 유입단IP, 서비스 수행시간, 인터페이스ID, 서비스ID, 화면ID
+형식으로 로그남기는 요구사항 옴 
+interceptor 이용해서 로그 남길거임 
+preHandler -> controller -> postHandler -> mvc 
+이런 순으로 로직이 탐 
 
-interceptor preHandler -> controller -> postHandler -> mvc 
+PerfLogInterceptor.java
 
 public class ActionLogInterceptor extends HandlerInterceptorAdapter {
 	private static Logger log = Logger.getLogger("PERF_LOG");
@@ -26,8 +30,17 @@ public class ActionLogInterceptor extends HandlerInterceptorAdapter {
 		String strClassPath = hanlder.toString().split("#")[0];
 		String strMethodName = handler.toString().split("#")[1];
 		strMethodName = strMethodName.subString(0, strMethodName.indexOd("("));
+		log.info(strClassPath + "," + strMethodName + "," + request.getRemoteAddr() + "," + sw.getTotalTimeMillis() + ",," + request.getRequestURL() + "," + modelAndView.getViewName() + (modelAndView.getViewName().contains(".do")?"":".jsp"));
 	}
 
 	@Override
 	public void afterCompletion( ...
-}
+	}
+
+
+Common-servlet.xml
+<mvc
+
+
+
+
