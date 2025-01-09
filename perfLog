@@ -39,7 +39,12 @@ public class ActionLogInterceptor extends HandlerInterceptorAdapter {
 
 
 Common-servlet.xml
-<mvc
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<bean id="perfLogInterceptor" class="com.sc.gf.perfLog.PerfLogInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
 
 
 
