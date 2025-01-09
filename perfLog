@@ -5,6 +5,13 @@
 interceptor 이용해서 로그 남길거임 
 preHandler -> controller -> postHandler -> mvc 
 이런 순으로 로직이 탐 
+*****
+클래스명, 메소드명 : handler.toString
+유입단ip	: HttpServletRequest reqeust.getRemoteAddr()
+서비스수행시간 : StopWatch sw.getTotalTimeMillis()
+서비스id 	: HttpServletRequest request.getRequestURI()
+화면id		: ModelAndView modelAndView.getViewName 
+******
 
 PerfLogInterceptor.java
 
