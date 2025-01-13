@@ -350,7 +350,8 @@ public void setDebug(boolean isDebug){
 
 
 
-
+%appdata%
+Roaming > Microsft > Windows > 시작메뉴 > 프로그램 > 시작프로그램 
 
 - nosleep.vbs
 Set ws = CreateObject("WScript.shell")
