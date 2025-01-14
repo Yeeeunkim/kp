@@ -95,7 +95,23 @@ Common-servlet.xml
 
 
 log4j.xml
+방법 1. 
 <appender name="PERF_LOG_APPENDER" class="org.apache.log4j.rolling.DailyRollingFileAppender">
+	<param name="append" value="true" />
+	<param name="encoding" value="UTF-8" />
+	<param name="file" value="/gfinance/wasApps/log/perf_log/easy_perf.log"/>
+	<layout class="org.apache.log4j.PatternLayout">
+		<param name="CoversionPattern" value="[%d] %m%n" />
+	</layout>
+</appender>
+
+<logger name="PERF_LOG">
+		<level value="INFO" />
+		<appender-ref ref="PERF_LOG_APPEDNER"/>
+</logger>
+
+2.방법2
+<appender name="PERF_LOG_APPENDER" class="org.apache.log4j.rolling.RollingFileAppender">
 	<param name="append" value="true" />
 	<param name="encoding" value="UTF-8" />
 	<param name="file" value="/gfinance/wasApps/log/perf_log/easy_perf.log"/>
