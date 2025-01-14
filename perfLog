@@ -95,7 +95,7 @@ Common-servlet.xml
 
 
 log4j.xml
-<appender name="PERF_LOG_APPENDER" class="org.apache.log4j.rolling.RollingFileAppender">
+<appender name="PERF_LOG_APPENDER" class="org.apache.log4j.rolling.DailyRollingFileAppender">
 	<param name="append" value="true" />
 	<param name="encoding" value="UTF-8" />
 	<param name="file" value="/gfinance/wasApps/log/perf_log/easy_perf.log"/>
