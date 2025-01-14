@@ -5,6 +5,17 @@
 interceptor 이용해서 로그 남길거임 
 preHandler -> controller -> postHandler -> mvc 
 이런 순으로 로직이 탐 
+
+HandlerMapping 
+HandlerAdapter 
+preHandle : 컨트롤 메서드가 호출되기 전에 실행
+controller
+postHandle : 컨트롤 메서드가 호출된 후, view 페이지 렌더링 되기 전에 실행
+view
+afterCompletion : view 페이지 렌더링된 후, 즉 모든 작업 완료 후 실행
+
+
+
 *****
 클래스명, 메소드명 : handler.toString
 유입단ip	: HttpServletRequest reqeust.getRemoteAddr()
