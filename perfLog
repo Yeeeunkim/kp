@@ -20,6 +20,7 @@ public class ActionLogInterceptor extends HandlerInterceptorAdapter {
 	
 	private StopWatch sw;
 
+	private String jspName;
 	@Override
 	public boolean preHandler(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
 		sw = new StopWatch();
@@ -34,14 +35,41 @@ public class ActionLogInterceptor extends HandlerInterceptorAdapter {
 //		MultiReadHttpServletRequest req = new MultiReadHttpServletRequest((HttpServletRequest)request);
 //		new ActionLogSerivce().makeLog(req);
 		
-		String strClassPath = hanlder.toString().split("#")[0];
-		String strMethodName = handler.toString().split("#")[1];
-		strMethodName = strMethodName.subString(0, strMethodName.indexOd("("));
-		log.info(strClassPath + "," + strMethodName + "," + request.getRemoteAddr() + "," + sw.getTotalTimeMillis() + ",," + request.getRequestURL() + "," + modelAndView.getViewName() + (modelAndView.getViewName().contains(".do")?"":".jsp"));
+		sw.stop();
+		if (modelAndView != null){
+			jspName = modelAndView.getViewName() + (modelAndView.getViewName().contatins(".do")?"":".jsp");
+		}else{
+			jspName = "";
+		}
 	}
 
 	@Override
 	public void afterCompletion( ...
+		String strDelemeter = ",";
+		String strClassName = handler.toString().split("#")[0];
+		String strMethodName = handler.toString().split("#")[1];
+		String strGUID = "";
+		String strIP = request.getRemoteAddr();
+		String strElapsedTime = String.format("%.3fs", sw.getTottalTimeSeconds());
+		String strError = (ex == null)? "success":"error";
+		String strInterfaceId = "";
+		String strServiceId = request.getRequestURI();
+		String strScreenId = jspName;
+		strMethodName = strMethodName.substring(0, strMethodName.indexOd("("));
+	
+		StringBuffer perflog = new StringBuffer();
+		perfLog.append(strClassName).append(strDelemeter)
+					.append(strMethodName).append(strDelemeter)
+					.append(strGUID).append(strDelemeter)
+					.append(strIP).append(strDelemeter)
+					.append(strElapsedTime).append(strDelemeter)
+					.append(strError).append(strDelemeter)
+					.append(strInterfaceId).append(strDelemeter)
+					.append(strServiceId).append(strDelemeter)
+					.append(strScreenId);
+			log.info(perfLog.toString());
+		}
+
 	}
 
 
@@ -64,7 +92,7 @@ log4j.xml
 		<param name="FileNamePattern" value="/gfinance/wasApps/log/perf_log/easy_perf_%d{yyyy-MM-dd}.log" />
 	</rollingPolicy>
 	<layout class="org.apache.log4j.PatternLayout">
-		<param name="CoversionPattern" value=%m%n" />
+		<param name="CoversionPattern" value="[%d] %m%n" />
 	</layout>
 </appender>
 
