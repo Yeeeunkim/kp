@@ -1,1 +1,24 @@
+객체지향적인 스프링 프레임워크 구조 분석
+
+
+1. ContextConfigLocation 스프링 프레임워크가 동작하기 위해 설정파일을 명시해준다 
+
+2. ContextLoaderListener는 ContextLoaderListener와 DispatcherServlet은 각 WebApplicationContext 생성하고 스프링에서 사용되는 Context간의 계층 관계를 연결해준다
+
+3. DispatcherServlet은 프론트 컨트롤러 패턴으로 구성되어 있어서 HandlerMapping을 통해 요청 처리해야할 컨트롤러를 찾는다 
+
+이때, HandlerMapping 인터페이스는 getHandler라는 메소드를 정의하고 있는데,
+이 메서드는 HttpServletRequest 객체를 받아서 HandlerExectionChain객체를 반환해준다 
+HandlerExectionChain 객체는 요청 처리할 Controller 와 요청 처리하기 전후로 실행하는 Interceptor를 포함하고있다
+
+여기서 Interceptor 프로세스는 집고 넘어가자면, 
+컨트롤러 전에 실행되는 preHandler
+컨트롤러 메소드 호출된 후 view 랜더링 되기 전에 실행되는 postHandler
+뷰 랜더링 된 후 모든 작업이 완료 후 실행되는 afterCompletion 흐름을 탄다 
+
+4. 처리해야할 컨트롤러를 찾았다면, HandlerAdapter 통해서 컨트롤러의 메소드의 실제 호출 및 결과를 반환 받는다
+
+5. 컨트롤러가 비즈니스 로직을 실행하고 뷰 이름을 바탕으로 ViewResolver 동작하여 뷰 객체를 찾아준다 
+
+6. 생성된 뷰는 클라이언트 응답으로 전송된다 
  
