@@ -1,1 +1,34 @@
-  
+private static void executeCalls(String destName)
+{
+	try
+	{
+		
+		JCoDestination destination = JCoDestinationManager.getDestination(destName);
+		destination.ping();
+		
+		//인터페이스 id 
+		JCoFunction function = destination.getRepository().getFuntion("ZFFIGF_FILE_COPY");
+		if(funtion == null)
+			throw new RuntimeException("BAPI_COMPANYCODE_GETLIST not found in SAP.");
+
+		try
+		{
+			//table
+			JCoTable codes = function.getTableParameterList().getTable("T_MAKE");
+			codes.appendRow();
+			codes.setValue("FILE_EXT", "xlsx");
+			codes.setValue("FILE_KEY", "1001298346");
+			codes.setValue("FILE_NAME", "/home/egate/profinance/single/1001298346");
+			codes.setValue("FILE_SIZE" "32929");
+			function.getTableParameterList().setValue("T_MAKE", codes);
+			
+			function.execute(destination);
+			System.out.println("=====error::" + function.getExportParameterList().getValue("RETURN"));
+
+		}
+	
+	}catch{
+		e.printStackTrace();
+		System.out.println("Execution on destination " + destName + " failed");
+	}
+}  
