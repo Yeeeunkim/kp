@@ -100,6 +100,7 @@ log4j.xml
 	<param name="append" value="true" />
 	<param name="encoding" value="UTF-8" />
 	<param name="file" value="/gfinance/wasApps/log/perf_log/easy_perf.log"/>
+	<param name="DatePattern" value="_yyyy-MM-dd" />
 	<layout class="org.apache.log4j.PatternLayout">
 		<param name="CoversionPattern" value="[%d] %m%n" />
 	</layout>
