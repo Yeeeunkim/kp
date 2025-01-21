@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="ISO_8859-1"?>
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+
 		<appender name="console" class="org.apache.log4j.ConsoleAppender">
 			<layout claee="org.apache.log4j.PatternLayout">
 				<param name="ConversionPatter" value="%d %5p [%c] %m%n" />
@@ -18,4 +19,17 @@
 		</appender>
 
 
+		<appender name="ACTION_LOG_APPENDER" class="org.apache.log4j.rolling.RollingFileAppender">
+			<param name="append" value="true" />
+			<param name="encoding" value="UTF-8" />
+			<param name="file" value="/app_log/gfinance/action_log/easy_action.log" />
+			<rollingPolicy class="org.apache.log4j.rolling.TimeBaseRollingPolicy">
+				<param name="FileNamePattern" value="/app_log/gfinance/action_log/easy_action-%d{yyyy-MM-dd}.log" />
+			</rollingPolicy>
+			<layout class="org.apache.log4j.PatternLayout" >
+				<param name="CoversionPattern" value="%m%n" />
+			</layout>
+		</appender>
+
+		
 		<
