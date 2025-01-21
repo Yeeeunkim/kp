@@ -9,6 +9,7 @@ less test.log
 tail -f test.log -n 1000
 cmd창에 curl -v 40.2.2.91:3610
 
+
 여러파일의 단어찾기
 find /gfinanve/wasApps/WEB-INF/classes/spring -name *.xml type f | xargs grep 40.2.2.91
 디렉토리 찾기
@@ -18,7 +19,10 @@ find /gfinanve/wasApps -type f -mtime -5
 하나파일에서 단어찾기
 grep "servlet" JeusServer_20241218.log
 
-OS 확인
+현재디렉토리에서 하위디렉토리까지 모두 포함하여 anyframe 문자열이 포함한 파일 검색하는 명령
+grep -r anyframe * 
+
+.OS 확인
 car /etc/*release*
 OS비트 확인
 getconf LONG_BIT
