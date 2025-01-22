@@ -13,6 +13,33 @@ Samsung Easy Securtiy Manager
 Symantec Management Agent
 adLockDown V2
 
+
+- 구축 범위
+easy 
+	os		SunOs 5.10 -> RHEL 8.10
+			HP-UX 11 -> RHEL 8.10
+	web	iplanet -> webtob5
+	was	jeus6 -> jeus8
+	클라우드 USEFLEX 삼성sds 클라우드 서비스 
+	spring  2.5.6 -> 5.2.21 
+  anyframe 
+	anyframe.common-4.2.0.jar
+	anyframe.common.tags-4.2.0.jar
+	anyframe.properties-4.2.0.jar
+
+etms
+	os		SunOs 5.10 -> RHEL 8.10
+	web	Iplanet	-> webtob5
+	was 	Weblogic 11 -> JEUS 8
+	db		oracle 11g -> oracle 19c 
+  spring 3.2.2 -> 5.2.21 , 5.3.10 
+  anyframe <anyframe 버전만 변경함> 
+	anyframe-core-1.5.1.jar
+	anyframe-jdbc-support-1.0.4.jar
+	anyframe-xplatform-1.5.1.jar
+	anyframe-titles-1.0.4.jar
+	anyframe-logmanager-1.0.4.jar
+	
 -형상관리 : 젠킨스 
 
 -프로젝트정보
