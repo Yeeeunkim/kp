@@ -161,6 +161,8 @@ etms
 	db		oracle 11g -> oracle 19c 
 
 - asis server 
+web intwbdev 40.1.16.51 
+was misdv02 40.1.15.65
 jeus		/was/jeus6/
 source		/gfinance/wasApps
 jeus6	/was/jeus6/gfinance/config/midv02/JEUSMain.xml (container로 application확인)
@@ -168,6 +170,7 @@ log.  /log/was/jeus8/misdv02/misdv02_container1
 			tail -f -n 1000 misdv02_container1_20250106.log
 
 - tobe server
+was teazap01 40.1.17.111
 java		/usr/lib/jvm/java-1.8.0
 jeus8	/was/jeus8/domains/T-EY11-0	(startEY11-F11.sh / stopEY11-F11.sh)
 log		/log/jeus8/T-EY11-0
