@@ -203,9 +203,36 @@ sap 	40.2.2.91
 .pointcut	execution 정의된걸 호출시켜 실행 시 제어권 뺏어감
 
 
+- 엑셀 다운로드 관련 함수들 변경사항
+	return type View -> String
+	변경 전
+	java 6 - poi-3.7-20101029.jar, poi-ooxml-3.7-20101029.jar, poi-ooxml-schemas-3.7-20101029.jar
+	public View 
+	return new excelView();
+	
+	변경 후 
+	java 8 - poi-4.1.jar, poi-ooxml-4.1.0.jar, poi-ooxml-schemas-4.1.0.jar
+	public String
+	return "excelView";
+
+	common-servlet.xml 에서 <bean name="excelView" class="~~~.excelView"/>
+	
+	AbstractExcelView -> AbstractXlsView ( spring-webmvc-5.2.2.1)
+	변경 전 
+  	public class excelView extends  AbstractExcelView
+		protected void buildExcelDocument(Map model, HSSFWorkbook workbook, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		~~~
+		HSSFSheet sheet = workbook.createSheet("result");
+	
+	변경 후 
+	public class excelView extends  AbstractExcelView
+		protected void buildExcelDocument(Map model, Workbook workbook, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		~~~
+		HSSFSheet sheet = (HSSFSheet) workbook.createSheet("result");
+	
 
 - spring 2->5 변경함수
-	AbstractExcelView -> AbstractXlsView ( spring-webmvc-5.2.2.1)
+	
   org.springframework.web.servlet.view.document.AbstractXlsView
 
 	multivalueMap(key, object) => multivalueMap(key, object) list방식 (spring-core-5.2.2.1)
