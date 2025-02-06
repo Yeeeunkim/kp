@@ -349,6 +349,8 @@ sap 	40.2.2.91
 	fileParamList.add(fileItem.getName());
 	fileParameter.put(fileItem.getFieldName(), fileParamList);
 	contentTypes.put(fileItem.getFieldName(), fileItem.getContentType());
+	
+	
 
 
 	<online anyframe jdk 1.6 - 1.7 >
@@ -372,8 +374,25 @@ sap 	40.2.2.91
 	org.springframework.integration.annotation.Payload => org.springframework.messaging.handler.annotation.Payload
 
 	
-
+	<엑셀다운로드 안되는 문제>
+	문제 : asis 엑셀 다운로드 정상 작동 , tobe에서는 에러도 안나오고 반응 없음
+	원인 : controller에서 sap 통신 후 return new excelView() 반환 될 때 return 안되는 문제
+	해결 : return new excelView() 를 대체할 수 있는 걸 모색함 
+	1) common-servlet.xml <bean name="excelView" class-"com.sc.gr.~~ExcelView" /> 사전에 정의함 
+	2) 서버 기동하면서 web.xml common-servlet 바라보면서 bean 생성되기 때문에
+	3) excelView를 return 할 경우 excelView의 class 호출되면서 엑셀 다운로드 함수로 넘어감 
 	
+	변경 전 
+	public View ~~ 
+	~~
+	return new excelView();
+
+	변경 후 
+	public String ~~ 
+	~~
+	return "excelView()";	
+
+
 -interface  추가하는 방법
 common-servlet.xml 
 <bans xmlns="http://www.springframework.org/schema/beans"
