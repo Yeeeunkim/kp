@@ -148,18 +148,27 @@ getconf LONG_BIT
 
 - 구축 범위
 easy 
+	java 6 -> 8
+	spring 2.5.6 -> 5.2.21 
 	os		SunOs 5.10 -> RHEL 8.10
 			HP-UX 11 -> RHEL 8.10
 	web	iplanet -> webtob5
 	was	jeus6 -> jeus8
 	클라우드 USEFLEX 삼성sds 클라우드 서비스 
-	
-etms
+	anyframe 	anyframe.properties-4.2.0 <- 이것만 실 사용하는걸로 보임 
+						anyframe.common-4.2.0
+						anyframe.common.tags-4.2.0
+
+
+etms ( 작업은 인선프로님, 찬호프로님이 하심 anyframe 은 .jar 만 제공함 !  ) 
 	os		SunOs 5.10 -> RHEL 8.10
 	web	Iplanet	-> webtob5
 	was 	Weblogic 11 -> JEUS 8
 	db		oracle 11g -> oracle 19c 
-
+	anyfrmae		anyframe-core-1.5.1.jar
+						anyframe-jdbc-support-1.0.4.jar
+						anyframe-titles-1.0.4.jar
+						anyfrmae-logmanager-1.0.4.jar
 - asis server 
 web intwbdev 40.1.16.51 
 was misdv02 40.1.15.65
@@ -231,7 +240,7 @@ sap 	40.2.2.91
 		HSSFSheet sheet = (HSSFSheet) workbook.createSheet("result");
 	
 
-- spring 2->5 변경함수
+- spring 2->5.2.21 변경함수
 	
   org.springframework.web.servlet.view.document.AbstractXlsView
 
@@ -434,3 +443,24 @@ Do
 				 Wscript.Sleep 120000
 				 ws.SendKeys "{SCROLLOCK}{SCROLLLOCK}"
 Loop
+
+
+- host 설정
+로컬 디스크 c > Windows > System32 > drivers > etc > hosts
+관리자로 실행 혹은 drm 걸리면 이클립스로 실행
+ip 도메인 
+
+- utf 인코딩 많이 깨질 경우
+프로젝트 전체 인코딩 변경해도 그래도 깨진다면 ? 
+하나씩 수정하는 방법뿐..ㅠㅠ
+1. utf8	 변경 후 파일 텍스트 복사 
+2. 파일 utf 설정 후 붙여넣기 
+
+
+
+
+
+
+
+
+
