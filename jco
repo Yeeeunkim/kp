@@ -1,3 +1,46 @@
+// 값 넣어줄때 
+
+private static void executeCalls(String destName)
+{
+	try
+	{
+		
+		JCoDestination destination = JCoDestinationManager.getDestination(destName);
+		destination.ping();
+		
+		//인터페이스 id 
+		JCoFunction function = destination.getRepository().getFuntion("ZFFIGF_820");
+		if(funtion == null)
+			throw new RuntimeException("BAPI_COMPANYCODE_GETLIST not found in SAP.");
+
+		try
+		{
+			JCoParameterList parameterList = function.getImportParameterList();
+			parameterList.setValue("IBUKRS" , "1000");
+			parameterList.setValue("IBYMD" "20250103");
+			parameterList.setValue("IEYMD" "20250204");
+			parameterList.setValue("IEMPNO", "");
+			parameterList.setValue("IZKOSTL" , "");
+			function.execute(destination);
+			
+			JCoTable code = function.getTableParameterList().getTable("T_ITAB");
+			for(int i =0; i < codes.getNumRows(); i++)
+			{
+					code.setRow(i);
+					System.out.println(codes.getString("BUSI_TYPE")+'\t'+codes.getString("BUSI_REG"));
+
+			}
+		}
+	
+	}catch{
+		e.printStackTrace();
+		System.out.println("Execution on destination " + destName + " failed");
+	}
+}
+
+
+// 테이블에 담아서 가져올 때
+
 private static void executeCalls(String destName)
 {
 	try
@@ -21,10 +64,16 @@ private static void executeCalls(String destName)
 			codes.setValue("FILE_NAME", "/home/egate/profinance/single/1001298346");
 			codes.setValue("FILE_SIZE" "32929");
 			function.getTableParameterList().setValue("T_MAKE", codes);
-			
+			System.out.println(function.getTableParameterList().getTable("T_MAKE");	
 			function.execute(destination);
 			System.out.println("=====error::" + function.getExportParameterList().getValue("RETURN"));
-
+	
+			JCoTable table = function.getTableParameterList().getTable("T_FILE");
+			for(int i =0; i < table.getNumRows(); i++)
+			{
+				table.setRow();
+				System.out.println(table.getString("MANDT").'\t'+function.getTableParameterList().getString("BUKRS"));
+			}
 		}
 	
 	}catch{
