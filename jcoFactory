@@ -1,1 +1,75 @@
-d 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Properties;
+
+import com.sap.conn.jco.JCoExcetpion;
+import com.sap.conn.jco.ext.DataProviderException;
+import com.sap.conn.jco.ext.DestinationDataEventListener;
+import com.sap.conn.jco.ext.DestinationDataProvider;
+import com.sap.conn.jco.ext..Environment;
+import com.sc.gf.common.BaseCommon;
+
+public class JCOFactory extends BaseCommon {
+
+	private JCOConnectionInfo jcoConnectionInfo;
+	
+	private InMemoryDestinationDataProvider memoryProvider;
+
+	public JCOConnectionInfo getJcoConnectionInfo(){
+		return jcoConnectionInfo;
+	}
+	public void setJcoConnectionInfo(JCOConnectionInfo jcoConnectionInfo){
+		this.jcoConnectionInfo = jcoConnectionInfo;
+	}
+
+	//jco 연결 초기화
+	private void initJCOPool() {
+		memoryProver = new JCOFactory.InMemoryDestinationDataProvider();
+		
+		try
+		{
+			Environment.registerDestinationDataProvider(memoryProvider);
+		}
+		catch ( IllegalStateException provierAlreadyRegisteredException)
+		{
+			throw new Error(priverAlreadyRegisteredException);
+		}
+	}
+	
+	public void refresh() throws Exception {	
+		debug("JCO clear success");
+	}
+	
+	public JCOManager getJCOManager() throws IOException {
+		Properties connectProperties = new Properties();
+	
+		//
+		if(jcoConnectionInfo.getR3Name().contains("SPD")){
+			connectProperties.setProperty(DestinationDataProvier.JCO_MSHOST, jcoConnectionInfo.getHostName());
+			connectProperties.setProperty(DestinationDataProvier.JCO_PEAK_LIMIT, jcoConnectionInfo.getMaxConn());
+		  connectProperties.setProperty(DestinationDataProvier.JCO_USER, jcoConnectionInfo.getUserName());
+      connectProperties.setProperty(DestinationDataProvier.JCO_PASSWD, jcoConnectionInfo.getPasswd());
+      connectProperties.setProperty(DestinationDataProvier.JCO_GROUP, jcoConnectionInfo.getGroup());
+			connectProperties.setProperty(DestinationDataProvier.JCO_MSHOST, jcoConnectionInfo.getHostName());
+		  connectProperties.setProperty(DestinationDataProvier.JCO_R3NAME, jcoConnectionInfo.getR3Name());
+		}else if ( jcoConnectionInfo.getR3Name().contains("SQA")) {
+			connectProperties.setProperty(DestinationDataProvier.JCO_ASHOST, jcoConnectionInfo.getHostName());
+			connectProperties.setProperty(DestinationDataProvier.JCO_SYSNR, jcoConnectionInfo.getSystemNumber());
+		  connectProperties.setProperty(DestinationDataProvier.JCO_CLIENT, jcoConnectionInfo.getClient());
+      connectProperties.setProperty(DestinationDataProvier.JCO_USER, jcoConnectionInfo.getUserName());
+      connectProperties.setProperty(DestinationDataProvier.JCO_PASSWD, jcoConnectionInfo.getPasswd());
+		}
+		
+		memoryProvider.changeProperties(jcoConnectionInfo.getGroup(), connectProperties);
+		JCOManager manager = null;
+		try {
+			manager = new JCOManager(jcoConectionInfo.getGroup();
+		}catch(JCoException e)
+			e.printStackTrace();
+		}
+		return manager;
+   }
+
+
+	}
+}
