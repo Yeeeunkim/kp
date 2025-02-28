@@ -16,6 +16,7 @@ adLockDown V2
 
 - 구축 범위
 easy 
+	서버스 web 6, ap 3 -> web 3 , ap4 
 	os		SunOs 5.10 -> RHEL 8.10
 			HP-UX 11 -> RHEL 8.10
 	web	iplanet -> webtob5
@@ -226,6 +227,8 @@ sap 	40.2.2.91
 
 	common-servlet.xml 에서 <bean name="excelView" class="~~~.excelView"/>
 	
+	
+
 	AbstractExcelView -> AbstractXlsView ( spring-webmvc-5.2.2.1)
 	변경 전 
   	public class excelView extends  AbstractExcelView
@@ -351,7 +354,7 @@ sap 	40.2.2.91
 	contentTypes.put(fileItem.getFieldName(), fileItem.getContentType());
 	
 	
-
+	
 
 	<online anyframe jdk 1.6 - 1.7 >
 	org.springframework.integration.Message -> org.anyframe.spring.message.Message;
