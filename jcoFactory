@@ -69,7 +69,37 @@ public class JCOFactory extends BaseCommon {
 		}
 		return manager;
    }
+	
+	private static calss InMemoryDestinationDataProvider implements DestinationDataProvider 
+	{
+		private DestinationDataEventListener eL;
+		private HashMap<STring, Properties> secureDBStorage = new HashMap<String, Properties>()
 
+		@Override
+		public Properties getDestinationProperties(String destinationName)
+		{
+			Properties p = secureDBStorage.get(destinatinonName);
+
+			if(p!=
+		}
+	}
 
 	}
 }
+
+
+
+개발계 운영계 dr 기능 테스트
+dr환경 기동 및 테스트 
+
+프로그램 형상관리시스템 promise 내에서 관리한느 약 37개 업무의 어플리케이션 소스 및 데이터베이스의 메타자원을 메타시스템으로 이관하며, 형상관리 프로세스도 arm/메타시스템으로 전화
+promise arm 으로 이관
+-- jcoManager 
+bigdecimal 00.0으로 표기되는 문제
+변경 전 
+if( value instanceof BigDecimal ) value = value.toString();
+
+변경 후 
+if (value instanceof BigDecimal) value= (((BigDecimal) value).compareTo(BigDecimal.ZERO)==0)? "0":value.toString();
+
+if (value instanceof BigDecimal) value = (((BigDecimal) value).compareTo(BigDecimal.ZERO)==0)? "0":value.toString();
