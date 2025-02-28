@@ -91,9 +91,12 @@ public class JCOFactory extends BaseCommon {
 
 개발계 운영계 dr 기능 테스트
 dr환경 기동 및 테스트 
+jdk/jeus 업그레이드 변경에 
 
 프로그램 형상관리시스템 promise 내에서 관리한느 약 37개 업무의 어플리케이션 소스 및 데이터베이스의 메타자원을 메타시스템으로 이관하며, 형상관리 프로세스도 arm/메타시스템으로 전화
 promise arm 으로 이관
+37개 이관대상 서비스 이관 후 이슈 및 기술지원 
+
 -- jcoManager 
 bigdecimal 00.0으로 표기되는 문제
 변경 전 
