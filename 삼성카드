@@ -1,3 +1,36 @@
+- ci
+37개 서비스 이관 /테스트 / 적용
+os HP-UX11.11 -> RHEL 8.10
+sw promise -> ARM 
+
+
+- easy
+업무 상세 정의 및 분석 
+단위테스트 수행/ 결함조치 
+통합테스트 시나리오 작성 지원/ 결함조치  - 성능/가용성테스트
+sapjco 튜닝 
+
+
+=>
+1. 크ㄹ라우드 적용
+서버부하 이슈로 서비스 확장 대응에 용이한 클라우드 적용 
+ 확장성, 유연성 가용성 및 안정성이 확보된 SCP 클라우드 환경에 서비스 구성 
+
+2. 노후서버교체
+EoS된 OS 업그레이드 및 U2L 
+sunos u2l 23대 
+hp-ux u2l 4대
+
+3. 주ㅇ요 sw 업그레이드
+oracle 11g -> 19c 
+카드표준 WEB/WAS 전환
+	iPlanet -> Webtob 
+	Weblogin -> Jeus 
+
+암호화솔류션 전환
+	ETMS 서비스 대상 XecureDB -> D'Amo변경
+
+-
 -설치 보안 프로그램
 escort
 nasca +sd 문서보안
