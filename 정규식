@@ -1,0 +1,6 @@
+엑셀
+="p"&LOWER('L3'!A17)
+=LOWER('L3'!A17)
+
+이클립스
+tmp_ext=${update_file##$teno#
