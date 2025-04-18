@@ -1,0 +1,358 @@
+package com.anyframe.admin.online.service.impl;
+
+import com.anyframe.admin.online.config.OnlineProperties;
+import com.anyframe.admin.online.controller.meta.dto.ClasspathInfo;
+import com.anyframe.admin.online.service.ServiceMetaCollector;
+import com.anyframe.online.core.annotation.LocalName;
+import com.anyframe.online.runtime.management.ServiceAttribute;
+import com.anyframe.online.runtime.service.mapping.annotation.ServiceIdMapping;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+@Component
+public class DefaultServiceMetaCollector implements ServiceMetaCollector {
+	
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());	
+    
+	private static final String CLASS_SUFFIX = ".class";
+
+	@Autowired
+    private OnlineProperties properties;
+
+	@Override
+    public List<ServiceAttribute> collectServiceAttributes(ClasspathInfo classpathInfo) {
+        List<ServiceAttribute> result = new ArrayList<ServiceAttribute>();
+
+        List<String> classnames = new ArrayList<String>();
+
+        String scanPackage = classpathInfo.getScanPackage();
+        String[] classpaths = classpathInfo.getClasspath().split("[,]");
+        String[] jarPaths = classpathInfo.getJarPath().split("[,]");
+        int jarFileCount = 0;
+        for(String jarPath : jarPaths){
+            File jarDir = new File(jarPath); // jaríì¼ ê²½ë¡(ex. ${war.home}/WEB-INF/lib)
+            File[] jars = jarDir.listFiles();
+            if (jars == null) {
+            	logger.warn("no jars in jar path.");
+            	break;
+            }
+            jarFileCount += jars.length;
+            classnames.addAll(findClassFilesFromJarpath(jars, scanPackage)); // jaríì¼ìì í´ëì¤ íì¼ëª ìì§
+        }
+
+        final URL[] urls = new URL[jarFileCount + classpaths.length];
+        int j = 0;
+        for(String jarPath : jarPaths){
+            File jarDir = new File(jarPath);
+            if (!jarDir.exists()) {
+                logger.warn("Jar path not found : " + jarDir.getAbsolutePath());
+            }
+            
+            File[] jars = jarDir.listFiles();
+            // 20190819 ì¶ê°, jarsê° nullì¸ì§ ì²´í¬
+            if (jars == null) {
+                logger.warn("no jars in jar path.");
+                break;
+            }
+            for (File jar : jars) {
+                try {
+                    urls[j++] = jar.toURI().toURL();
+                } catch (MalformedURLException e) {
+                }
+            }
+            classnames.addAll(findClassFilesFromJarpath(jars, scanPackage)); // jaríì¼ìì í´ëì¤ íì¼ëª ìì§
+            jarFileCount += jars.length;
+        }
+
+        int k = urls.length - 1;
+        for(String classpath : classpaths){
+            File externalClasspath = new File(classpath); //class íì¼ ë£¨í¸ ê²½ë¡(ex. ${war.home}/WEB-INF/classes)
+            if (!externalClasspath.exists()) {
+                logger.warn("Classpath path not found : " + externalClasspath.getAbsolutePath());
+            }
+            try {
+                urls[k--] = externalClasspath.toURI().toURL();
+            } catch (MalformedURLException e) {
+            }
+            classnames.addAll(findClassFilesFromClasspath(externalClasspath, null, scanPackage));    // classpathìì í´ëì¤ íì¼ëª ìì§
+        }
+
+
+        // ê²ìí  Annotation ì´ë¦
+        String serviceAnnotation = Service.class.getName();
+        String componentAnnotation = Component.class.getName();
+        String localNameAnnotation = LocalName.class.getName();
+        String serviceIdMappingAnnotation = ServiceIdMapping.class.getName();
+
+       
+        URLClassLoader urlClassLoader = 
+        	AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+				public URLClassLoader run() {
+					return new URLClassLoader(urls);
+				}
+			});
+        // service duplicate check
+        Set<String> serviceIds = new HashSet<String>();
+        for (String classname : classnames) {
+    		Class<?> clazz = null;
+            try {
+                clazz = urlClassLoader.loadClass(classname); // í´ëì¤ëªì¼ë¡ URLClassLoaderë¥¼ íµí´ì Class ê°ì²´ ë¡ë©
+            } catch (ClassNotFoundException e) {
+                logger.warn("Class scanning fail [" + e.getClass() + "] - " + e.getMessage());
+                continue;
+            } catch (NoClassDefFoundError err) {
+            	logger.warn("Class scanning fail [" + err.getClass() + "] - " + err.getMessage());
+                continue;
+            } catch (IllegalAccessError err) {
+            	logger.warn("Class scanning fail [" + err.getClass() + "] - " + err.getMessage());
+                continue;
+            }
+            if (clazz.isInterface()) continue;  // ì¸í°íì´ì¤ì¸ ê²½ì° ì¤íµ
+
+            Annotation[] classAnnotations = clazz.getAnnotations();
+            // Class Annotationì Service í´ëì¤ë¡ íë¨í  ì ìë ì´ë¸íì´ìì´ ìë ì§ íì¸(@Service, @Component, @ComplexService ë±)
+            boolean hasServiceAnnotation = hasAnnotation(classAnnotations, serviceAnnotation, componentAnnotation, "ComplexService");
+            String classLocalName = getAnnotationValue(classAnnotations, localNameAnnotation);
+            Class<?> serviceInterface = null;
+            String beanName = null;
+            Method[] interfaceMethods = null;
+            Class<?>[] interfaces = clazz.getInterfaces();
+            if (interfaces != null && interfaces.length > 0) {
+                serviceInterface = interfaces[0];
+                try{
+                	interfaceMethods = serviceInterface.getMethods();
+                // getMethods í¸ì¶íë ìì ìì ClassNotFoundExcepionì´ ë°ìíë ê²½ì°ë ììì 	
+                } catch (Exception e) {
+                    logger.warn("getMethods() fail [" + e.getClass() + "] - " + e.getMessage());
+                    continue;
+                }
+                
+            }
+            if (serviceInterface != null) {  // Classì ì¸í°íì´ì¤ê° ìë ê²½ì°, ìë¹ì¤ ì´ë¸íì´ìê³¼ @ClassLocalNameì´ ìëì§ ë¤ì íì¸
+                Annotation[] serviceInterfaceAnnotations = serviceInterface.getAnnotations();
+                if (hasServiceAnnotation == false) {
+                    hasServiceAnnotation = hasAnnotation(serviceInterfaceAnnotations, serviceAnnotation, componentAnnotation, "ComplexService");
+                }
+                if (classLocalName == null) {
+                    classLocalName = getAnnotationValue(serviceInterfaceAnnotations, localNameAnnotation);
+                }
+            }
+            if (hasServiceAnnotation == true) {  //ìë¹ì¤ í´ëì¤ì¸ ê²½ì°ìë§ ìë ì²ë¦¬
+            	beanName = clazz.getName(); // Bean ì´ë¦ì ìë¹ì¤ í´ëì¤ì FQNì¼ë¡ íë¨
+                logger.trace("====> Service Class : " + classname);
+                Method[] methods = clazz.getMethods();
+                for (Method method : methods) {
+                    Method interfaceMethod = null;
+                    String serviceId = null;
+                    if (interfaces != null && interfaces.length > 0) {
+                        for (Method temp : interfaceMethods) {
+                            if (temp.getName().equals(method.getName())) {
+                                interfaceMethod = temp;
+                                break;
+                            }
+                        }
+                        if (interfaceMethod != null) { // ìë¹ì¤ ì¸í°íì´ì¤ì ë©ìëìì @ServiceIdMapping ì´ë¸íì´ì íì¸
+                            serviceId = getAnnotationValue(interfaceMethod.getAnnotations(), serviceIdMappingAnnotation);
+                        }
+                    }
+                    if (StringUtils.isEmpty(serviceId)) { // ìë¹ì¤ í´ëì¤ì ë©ìëìì @ServiceIdMapping ì´ë¸íì´ì ìëì§ ì¬íì¸
+                        serviceId = getAnnotationValue(method.getAnnotations(), serviceIdMappingAnnotation);
+                    }
+                    if (StringUtils.isEmpty(serviceId)) continue; // @ServiceIdMapping ì´ë¸íì´ìì´ ìë ê²½ì° ì¤íµ
+                    
+                    // serviceId ì¤ë³µ ì²´í¬
+                    if(serviceIds.contains(serviceId)){
+                    	logger.warn("ServiceId ["+serviceId + "] duplicated. - method : " + method.toGenericString());
+                    	continue;
+                    }
+                    serviceIds.add(serviceId);
+                    String methodLocalName = getAnnotationValue(method.getAnnotations(), localNameAnnotation);
+                    if (methodLocalName == null) {
+                        methodLocalName = getAnnotationValue(interfaceMethod.getAnnotations(), localNameAnnotation);
+                    }
+                    String returnType = method.getReturnType().getName();
+                    Class<?>[] paramClasses = method.getParameterTypes();
+                    String[] parameters = new String[paramClasses.length];
+                    int index = 0;
+                    for (Class<?> param : paramClasses) {
+                        parameters[index++] = param.getName();
+                    }
+                    ServiceAttribute serviceAttribute = new ServiceAttribute(serviceId, clazz, beanName, method.getName(), classLocalName, methodLocalName, parameters, returnType);
+                    serviceAttribute.setArguments(Arrays.toString(parameters));
+                    result.add(serviceAttribute);
+                }
+
+            }
+        }
+        
+    	try {
+			urlClassLoader.close();
+		} catch (IOException e) {
+			logger.error("#### Error While URL Classloader Closing() ####", e);
+		}
+    	
+        if(logger.isTraceEnabled()){
+            for (ServiceAttribute sa : result) {
+                logger.trace("#### Collected Service Attribute : "+sa.toString());
+            }
+        }
+        logger.debug("Service Attribute size : " + result.size());
+        return result;
+    }
+
+
+    /**
+     * í´ë¹ í´ëì¤ ëªì¹­ì¼ë¡ ìë¹ì¤ í´ëì¤ ì¬ë¶ë¥¼ íë³íì¬ íì í¨ 
+     * 
+     * @param classname ê²ì¬í  í´ëì¤ëªì¹­
+     * @return ìë¹ì¤í´ëì¤ì¬ë¶
+     */
+    @Override
+    public boolean isServiceClass(String classname) {
+    	for(int i=0;i<properties.getServicePostfix().length;i++) {
+    		if( StringUtils.endsWith(classname, properties.getServicePostfix()[i]) )
+    			return true; 
+    	}
+		return false;
+	}
+
+
+	private boolean hasAnnotation(Annotation[] annotations, String... annotationNames) {
+        for (Annotation annotation : annotations) {
+            for (String annotationName : annotationNames) {
+                if (annotation.toString().contains(annotationName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private String getAnnotationValue(Annotation[] annotations, String annotationName) {
+        String value = null;
+        for (Annotation annotation : annotations) {
+            if (annotation.toString().contains(annotationName)) {
+                Class<? extends Annotation> serviceAnnotationType = annotation.annotationType();
+                Method valueMethod = null;
+                try {
+                    valueMethod = serviceAnnotationType.getMethod("value");
+                } catch (NoSuchMethodException e) {
+                }
+                try {
+                    value = (String) valueMethod.invoke(annotation);
+                } catch (IllegalAccessException e) {
+                } catch (InvocationTargetException e) {
+                }
+                break;
+            }
+        }
+        return value;
+    }
+
+    /**
+     * Jar íì¼ìì ìë Classíì¼(.class)ë¤ì FQNì ìì§íë¤.
+     * @param jars
+     * @param scanPackage
+     * @return
+     * @throws  
+     */
+    private List<String> findClassFilesFromJarpath(File[] jars, String scanPackage) {
+        List<String> result = new ArrayList<String>();
+        for (File jar : jars) {
+        	
+            ZipFile zipFile = null;
+            try {
+                zipFile = new ZipFile(jar);
+                
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry zipEntry = entries.nextElement();
+                    String classname = zipEntry.getName();
+                    if (classname.endsWith(CLASS_SUFFIX)) {
+                        classname = classname.replaceAll("[/]", ".");
+                        classname = classname.substring(0, classname.lastIndexOf("."));
+                        if(scanPackage != null && classname.startsWith(scanPackage) && !classname.contains("$") && isServiceClass(classname)) {
+                            result.add(classname);
+                        }
+                    }
+                }
+            } catch (IOException e) {            	
+                continue;
+            } finally {
+            	try {
+            		if (zipFile != null) {
+            			zipFile.close();
+            		}
+				} catch (IOException e) {			
+					zipFile = null;
+				}
+            }
+
+        }
+        return result;
+    }
+
+    private List<String> findClassFilesFromClasspath(File root, File dir, String scanPackage) {
+        List<String> result = new ArrayList<String>();
+        if (dir == null) dir = root;
+        File[] subFiles = dir.listFiles(new FileFilter() {
+            public boolean accept(File pathname) {
+                try {
+                    String filename = pathname.getName();
+                    if (filename.endsWith(CLASS_SUFFIX)) {
+                        return true;
+                    }
+                } catch (Exception e) {
+                }
+                if (pathname.isDirectory()) return true;
+                return false;
+            }
+        });
+        // 20190819 subfiles null check ì¶ê°
+        if (subFiles != null) {
+            for (File file : subFiles) {
+                // check null
+                if (file != null) {
+                    if (file.isDirectory()) {
+                        result.addAll(findClassFilesFromClasspath(root, file, scanPackage));
+                    } else {
+                        try {
+                            String classname = file.getCanonicalPath();
+                            // check null
+                            if (org.springframework.util.StringUtils.hasText(classname)) {
+                                classname = classname.substring(0, classname.lastIndexOf("."));
+                                classname = classname.replaceAll("[\\" + File.separator + "]", ".");
+                                String rootpath = root.getCanonicalPath().replaceAll("[\\" + File.separator + "]", ".");
+                                classname = classname.replaceFirst(rootpath, "").substring(1);
+                                if (scanPackage != null && classname.startsWith(scanPackage) && !classname.contains("$") && isServiceClass(classname)) {
+                                    result.add(classname);
+                                }
+                            }
+                        } catch (IOException | StringIndexOutOfBoundsException e) {
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+}
