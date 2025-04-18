@@ -1365,3 +1365,28 @@ http://182.195.89.102/subv/anyframe-opensource/anyframe/tags/plugin/essential/co
 core : jsp-api-2.1.jar -> javax.servlet.jsp-api.jar
 support :  log4jdbc3-1.2beta2.jar -> log4jdbc4-1.2.jar
 titles : jboss-el-2.0.1.GA.jar  .jar 추가 
+
+
+
+================
+문의 : 어드민6 에서 온라인 > 서비스메타관리 > 서비스 메타 정보 불러오기 클릭시 
+java.lang.NullPointException
+at com.anyframe.admin.online.service.impl.DefaultServiceMetaClector.collectServiceAttributes(DefaultServiceMetaCollector.java:190)
+
+원인 : 
+임플 - 실제코딩하는 곳
+인터페이스 - @ServiceIdMapping 서비스 매핑 어노테이션 정의되는 곳 / 메소드만 구현하는 곳
+        - svc 메소드만 정의하여 상속당하는 역할
+
+예전에도 인터페이스 어노테이션 안달고 임플에서 어노테이션 달아서 문제됐음
+
+해결 :
+신규서비스 만든거라면
+인터페이스 모든소스에  @ServiceMapping 정의되어있는지 확인해야함
+
+메타불러오기를 누르면 추가된 서비스는 해당 서비스아이디로부터 출발해 
+service_meta 테이블에 자동으로 추가됨
+
+
+
+
