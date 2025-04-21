@@ -3,4 +3,8 @@
 =LOWER('L3'!A17)
 
 이클립스
-tmp_ext=${update_file##$teno#
+tmp_ext=${update_file##$tmp_name\.\}
+
+tmp_ext=\$\{(.*)##\$tmp_name\.\}
+tmp_ext=\$\{\1##\$tmp_name\}
+
