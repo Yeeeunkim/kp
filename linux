@@ -10,6 +10,9 @@ tail -f test.log -n 1000
 cmd창에 curl -v 40.2.2.91:3610
 
 
+^M없애기
+perl -pi -e 's/\r//' *.sh
+
 여러파일의 단어찾기
 find /gfinanve/wasApps/WEB-INF/classes/spring -name *.xml type f | xargs grep 40.2.2.91
 디렉토리 찾기
