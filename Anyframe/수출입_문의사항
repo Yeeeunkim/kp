@@ -1,1 +1,17 @@
-ㅇㅇ
+2025.05.09
+
+문의내용 : 어드민 온라인에서 서비스메타불러오기 시 에러
+defaultservicemetacollector 190 라인 nullpointexception 
+
+원인 :
+delete~메소드가 임플에는 있고 인터페이스에 정의가 안되어 있었음
+
+조치 :
+defaultservicemetacollector 클래스에서
+interfacemethod null 일 경우 method 넣어지는 분기추가함
+
+*
+수출입참고사항
+개발자측에서 serviceid 많다보니 가끔 중복이되서
+수출입에서 자체커스텀소스중 servicemapper에서 
+methoed 가져와 중복되는 부분 #####패턴으로 로그에 만도록 하는 부분이 있음 
