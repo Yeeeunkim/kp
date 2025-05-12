@@ -1,21 +1,34 @@
 2025.05.09
-
-문의내용 : 어드민 온라인에서 서비스메타불러오기 시 에러
+-문의내용 
+어드민 온라인에서 서비스메타불러오기 시 에러
 defaultservicemetacollector 190 라인 nullpointexception 
 
-원인 :
+-원인
 deleteIntgLdgChgInfo메소드가 임플에는 있고 인터페이스에 정의가 안되어 있었음
 (수출입측에서는 따로 수정사항이 없으므로 anyframe쪽에서 변경해달라고 한듯)
 
-조치 :
-defaultservicemetacollector 클래스에서
+-조치
+1) 190라인 로그찍음
+
+logger.error("Success ServiceId [" + serviceId + "] - method : " method.toGenericString());
+if(interfaceMethod == null){
+  logger.error("Error ServiceId [" + serviceId + "] - method : " method.toGenericString());
+  System.out.println("\n\n\n\n\n\n\n\n\n\n\n");
+  System.out.println("null serviceId >>>>> " + serviceId);
+  System.out.println("\n\n\n\n\n\n\n\n\n\n\n");
+}
+
+2) defaultservicemetacollector 클래스에서
+
 interfacemethod null 일 경우 method 넣어지는 분기추가함
 if(interfaceMethod == null){
 	interfaceMethod = method;
 }
 
-*<서비스아이디 중복 확인가능한 로그출력 로직>
+<서비스아이디 중복 확인가능한 로그출력 로직>
 수출입개발자측에서 개발할 때 serviceid 많다보니 중복이되서 
 수출입내부에서 중복 확인 가능한 자체커스텀소스가 있음
 이원희팀장이 주기적으로 보는 듯
 로직은 servicemapper에서 methoed 가져와 중복되는 부분은 #####패턴으로 로그 출력됨
+
+=====================================
