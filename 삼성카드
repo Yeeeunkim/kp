@@ -1,3 +1,9 @@
+삼카 특징 
+- 계정권한관리시스템 : svn 접근권한 관리
+- it-desk : 서버 접근권한 관리 
+- ssbridge 파일무버로  업무피시, 서버피시 파일전달
+- 피시off , 사물함 책상 보안관리 철저
+
 =========================
 ======== 프로젝트 개요 =======
 ==========================
@@ -507,6 +513,54 @@ ip 도메인
 
 
 
+=================================
+====== arm 이관 sh : 표준방식 =======
+=================================
+#########1. was compile############
+
+cd /product/oden/compile/pfac/fac/prewasApps/buildTarget/101010101010
+
+find facto_any/src/main/java -type f -name "*.java" > 1010101010100.u
+find facto_any/src/main/resources/sql/query -type f -name "*.xml" >> 101010101010.u
+find facto_any/src/main/webapp/FRGO.jsp -type f -name "*.jsp" >> 101010101010.u
+find facto_any/src/main/webapp/index.jsp -type f -name "*.jsp" >> 101010101010.u
+
+cd /product/oden/compile/pfac/fac/prewasApps/buildClasspath
+rm -rf *
+
+cd /product/oden/deploy/build/pfac/fac/prewasApps/bin
+bash build.sh 101010101010
+
+cd /prduct/oden/copmile/pfac/fac/prewasApps/buildClasspath
+find . -name "*.*"
+
+#######1-2.was deploy########
+
+cd /product/oden/deploy/build/pfac/fac/prewasApps/bin
+bash deploy.sh 101010101010
+
+cd /product/oden/compile/pfac/fac/prewasApps/buildClasspath/wasAppsBackup/10101010101010
+find . -name "*.* > b.u
+mv b.u ../
+
+cd /product/oden/compile/pfac/fac/prewasApps/buildTarget/101010101010
+cp 1010101010101010.u 101010101010101010.i.r
+
+cd /product/oden/deploy/build/pfac/fac/prewasApps/bin
+bash deployBack.sh 1010101010101010
+
+cd /product/oden/compile/pfac/fac/prewasApps/buildClasspath/wasAppsBackup/10101010101010_r
+find . -name "*.*" > r.u
+mv r.u ../
+
+cd ../
+diff b.u r.u
+
+
+########### 2.web ##############
+cd /product/oden/compile/pfac/fac/prewebApps/buildTarget/10101010101010.u
+
+find 
 
 
 
