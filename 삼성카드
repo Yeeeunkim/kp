@@ -98,6 +98,7 @@ adLockDown V2
 
 - 구축 범위
 easy 
+  java 6 -> 8
 	서버스 web 6, ap 3 -> web 3 , ap4 
 	os		SunOs 5.10 -> RHEL 8.10
 			HP-UX 11 -> RHEL 8.10
@@ -110,7 +111,7 @@ easy
 	anyframe.common.tags-4.2.0.jar
 	anyframe.properties-4.2.0.jar
 
-etms
+etms ( 작업은 인선프로님, 찬호프로님이 하심 anyframe 은 .jar 만 제공함 !  ) 
 	os		SunOs 5.10 -> RHEL 8.10
 	web	Iplanet	-> webtob5
 	was 	Weblogic 11 -> JEUS 8
@@ -204,54 +205,6 @@ anyframe.properties-4.2.0
 anyframe.springmvc.ext-4.2.0
 anyframe-tags.tld
 
-- 리눅스 
-강제종료 ctrl + \ 
-문자지우기 ctrl + H 
-Terminal too wide 나면서 stty columns 160 이라는 명령어를 미리 날리면 문제 안생김 - HP-UX OS 특성
-find 경로 -name *.xml -type f | xargs grep 40.2.2.91
-find 경로 -type f | xargs grep ZFFIFT_870
-less test.log
-tail -f test.log -n 1000
-cmd창에 curl -v 40.2.2.91:3610
-
-여러파일의 단어찾기
-find /gfinanve/wasApps/WEB-INF/classes/spring -name *.xml type f | xargs grep 40.2.2.91
-디렉토리 찾기
-find /etc -name 'profile' -type d -print
-5일전 수정된 파일
-find /gfinanve/wasApps -type f -mtime -5
-하나파일에서 단어찾기
-grep "servlet" JeusServer_20241218.log
-
-OS 확인
-car /etc/*release*
-OS비트 확인
-getconf LONG_BIT
-
-
-- 구축 범위
-easy 
-	java 6 -> 8
-	spring 2.5.6 -> 5.2.21 
-	os		SunOs 5.10 -> RHEL 8.10
-			HP-UX 11 -> RHEL 8.10
-	web	iplanet -> webtob5
-	was	jeus6 -> jeus8
-	클라우드 USEFLEX 삼성sds 클라우드 서비스 
-	anyframe 	anyframe.properties-4.2.0 <- 이것만 실 사용하는걸로 보임 
-						anyframe.common-4.2.0
-						anyframe.common.tags-4.2.0
-
-
-etms ( 작업은 인선프로님, 찬호프로님이 하심 anyframe 은 .jar 만 제공함 !  ) 
-	os		SunOs 5.10 -> RHEL 8.10
-	web	Iplanet	-> webtob5
-	was 	Weblogic 11 -> JEUS 8
-	db		oracle 11g -> oracle 19c 
-	anyfrmae		anyframe-core-1.5.1.jar
-						anyframe-jdbc-support-1.0.4.jar
-						anyframe-titles-1.0.4.jar
-						anyfrmae-logmanager-1.0.4.jar
 - asis server 
 web intwbdev 40.1.16.51 
 was misdv02 40.1.15.65
