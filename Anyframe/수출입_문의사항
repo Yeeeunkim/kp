@@ -4,14 +4,18 @@
 defaultservicemetacollector 190 라인 nullpointexception 
 
 원인 :
-delete~메소드가 임플에는 있고 인터페이스에 정의가 안되어 있었음
+deleteIntgLdgChgInfo메소드가 임플에는 있고 인터페이스에 정의가 안되어 있었음
+(수출입측에서는 따로 수정사항이 없으므로 anyframe쪽에서 변경해달라고 한듯)
 
 조치 :
 defaultservicemetacollector 클래스에서
 interfacemethod null 일 경우 method 넣어지는 분기추가함
+if(interfaceMethod == null){
+	interfaceMethod = method;
+}
 
-*
-수출입참고사항
-개발자측에서 serviceid 많다보니 가끔 중복이되서
-수출입에서 자체커스텀소스중 servicemapper에서 
-methoed 가져와 중복되는 부분 #####패턴으로 로그에 만도록 하는 부분이 있음 
+*<서비스아이디 중복 확인가능한 로그출력 로직>
+수출입개발자측에서 개발할 때 serviceid 많다보니 중복이되서 
+수출입내부에서 중복 확인 가능한 자체커스텀소스가 있음
+이원희팀장이 주기적으로 보는 듯
+로직은 servicemapper에서 methoed 가져와 중복되는 부분은 #####패턴으로 로그 출력됨
