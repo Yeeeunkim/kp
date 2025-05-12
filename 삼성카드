@@ -485,7 +485,7 @@ public void setDebug(boolean isDebug){
 %appdata%
 Roaming > Microsft > Windows > 시작메뉴 > 프로그램 > 시작프로그램 
 
-- nosleep.vbs
+- nosleep.vbs 화면 안잠기게
 Set ws = CreateObject("WScript.shell")
 Do
 				 Wscript.Sleep 120000
