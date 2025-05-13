@@ -560,7 +560,72 @@ diff b.u r.u
 ########### 2.web ##############
 cd /product/oden/compile/pfac/fac/prewebApps/buildTarget/10101010101010.u
 
-find 
+find facto_any/target/webapp/xui -type f -name "*.*" >101010101010.u
+
+cd /product/oden/deploy/build/pfac/fac/prewebApps/bin
+bash deploy.sh 1010101010101010
+
+cd /product/oden/compile/pfac/fac/prewebApps/buildClasspath/webAppsBackup/1010101010101010101
+find . -name "*.* > b.u
+mv b.u
+
+cd /product/oden/compile/pfac/fac/prewebApps/buildTarget/10101010101010
+cp 101010101010101010.u 1010101010101010101010.i.r
+
+cd /product/oden/deploy/build/pfac/fac/prewebApps/bin
+bash deployBack.sh 1010101010101010
+
+cd /product/oden/compile/pfac/fac/prewebApps/buildClasspath/webAppsBackup/101010101010101010_r
+find . -name "*.*" > r.u
+mv r.u ../
+
+cd ../
+diff b.u r.u
+
+
+================================
+====== arm 이관 sh : 비표준방식 =====
+=================================
+1. 테스트 환경
+mkdir -p /cygdrive/d/product/oden/compile/pge4/ge4/preCarMng/buildTarget/1010101010
+cd /cygdrive/d/product/oden/compile/pge4/ge4/preCarMng/buildTarget/101010101010
+
+cp -R d:/CarMng .
+cp -R d:/MFT/GE4/PGM MFT/GE4
+ls
+#find CarMng ! -name "**[가-힣]*" > 1010101010.ㅕ
+
+2. 테스트 실행
+mkdir -p /cygdrive/d/product/oden/deploy/build/pge4/ge4/preCarMng/bin
+cd /cygdrive/d/product/oden/deploy/build/pge4/ge4/preCarMng/bin
+
+###추가: ftp upload 후
+#sed -i 's/^M/g' *.sh ^M을 공백으로 변경
+#sed 텍스트 변환
+
+#perl -pi -e 's/\r//' *.sh 문자 끝에 \r 들어가는 부분 공백으로 변경 (window스타일줄바꿈 CRLF --> Unix 스타일줄바꿈 LF 변경
+#perl 인터프리터실행,  -p 한줄씩 읽어와 자동 출력 , -i 파일직접 수정 -e perl 코드 한줄을 인라인으로 실행
+
+sh deploy.sh 101010101010
+
+2-1.deploy 확인
+cd /cygdrive/d/product/oden/compile/pge4/ge4/preCarMng/buildClasspath/CarMngBackup/10101010101010
+find . ! -name "*[가-힝]*" > 101010101010.c
+mv 10101010101010.c ../
+
+3.rollback 확인
+cd /cygdrive/d/product/oden/compile/pge4/ge4/preCarMng/buildTarget/1010101010
+cp 1010101010.u 1010101010.i.r
+
+cd /cygdrive/d/product/oden/deploy/build/pge4/ge4/preCarMng/bin
+sh deployBack.sh 10101010101010
+
+cd /cygdirve/d/product/oden/compile/pge4/ge4/preCarMng/buildClasspath/CarMngBackup/1010101010_r
+find . ! -name "*[가-힝]*" > 101010101010.r
+mv 1010101010100.r ../
+
+cd ../
+diff 101010101010.c 10101010010101.r
 
 
 
