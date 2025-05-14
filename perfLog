@@ -1,7 +1,7 @@
 
 - 히스토리 
-클래스명(패키지포함), 메소드명, GUID, 유입단IP, 서비스 수행시간, 인터페이스ID, 서비스ID, 화면ID
-형식으로 로그남기는 요구사항 옴 
+ci팀에서 금관원보고로 인해 퍼포먼스로그 요청함
+퍼포먼스로그형태 : 클래스명(패키지포함), 메소드명, GUID, 유입단IP, 서비스 수행시간, 인터페이스ID, 서비스ID, 화면ID
 interceptor 이용해서 로그 남길거임 
 preHandler -> controller -> postHandler -> mvc 
 이런 순으로 로직이 탐 
@@ -23,7 +23,12 @@ afterCompletion : view 페이지 렌더링된 후, 즉 모든 작업 완료 후 
 서비스id 	: HttpServletRequest request.getRequestURI()
 화면id		: ModelAndView modelAndView.getViewName 
 ******
+- 퍼포먼스로그 실제형태
+[2025-04-13 03:34:46,466] com.sc.gf.main.web.MainController,getBizMangerList,,40.46.194.186,0.768s,success,,/main.do,main/main.jsp
+[2025-04-13  03:34:46:466] com.sc.gf.board.web.BoardListController,getboardForm,,40.46.194.186,0.023s,success,,/BoardListForm.do,/BoardDetailForm.jsp
 
+
+- 경범수석님 구현코드 
 PerfLogInterceptor.java
 
 public class ActionLogInterceptor extends HandlerInterceptorAdapter {
