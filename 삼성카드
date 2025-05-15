@@ -510,6 +510,57 @@ ip 도메인
 1. utf8	 변경 후 파일 텍스트 복사 
 2. 파일 utf 설정 후 붙여넣기 
 
+=================================
+========== easy이슈정리 ===========
+=================================
+<DR서버 로그인 접속 시 에러>
+문제 			: DR서버 테스트 이슈 중 EASY시스템과 SAP JCo connection info 통신 오류 발생
+
+에러메세지 : com.sap.conn.jco.JCoException: (101) JCO_ERROR_CONFIGUIRATION lnitialzation of destination EASY failed
+					Either parameter ABAP system ID ('jco.client.r3name') or message server service ('jco.client.msserv') is missing at destination EASY
+
+원인 			: sapjco2 -> sapjco3 업그레이드되면서 
+sapjco2의 키값이 SID 였는데 sapjco3 키값은 R3Name으로 구별이 안되서 JCoException 발생
+
+조치 			: sapjco3버전의 키값인 R3Name으로 분기처리함 
+ey1-pjt-new/src/new/java/com/sc/gf/utils/jco/jcoFactory.java
+if(jcoConnectionInfo.getR3Name().contains("SPD") { //운영기준
+	connectionProperties.setProperty(DestinationDataProvider.JCO_PEAK_LIMIT, jcoConnectionInfo.getMaxConn());
+  connectionProperties.setProperty(DestinationDataProvider.JCO_POOL_CAPACITY, "30");
+  connectionProperties.setProperty(DestinationDataProvider.JCO_USER, jcoConnectionInfo.getUserName());
+	connectionProperties.setProperty(DestinationDataProvider.JCO_PASSWD, jcoConnectionInfo.getPasswd());
+  connectionProperties.setProperty(DestinationDataProvider.JCO_MSHOST, jcoConnectionInfo.getHostName()); //SAP message serverhost
+	connectionProperties.setProperty(DestinationDataProvider.JCO_GROUP, jcoConnectionInfo.getGroup());
+	connectionProperties.setProperty(DeatinationDataProvider.JCO_R3NAME, jcoConnectionInfo.getR3Name());        
+} else {
+	//개발
+	connectionProperties.setProperty(DestinationDataProvider.JCO_PEAK_LIMIT, jcoConnectionInfo.getMaxConn());
+  connectionProperties.setProperty(DestinationDataProvider.JCO_POOL_CAPACITY, "30");
+  connectionProperties.setProperty(DestinationDataProvider.JCO_USER, jcoConnectionInfo.getUserName());
+	connectionProperties.setProperty(DestinationDataProvider.JCO_PASSWD, jcoConnectionInfo.getPasswd());
+  connectionProperties.setProperty(DestinationDataProvider.JCO_ASHOST, jcoConnectionInfo.getHostName());  //SAP application server host
+	connectionProperties.setProperty(DestinationDataProvider.JCO_SYSNR, jcoConnectionInfo.getSystemNumber());
+	connectionProperties.setProperty(DeatinationDataProvider.JCO_CLIENT, jcoConnectionInfo.getClient());        
+}
+
+** 참고
+isloadBalance기준으로 분기처리했을 때 message server connection 오류 발생
+로컬개발서버는 ip로 sap 이랑 직접 붙어서 ASHOST 사용함
+dr서버는 ms sap 사용해서 MSHOST 사용함
+그리고 3버전의 sid였던 R3NAME 과 GROUP 설정값은 그룹로그인으로 필수로 들어가야함 !! 
+
+<개발,운영서버 사용자화면에서 간헐적 500에러호출>
+문제 : 사용자화면에서 화면멈춤 및 "웹 사이트에서 페이지를 표시할 수 없습니다" 나옴
+
+에러메세지 : 40.60.22.32 [31/Mar/2025:10:36:01 +0900] "GET /card/carUseForm.do HTTP/1.1" 500 -1001
+
+원인 : 서블릿레벨에서 작동하는 filter와 신규추가한 perfInterceptor가 비동기적요청으로 충돌
+
+해결 : common-servlet.xml perLogInterceptor 주석처리
+
+
+
+
 
 
 
